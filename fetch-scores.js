@@ -177,8 +177,13 @@ async function main() {
         continue;
       }
       const closes = closesAscending(seriesObj);
-      if (!closes || closes.length < 200) {
-        console.warn(`Skipping ${sym}: insufficient data`);
+      // Need >= 35 bars for MACD(12,26,9) + RSI(14). The 50- and 200-day
+      // moving averages compute only when enough history exists, otherwise
+      // they come back null and the trend score adjusts accordingly. This
+      // lets newly-listed names (e.g. recent ETFs) still be scored.
+      const MIN_BARS = 35;
+      if (!closes || closes.length < MIN_BARS) {
+        console.warn(`Skipping ${sym}: only ${closes ? closes.length : 0} bars, need >= ${MIN_BARS}`);
         continue;
       }
 
