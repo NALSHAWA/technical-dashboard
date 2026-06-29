@@ -1,19 +1,19 @@
 {
-  "updated": "2026-06-29T12:06:40.820Z",
+  "updated": "2026-06-29T12:28:33.895Z",
   "stocks": [
     {
-      "symbol": "FTAI",
-      "price": 260.08,
-      "change_pct": -3.1,
-      "rsi": 51.88,
+      "symbol": "C",
+      "price": 141.76,
+      "change_pct": -2.22,
+      "rsi": 61.12,
       "macd": {
-        "macd": 5.4082,
-        "signal": 3.8415,
-        "hist": 1.5668
+        "macd": 4.5132,
+        "signal": 4.2904,
+        "hist": 0.2227
       },
       "trend": {
-        "sma50": 250.27,
-        "sma200": 223.57,
+        "sma50": 131.26,
+        "sma200": 114.51,
         "above50": true,
         "above200": true
       },
@@ -25,18 +25,386 @@
       }
     },
     {
-      "symbol": "AAPL",
-      "price": 283.78,
-      "change_pct": 3.14,
-      "rsi": 41.25,
+      "symbol": "SEI",
+      "price": 76.8,
+      "change_pct": -3.31,
+      "rsi": 52.22,
       "macd": {
-        "macd": -2.2558,
-        "signal": 0.5084,
-        "hist": -2.7642
+        "macd": 1.9001,
+        "signal": 1.7704,
+        "hist": 0.1297
       },
       "trend": {
-        "sma50": 291.5,
-        "sma200": 269.46,
+        "sma50": 73.43,
+        "sma200": 56.02,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 2,
+        "rsi": 1,
+        "composite": 5
+      }
+    },
+    {
+      "symbol": "LRCX",
+      "price": 379.09,
+      "change_pct": -5.66,
+      "rsi": 57.87,
+      "macd": {
+        "macd": 23.8912,
+        "signal": 23.2342,
+        "hist": 0.657
+      },
+      "trend": {
+        "sma50": 310.35,
+        "sma200": 217.19,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 2,
+        "rsi": 1,
+        "composite": 5
+      }
+    },
+    {
+      "symbol": "AMAT",
+      "price": 626.84,
+      "change_pct": -6.16,
+      "rsi": 63.92,
+      "macd": {
+        "macd": 50.0921,
+        "signal": 43.7448,
+        "hist": 6.3473
+      },
+      "trend": {
+        "sma50": 468.21,
+        "sma200": 329.35,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 2,
+        "rsi": 1,
+        "composite": 5
+      }
+    },
+    {
+      "symbol": "BTDR",
+      "price": 17.15,
+      "change_pct": 4.64,
+      "rsi": 52.44,
+      "macd": {
+        "macd": 0.5826,
+        "signal": 0.912,
+        "hist": -0.3294
+      },
+      "trend": {
+        "sma50": 15.07,
+        "sma200": 13.88,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 4
+      }
+    },
+    {
+      "symbol": "HUT",
+      "price": 123.02,
+      "change_pct": 4.54,
+      "rsi": 57.63,
+      "macd": {
+        "macd": 4.41,
+        "signal": 5.6935,
+        "hist": -1.2835
+      },
+      "trend": {
+        "sma50": 103.51,
+        "sma200": 62.11,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 4
+      }
+    },
+    {
+      "symbol": "ASML",
+      "price": 1794.62,
+      "change_pct": -2.53,
+      "rsi": 53.62,
+      "macd": {
+        "macd": 64.9976,
+        "signal": 77.5516,
+        "hist": -12.554
+      },
+      "trend": {
+        "sma50": 1613.57,
+        "sma200": 1293.79,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 4
+      }
+    },
+    {
+      "symbol": "TSM",
+      "price": 432.35,
+      "change_pct": -0.61,
+      "rsi": 51.69,
+      "macd": {
+        "macd": 8.4693,
+        "signal": 9.6875,
+        "hist": -1.2182
+      },
+      "trend": {
+        "sma50": 412.64,
+        "sma200": 340.17,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 4
+      }
+    },
+    {
+      "symbol": "LLY",
+      "price": 1208.12,
+      "change_pct": 7.13,
+      "rsi": 72.35,
+      "macd": {
+        "macd": 28.9799,
+        "signal": 30.0017,
+        "hist": -1.0218
+      },
+      "trend": {
+        "sma50": 1031.3,
+        "sma200": 975.91,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 1,
+        "rsi": 0,
+        "composite": 3
+      }
+    },
+    {
+      "symbol": "HOOD",
+      "price": 98.69,
+      "change_pct": 5.58,
+      "rsi": 57.17,
+      "macd": {
+        "macd": 5.0274,
+        "signal": 5.0486,
+        "hist": -0.0212
+      },
+      "trend": {
+        "sma50": 85.22,
+        "sma200": 102.58,
+        "above50": true,
+        "above200": false
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 3
+      }
+    },
+    {
+      "symbol": "IBM",
+      "price": 271.63,
+      "change_pct": 5.17,
+      "rsi": 53.74,
+      "macd": {
+        "macd": 1.3515,
+        "signal": 4.0626,
+        "hist": -2.7111
+      },
+      "trend": {
+        "sma50": 252.92,
+        "sma200": 273.72,
+        "above50": true,
+        "above200": false
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 3
+      }
+    },
+    {
+      "symbol": "BWXT",
+      "price": 197.91,
+      "change_pct": -3.35,
+      "rsi": 47.46,
+      "macd": {
+        "macd": 0.6436,
+        "signal": -1.0558,
+        "hist": 1.6994
+      },
+      "trend": {
+        "sma50": 205.39,
+        "sma200": 197.74,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 2,
+        "rsi": 0,
+        "composite": 3
+      }
+    },
+    {
+      "symbol": "DRAM",
+      "price": 71.88,
+      "change_pct": -6.52,
+      "rsi": 57.12,
+      "macd": {
+        "macd": 5.5642,
+        "signal": 5.6905,
+        "hist": -0.1264
+      },
+      "trend": {
+        "sma50": 54.88,
+        "sma200": null,
+        "above50": true,
+        "above200": false
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 3
+      }
+    },
+    {
+      "symbol": "NU",
+      "price": 13.17,
+      "change_pct": 5.7,
+      "rsi": 56.96,
+      "macd": {
+        "macd": -0.0836,
+        "signal": -0.2204,
+        "hist": 0.1367
+      },
+      "trend": {
+        "sma50": 13.24,
+        "sma200": 15.33,
+        "above50": false,
+        "above200": false
+      },
+      "scores": {
+        "trend": 0,
+        "macd": 1,
+        "rsi": 1,
+        "composite": 2
+      }
+    },
+    {
+      "symbol": "CCJ",
+      "price": 104.49,
+      "change_pct": 0.88,
+      "rsi": 45.9,
+      "macd": {
+        "macd": -1.5522,
+        "signal": -1.8621,
+        "hist": 0.3099
+      },
+      "trend": {
+        "sma50": 112.05,
+        "sma200": 103.71,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 1,
+        "rsi": 0,
+        "composite": 2
+      }
+    },
+    {
+      "symbol": "CF",
+      "price": 105.7,
+      "change_pct": 0.2,
+      "rsi": 40.76,
+      "macd": {
+        "macd": -3.9876,
+        "signal": -4.0362,
+        "hist": 0.0486
+      },
+      "trend": {
+        "sma50": 116.85,
+        "sma200": 99.41,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 1,
+        "rsi": 0,
+        "composite": 2
+      }
+    },
+    {
+      "symbol": "BE",
+      "price": 252.02,
+      "change_pct": -18.49,
+      "rsi": 43.04,
+      "macd": {
+        "macd": 9.1803,
+        "signal": 9.6699,
+        "hist": -0.4896
+      },
+      "trend": {
+        "sma50": 273.7,
+        "sma200": 160.49,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 1,
+        "rsi": 0,
+        "composite": 2
+      }
+    },
+    {
+      "symbol": "OIH",
+      "price": 375.55,
+      "change_pct": -1.31,
+      "rsi": 32.8,
+      "macd": {
+        "macd": -13.8111,
+        "signal": -9.2201,
+        "hist": -4.591
+      },
+      "trend": {
+        "sma50": 423.61,
+        "sma200": 346.96,
         "above50": false,
         "above200": true
       },
@@ -71,18 +439,18 @@
       }
     },
     {
-      "symbol": "COP",
-      "price": 105.96,
-      "change_pct": -0.42,
-      "rsi": 33.47,
+      "symbol": "FSLR",
+      "price": 239.07,
+      "change_pct": -3.85,
+      "rsi": 41.32,
       "macd": {
-        "macd": -3.2853,
-        "signal": -2.4843,
-        "hist": -0.801
+        "macd": -1.1541,
+        "signal": 4.7014,
+        "hist": -5.8555
       },
       "trend": {
-        "sma50": 117.71,
-        "sma200": 105.49,
+        "sma50": 241.71,
+        "sma200": 234.47,
         "above50": false,
         "above200": true
       },
@@ -94,41 +462,18 @@
       }
     },
     {
-      "symbol": "DVN",
-      "price": 42.21,
-      "change_pct": -0.92,
-      "rsi": 38.8,
+      "symbol": "TSLA",
+      "price": 379.71,
+      "change_pct": 1.22,
+      "rsi": 41.2,
       "macd": {
-        "macd": -1.128,
-        "signal": -1.023,
-        "hist": -0.105
+        "macd": -7.9762,
+        "signal": -4.3734,
+        "hist": -3.6028
       },
       "trend": {
-        "sma50": 46.23,
-        "sma200": 40.83,
-        "above50": false,
-        "above200": true
-      },
-      "scores": {
-        "trend": 1,
-        "macd": 0,
-        "rsi": 0,
-        "composite": 1
-      }
-    },
-    {
-      "symbol": "MSFT",
-      "price": 372.97,
-      "change_pct": 5.71,
-      "rsi": 40.43,
-      "macd": {
-        "macd": -13.8719,
-        "signal": -9.8123,
-        "hist": -4.0596
-      },
-      "trend": {
-        "sma50": 410.97,
-        "sma200": 447.99,
+        "sma50": 404.76,
+        "sma200": 417.96,
         "above50": false,
         "above200": false
       },
@@ -140,18 +485,87 @@
       }
     },
     {
-      "symbol": "MP",
-      "price": 53.9,
-      "change_pct": -3.09,
-      "rsi": 39.07,
+      "symbol": "CRWV",
+      "price": 96.58,
+      "change_pct": -2.21,
+      "rsi": 41.57,
       "macd": {
-        "macd": -1.7123,
-        "signal": -1.2553,
-        "hist": -0.457
+        "macd": -1.608,
+        "signal": -0.6618,
+        "hist": -0.9462
       },
       "trend": {
-        "sma50": 62.52,
-        "sma200": 62.01,
+        "sma50": 110.84,
+        "sma200": 100.66,
+        "above50": false,
+        "above200": false
+      },
+      "scores": {
+        "trend": 0,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 0
+      }
+    },
+    {
+      "symbol": "WOLF",
+      "price": 45.97,
+      "change_pct": -3.81,
+      "rsi": 45.85,
+      "macd": {
+        "macd": -1.0298,
+        "signal": 0.0639,
+        "hist": -1.0936
+      },
+      "trend": {
+        "sma50": 47.93,
+        "sma200": null,
+        "above50": false,
+        "above200": false
+      },
+      "scores": {
+        "trend": 0,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 0
+      }
+    },
+    {
+      "symbol": "CEPT",
+      "price": 10.86,
+      "change_pct": 7,
+      "rsi": 40.29,
+      "macd": {
+        "macd": -0.4508,
+        "signal": -0.2595,
+        "hist": -0.1913
+      },
+      "trend": {
+        "sma50": 11.92,
+        "sma200": 11.42,
+        "above50": false,
+        "above200": false
+      },
+      "scores": {
+        "trend": 0,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 0
+      }
+    },
+    {
+      "symbol": "XME",
+      "price": 108.01,
+      "change_pct": -0.67,
+      "rsi": 36.44,
+      "macd": {
+        "macd": -2.7675,
+        "signal": -1.2577,
+        "hist": -1.5097
+      },
+      "trend": {
+        "sma50": 118.79,
+        "sma200": 109.31,
         "above50": false,
         "above200": false
       },
