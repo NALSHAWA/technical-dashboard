@@ -26,7 +26,7 @@ let STOCKS=[];
 let PREV=[];
 let UPDATED=null;
 
-function calcScore(s){let sc=0;if((s.ma50!=null&&s.price>s.ma50))sc+=1;if((s.ma100!=null&&s.price>s.ma100))sc+=0.5;if((s.ma200!=null&&s.price>s.ma200))sc+=0.5;const r14=s.rsi14;if(r14>=40&&r14<=60)sc+=0.75;else if(r14>=30&&r14<40)sc+=0.5;else if(r14<30)sc+=0.75;const r30=s.rsi30;if(r30>=40&&r30<=60)sc+=0.75;else if(r30>=30&&r30<40)sc+=0.5;else if(r30<30)sc+=0.75;if(s.macd>0)sc+=1.5;return Math.min(sc,5)}
+function calcScore(s){let sc=0;if((s.ma50!=null&&s.price>s.ma50))sc+=1;if((s.ma100!=null&&s.price>s.ma100))sc+=0.5;if((s.ma200!=null&&s.price>s.ma200))sc+=0.5;const r14=s.rsi14;if(r14>=40&&r14<=60)sc+=0.75;else if(r14>=30&&r14<40)sc+=0.5;else if(r14<30)sc+=0.75;const r30=s.rsi30;if(r30>=40&&r30<=60)sc+=0.75;else if(r30>=30&&r30<40)sc+=0.5;else if(r30<30)sc+=0.75;sc+=(s.macdMom!=null?s.macdMom:0);return Math.min(sc,5)}
 
 function generateBriefing(stocks,prev){
   const alerts=[];const pm={};
@@ -108,7 +108,7 @@ const COLS=[
 {key:"price",label:"Price",w:95},{key:"d1",label:"%1D",w:68},{key:"m1",label:"%1M",w:72},
 {key:"aboveMa50",label:"> 50D MA",w:75},{key:"aboveMa100",label:"> 100D MA",w:80},{key:"aboveMa200",label:"> 200D MA",w:80},
 {key:"watchCol",label:"Watch Closely",w:110},
-{key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"score",label:"Score",w:100},
+{key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"macdScore",label:"MACD 0-5",w:78},{key:"score",label:"Score",w:100},
 ];
 
 const FILTERS=[{key:"all",label:"All"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"}];
@@ -136,7 +136,7 @@ function PriceLadder({stock}){
   const tT=((s.ma50!=null&&s.price>s.ma50)?1:0)+((s.ma100!=null&&s.price>s.ma100)?0.5:0)+((s.ma200!=null&&s.price>s.ma200)?0.5:0);
   const r14P=(s.rsi14>=40&&s.rsi14<=60)?0.75:(s.rsi14>=30&&s.rsi14<40)?0.5:s.rsi14<30?0.75:0;
   const r30P=(s.rsi30>=40&&s.rsi30<=60)?0.75:(s.rsi30>=30&&s.rsi30<40)?0.5:s.rsi30<30?0.75:0;
-  const rT=r14P+r30P,mP=s.macd>0?1.5:0;
+  const rT=r14P+r30P,mP=(s.macdMom!=null?s.macdMom:0);
   const Bar=({label,pts,max,color})=>(<div style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}><span style={{color:"#94a3b8"}}>{label}</span><span style={{color,fontWeight:600}}>{pts.toFixed(1)} / {max.toFixed(1)}</span></div><div style={{height:6,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${(pts/max)*100}%`,background:color,borderRadius:3}}/></div></div>);
   const M=({label,value,color})=>(<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}><span style={{color:"#64748b",fontSize:12}}>{label}</span><span style={{color,fontSize:12,fontWeight:600,fontVariantNumeric:"tabular-nums"}}>{value}</span></div>);
   return(
@@ -145,11 +145,11 @@ function PriceLadder({stock}){
       <div style={{flex:"1 1 280px",minWidth:240}}>
         <div style={{fontSize:11,color:"#64748b",marginBottom:12,letterSpacing:"0.04em",fontWeight:600}}>SCORE BREAKDOWN</div>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{fontSize:36,fontWeight:800,color:scoreColor(sc)}}>{sc.toFixed(1)}</div><div style={{fontSize:14,color:"#64748b"}}>/ 5.0</div></div>
-        <Bar label="Trend (Price vs MAs)" pts={tT} max={2} color="#3b82f6"/><Bar label="RSI Momentum" pts={rT} max={1.5} color="#8b5cf6"/><Bar label="MACD Signal" pts={mP} max={1.5} color="#22c55e"/>
+        <Bar label="Trend (Price vs MAs)" pts={tT} max={2} color="#3b82f6"/><Bar label="RSI Momentum" pts={rT} max={1.5} color="#8b5cf6"/><Bar label="MACD Momentum" pts={mP} max={1.5} color="#22c55e"/>
         <div style={{marginTop:16}}>
           <M label="1D Change" value={`${s.d1>0?"+":""}${s.d1.toFixed(2)}%`} color={pctColor(s.d1)}/><M label="1M Change" value={`${s.m1>0?"+":""}${s.m1.toFixed(2)}%`} color={pctColor(s.m1)}/>
           <M label="RSI 14D" value={s.rsi14.toFixed(2)} color={rsiColor(s.rsi14)}/><M label="RSI 30D" value={s.rsi30.toFixed(2)} color={rsiColor(s.rsi30)}/>
-          <M label="MACD" value={`${s.macd>0?"+":""}${s.macd.toFixed(2)}`} color={macdColor(s.macd)}/>
+          <M label="MACD" value={`${s.macd>0?"+":""}${s.macd.toFixed(2)}`} color={macdColor(s.macd)}/><M label="MACD State (0-5)" value={s.macdScore!=null?s.macdScore.toFixed(1):"n/a"} color={s.macdScore!=null?scoreColor(s.macdScore):"#64748b"}/>
           <M label="vs MA50" value={s.ma50==null?"n/a":`${((s.price/s.ma50-1)*100).toFixed(2)}%`} color={s.ma50==null?"#64748b":maColor(s.price,s.ma50)}/><M label="vs MA100" value={s.ma100==null?"n/a":`${((s.price/s.ma100-1)*100).toFixed(2)}%`} color={s.ma100==null?"#64748b":maColor(s.price,s.ma100)}/><M label="vs MA200" value={s.ma200==null?"n/a":`${((s.price/s.ma200-1)*100).toFixed(2)}%`} color={s.ma200==null?"#64748b":maColor(s.price,s.ma200)}/>
         </div>
       </div>
@@ -251,6 +251,7 @@ function App(){
                 <td style={{padding:"9px 10px",textAlign:"right",color:rsiColor(s.rsi14),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi14.toFixed(2)}</td>
                 <td style={{padding:"9px 10px",textAlign:"right",color:rsiColor(s.rsi30),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi30.toFixed(2)}</td>
                 <td style={{padding:"9px 10px",textAlign:"right",color:macdColor(s.macd),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.macd>0?"+":""}{s.macd.toFixed(2)}</td>
+                <td style={{padding:"9px 10px",textAlign:"right",borderBottom:bb,background:rowBg}}>{s.macdScore!=null?<span style={{display:"inline-block",padding:"3px 9px",borderRadius:6,background:scoreBg(s.macdScore),color:scoreColor(s.macdScore),fontWeight:700,fontSize:12}}>{s.macdScore.toFixed(1)}</span>:<span style={{color:"#475569"}}>—</span>}</td>
                 <td style={{padding:"9px 10px",textAlign:"right",borderBottom:bb,background:rowBg}}>
                   <span style={{display:"inline-block",padding:"3px 10px",borderRadius:6,background:scoreBg(s.score),color:scoreColor(s.score),fontWeight:700,fontSize:12}}>{s.score.toFixed(1)}</span>
                 </td>
@@ -264,8 +265,9 @@ function App(){
         <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.7}}>
           <strong style={{color:"#e2e8f0"}}>Trend (0–2):</strong> +1.0 if Price &gt; MA50 · +0.5 if Price &gt; MA100 · +0.5 if Price &gt; MA200 &nbsp;|&nbsp;
           <strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5):</strong> 0.75 per RSI (14D &amp; 30D) if 40–60 or &lt;30 · 0.5 if 30–40 · 0 if &gt;70 &nbsp;|&nbsp;
-          <strong style={{color:"#e2e8f0"}}>MACD (0–1.5):</strong> +1.5 if positive · 0 if negative
+          <strong style={{color:"#e2e8f0"}}>MACD Momentum (0–1.5):</strong> histogram axis only — rising &amp; + = 1.5 · falling &amp; + = 1.0 · rising &amp; − = 0.75 · falling &amp; − = 0 · flat or near zero-line → neutral
         </div>
+        <div style={{fontSize:11,color:"#64748b",marginTop:10,lineHeight:1.6}}><strong style={{color:"#94a3b8"}}>MACD State (0–5)</strong> shown per name is the full regime×momentum grid (MACD line vs zero crossed with histogram sign &amp; 3-bar slope). The composite deliberately uses only the histogram-momentum axis above, so regime is owned by the Trend pillar and not double-counted.</div>
       </div>
     </div>
   );
