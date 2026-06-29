@@ -1,0 +1,166 @@
+{
+  "updated": "2026-06-29T12:06:40.820Z",
+  "stocks": [
+    {
+      "symbol": "FTAI",
+      "price": 260.08,
+      "change_pct": -3.1,
+      "rsi": 51.88,
+      "macd": {
+        "macd": 5.4082,
+        "signal": 3.8415,
+        "hist": 1.5668
+      },
+      "trend": {
+        "sma50": 250.27,
+        "sma200": 223.57,
+        "above50": true,
+        "above200": true
+      },
+      "scores": {
+        "trend": 2,
+        "macd": 2,
+        "rsi": 1,
+        "composite": 5
+      }
+    },
+    {
+      "symbol": "AAPL",
+      "price": 283.78,
+      "change_pct": 3.14,
+      "rsi": 41.25,
+      "macd": {
+        "macd": -2.2558,
+        "signal": 0.5084,
+        "hist": -2.7642
+      },
+      "trend": {
+        "sma50": 291.5,
+        "sma200": 269.46,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 1
+      }
+    },
+    {
+      "symbol": "NVDA",
+      "price": 192.53,
+      "change_pct": -1.64,
+      "rsi": 37.49,
+      "macd": {
+        "macd": -3.6973,
+        "signal": -1.7928,
+        "hist": -1.9045
+      },
+      "trend": {
+        "sma50": 210.09,
+        "sma200": 190.64,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 1
+      }
+    },
+    {
+      "symbol": "COP",
+      "price": 105.96,
+      "change_pct": -0.42,
+      "rsi": 33.47,
+      "macd": {
+        "macd": -3.2853,
+        "signal": -2.4843,
+        "hist": -0.801
+      },
+      "trend": {
+        "sma50": 117.71,
+        "sma200": 105.49,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 1
+      }
+    },
+    {
+      "symbol": "DVN",
+      "price": 42.21,
+      "change_pct": -0.92,
+      "rsi": 38.8,
+      "macd": {
+        "macd": -1.128,
+        "signal": -1.023,
+        "hist": -0.105
+      },
+      "trend": {
+        "sma50": 46.23,
+        "sma200": 40.83,
+        "above50": false,
+        "above200": true
+      },
+      "scores": {
+        "trend": 1,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 1
+      }
+    },
+    {
+      "symbol": "MSFT",
+      "price": 372.97,
+      "change_pct": 5.71,
+      "rsi": 40.43,
+      "macd": {
+        "macd": -13.8719,
+        "signal": -9.8123,
+        "hist": -4.0596
+      },
+      "trend": {
+        "sma50": 410.97,
+        "sma200": 447.99,
+        "above50": false,
+        "above200": false
+      },
+      "scores": {
+        "trend": 0,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 0
+      }
+    },
+    {
+      "symbol": "MP",
+      "price": 53.9,
+      "change_pct": -3.09,
+      "rsi": 39.07,
+      "macd": {
+        "macd": -1.7123,
+        "signal": -1.2553,
+        "hist": -0.457
+      },
+      "trend": {
+        "sma50": 62.52,
+        "sma200": 62.01,
+        "above50": false,
+        "above200": false
+      },
+      "scores": {
+        "trend": 0,
+        "macd": 0,
+        "rsi": 0,
+        "composite": 0
+      }
+    }
+  ]
+}
