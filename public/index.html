@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Technical Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a1019;
+    --panel: #111a28;
+    --panel-2: #0e1622;
+    --border: #1e2a3d;
+    --border-soft: #182333;
+    --text: #e7eef8;
+    --muted: #8595ac;
+    --faint: #5d6b81;
+    --bull: #2fbd7e;
+    --bull-dim: #1c5740;
+    --bear: #ed5a5a;
+    --bear-dim: #5c2630;
+    --watch: #e9a93c;
+    --watch-dim: #5a4520;
+    --accent: #5aa9e6;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --ui: "Inter", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 0 48px;
+  }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(20,30,46,.6), transparent);
+  }
+  .head-inner {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; padding: 22px 0 18px;
+  }
+  .title {
+    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .title .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--bull);
+    box-shadow: 0 0 10px var(--bull);
+  }
+  .title .sub { color: var(--faint); font-weight: 500; font-size: 13px; }
+  .meta { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+  .meta b { color: var(--text); font-weight: 600; }
+
+  /* Summary cards */
+  .grid { display: grid; gap: 14px; margin-top: 22px; }
+  .cards { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 860px){ .cards { grid-template-columns: repeat(2,1fr); } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px;
+  }
+  .card .label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); font-weight: 600; margin-bottom: 8px;
+  }
+  .card .big { font-family: var(--mono); font-size: 28px; font-weight: 600; line-height: 1; }
+  .card .note { font-size: 12px; color: var(--faint); margin-top: 6px; }
+
+  /* Breadth bar */
+  .breadth { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 10px; background: var(--panel-2); }
+  .breadth span { display: block; height: 100%; }
+
+  /* Panels row */
+  .panels { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 860px){ .panels { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px;
+  }
+  .panel h2 {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); font-weight: 600; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mover { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+  .mover + .mover { border-top: 1px solid var(--border-soft); }
+  .mover .sym { font-weight: 600; }
+  .mover .val { font-family: var(--mono); font-weight: 500; }
+  .up { color: var(--bull); }
+  .down { color: var(--bear); }
+  .watch-tag {
+    font-family: var(--ui); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: 2px 7px; border-radius: 20px; margin-left: 8px;
+  }
+  .tag-ob { background: var(--bear-dim); color: var(--bear); }
+  .tag-os { background: var(--watch-dim); color: var(--watch); }
+  .tag-hot { background: var(--bull-dim); color: var(--bull); }
+  .tag-cold { background: var(--bear-dim); color: var(--bear); }
+  .empty { color: var(--faint); font-size: 13px; font-style: italic; }
+
+  /* Controls */
+  .controls {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-top: 26px; margin-bottom: 14px;
+  }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filters button {
+    font-family: var(--ui); font-size: 12px; font-weight: 600;
+    color: var(--muted); background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 12px; cursor: pointer; transition: .15s;
+  }
+  .filters button:hover { color: var(--text); border-color: #2c3c54; }
+  .filters button.active { background: var(--accent); color: #05101c; border-color: var(--accent); }
+  .search {
+    margin-left: auto; font-family: var(--mono); font-size: 13px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 8px 12px; color: var(--text); min-width: 160px;
+  }
+  .search::placeholder { color: var(--faint); }
+  .search:focus { outline: none; border-color: var(--accent); }
+
+  /* Table */
+  .table-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); font-weight: 600; text-align: right;
+    padding: 12px 14px; background: var(--panel-2);
+    border-bottom: 1px solid var(--border); cursor: pointer; white-space: nowrap;
+    user-select: none;
+  }
+  thead th:first-child { text-align: left; }
+  thead th.sorted { color: var(--text); }
+  thead th .arrow { color: var(--accent); font-size: 10px; }
+  tbody td {
+    padding: 11px 14px; text-align: right; font-family: var(--mono);
+    font-size: 13px; border-bottom: 1px solid var(--border-soft); white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(90,169,230,.05); }
+  td.sym { text-align: left; font-family: var(--ui); font-weight: 600; font-size: 14px; }
+  .ma { color: var(--faint); font-size: 11px; }
+  .ma b { color: var(--bull); font-weight: 600; }
+  .ma .x { color: var(--bear); font-weight: 600; }
+
+  /* Composite pips */
+  .pips { display: inline-flex; gap: 3px; vertical-align: middle; }
+  .pip { width: 7px; height: 16px; border-radius: 2px; background: #1c283a; }
+  .pip.on-bull { background: var(--bull); }
+  .pip.on-watch { background: var(--watch); }
+  .pip.on-bear { background: var(--bear); }
+  .comp-cell { display: inline-flex; align-items: center; gap: 9px; }
+  .comp-num { font-weight: 600; width: 12px; }
+
+  .loading, .error { padding: 60px 20px; text-align: center; color: var(--muted); }
+  .error { color: var(--bear); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card, .panel, .table-wrap { animation: rise .4s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none; } }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap head-inner">
+      <div class="title">
+        <span class="dot" id="healthDot"></span>
+        Technical Dashboard <span class="sub">US equities &middot; trend / RSI / MACD composite</span>
+      </div>
+      <div class="meta" id="meta">loading&hellip;</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="app">
+      <div class="loading">Loading market data&hellip;</div>
+    </div>
+  </main>
+
+<script>
+const SRC = "./data/scores.json";
+
+function classifyComposite(c){
+  if (c >= 4) return "bull";
+  if (c <= 1) return "bear";
+  return "watch";
+}
+function fmt(n, dp){
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return Number(n).toFixed(dp === undefined ? 2 : dp);
+}
+
+let DATA = [];
+let state = { filter: "all", sort: "composite", dir: -1, q: "" };
+
+function watchFlags(s){
+  const flags = [];
+  if (s.rsi !== null && s.rsi >= 70) flags.push({t:"Overbought", c:"tag-ob"});
+  else if (s.rsi !== null && s.rsi <= 30) flags.push({t:"Oversold", c:"tag-os"});
+  if (s.scores.composite >= 5) flags.push({t:"Max strength", c:"tag-hot"});
+  else if (s.scores.composite <= 0) flags.push({t:"Max weakness", c:"tag-cold"});
+  return flags;
+}
+
+function render(){
+  const app = document.getElementById("app");
+  const total = DATA.length;
+  const avg = total ? DATA.reduce((a,b)=>a+b.scores.composite,0)/total : 0;
+  const bull = DATA.filter(s=>s.scores.composite>=4).length;
+  const neutral = DATA.filter(s=>s.scores.composite>1 && s.scores.composite<4).length;
+  const bear = DATA.filter(s=>s.scores.composite<=1).length;
+  const upCount = DATA.filter(s=>s.change_pct>0).length;
+
+  // health dot color
+  const dot = document.getElementById("healthDot");
+  const healthCol = avg>=3 ? "var(--bull)" : avg<=2 ? "var(--bear)" : "var(--watch)";
+  dot.style.background = healthCol; dot.style.boxShadow = "0 0 10px "+healthCol;
+
+  // movers
+  const byChange = [...DATA].filter(s=>s.change_pct!==null).sort((a,b)=>b.change_pct-a.change_pct);
+  const gainers = byChange.slice(0,5);
+  const losers = byChange.slice(-5).reverse();
+
+  // watch list
+  const watch = DATA.map(s=>({s, f:watchFlags(s)})).filter(x=>x.f.length);
+
+  const pct = v => total ? (v/total*100).toFixed(1) : 0;
+
+  app.innerHTML = `
+    <div class="grid cards">
+      <div class="card">
+        <div class="label">Book breadth</div>
+        <div class="big" style="color:${healthCol}">${avg.toFixed(2)}<span style="font-size:14px;color:var(--faint)"> / 5</span></div>
+        <div class="breadth">
+          <span style="width:${pct(bull)}%;background:var(--bull)"></span>
+          <span style="width:${pct(neutral)}%;background:var(--watch)"></span>
+          <span style="width:${pct(bear)}%;background:var(--bear)"></span>
+        </div>
+        <div class="note">avg composite across ${total} names</div>
+      </div>
+      <div class="card">
+        <div class="label">Bullish (4&ndash;5)</div>
+        <div class="big up">${bull}</div>
+        <div class="note">${pct(bull)}% of the book</div>
+      </div>
+      <div class="card">
+        <div class="label">Weak (0&ndash;1)</div>
+        <div class="big down">${bear}</div>
+        <div class="note">${pct(bear)}% of the book</div>
+      </div>
+      <div class="card">
+        <div class="label">Up on the day</div>
+        <div class="big">${upCount}<span style="font-size:14px;color:var(--faint)"> / ${total}</span></div>
+        <div class="note">${total-upCount} down or flat</div>
+      </div>
+    </div>
+
+    <div class="grid panels" style="margin-top:14px">
+      <div class="panel">
+        <h2>Top movers</h2>
+        ${gainers.map(s=>moverRow(s,"up")).join("")}
+        <div style="height:8px"></div>
+        ${losers.map(s=>moverRow(s,"down")).join("")}
+      </div>
+      <div class="panel">
+        <h2>Watch closely</h2>
+        ${watch.length ? watch.map(x=>`
+          <div class="mover">
+            <span class="sym">${x.s.symbol}${x.f.map(f=>`<span class="watch-tag ${f.c}">${f.t}</span>`).join("")}</span>
+            <span class="val">RSI ${fmt(x.s.rsi,0)}</span>
+          </div>`).join("") : `<div class="empty">Nothing at extremes right now.</div>`}
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="filters">
+        ${filterBtn("all","All")}
+        ${filterBtn("bull","Bullish")}
+        ${filterBtn("neutral","Neutral")}
+        ${filterBtn("bear","Weak")}
+        ${filterBtn("ob","Overbought")}
+        ${filterBtn("os","Oversold")}
+      </div>
+      <input class="search" id="search" placeholder="Filter symbol&hellip;" value="${state.q}" />
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          ${th("symbol","Symbol")}
+          ${th("price","Price")}
+          ${th("change_pct","Chg %")}
+          ${th("rsi","RSI")}
+          ${th("hist","MACD hist")}
+          <th>Trend</th>
+          ${th("composite","Composite")}
+        </tr></thead>
+        <tbody>${rows()}</tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById("search").addEventListener("input", e=>{
+    state.q = e.target.value; const tb = document.querySelector("tbody"); if(tb) tb.innerHTML = rows();
+  });
+  document.querySelectorAll(".filters button").forEach(b=>{
+    b.addEventListener("click",()=>{ state.filter = b.dataset.f; render(); });
+  });
+  document.querySelectorAll("thead th[data-k]").forEach(h=>{
+    h.addEventListener("click",()=>{
+      const k = h.dataset.k;
+      if (state.sort===k) state.dir*=-1; else { state.sort=k; state.dir = k==="symbol"?1:-1; }
+      render();
+    });
+  });
+}
+
+function moverRow(s, dir){
+  return `<div class="mover"><span class="sym">${s.symbol}</span>
+    <span class="val ${dir}">${s.change_pct>0?"+":""}${fmt(s.change_pct)}%</span></div>`;
+}
+function filterBtn(f,label){
+  return `<button data-f="${f}" class="${state.filter===f?"active":""}">${label}</button>`;
+}
+function th(k,label){
+  const on = state.sort===k;
+  const arrow = on ? `<span class="arrow">${state.dir<0?"▼":"▲"}</span>` : "";
+  return `<th data-k="${k}" class="${on?"sorted":""}">${label} ${arrow}</th>`;
+}
+
+function passesFilter(s){
+  const c = s.scores.composite;
+  switch(state.filter){
+    case "bull": return c>=4;
+    case "neutral": return c>1 && c<4;
+    case "bear": return c<=1;
+    case "ob": return s.rsi!==null && s.rsi>=70;
+    case "os": return s.rsi!==null && s.rsi<=30;
+    default: return true;
+  }
+}
+
+function rows(){
+  let list = DATA.filter(passesFilter);
+  if (state.q.trim()) list = list.filter(s=>s.symbol.toLowerCase().includes(state.q.trim().toLowerCase()));
+  const k = state.sort;
+  list.sort((a,b)=>{
+    let av, bv;
+    if (k==="symbol"){ av=a.symbol; bv=b.symbol; return av<bv?-1*state.dir:av>bv?1*state.dir:0; }
+    if (k==="hist"){ av=a.macd?a.macd.hist:0; bv=b.macd?b.macd.hist:0; }
+    else if (k==="composite"){ av=a.scores.composite; bv=b.scores.composite; }
+    else { av=a[k]; bv=b[k]; }
+    av = av===null?-Infinity:av; bv = bv===null?-Infinity:bv;
+    return (av-bv)*state.dir;
+  });
+  if (!list.length) return `<tr><td colspan="7" class="empty" style="text-align:center;padding:30px">No names match this filter.</td></tr>`;
+  return list.map(s=>{
+    const cls = classifyComposite(s.scores.composite);
+    const pipCls = cls==="bull"?"on-bull":cls==="bear"?"on-bear":"on-watch";
+    const pips = Array.from({length:5},(_,i)=>`<span class="pip ${i<s.scores.composite?pipCls:""}"></span>`).join("");
+    const chg = s.change_pct;
+    const hist = s.macd?s.macd.hist:null;
+    return `<tr>
+      <td class="sym">${s.symbol}</td>
+      <td>${fmt(s.price)}</td>
+      <td class="${chg>0?"up":chg<0?"down":""}">${chg>0?"+":""}${fmt(chg)}%</td>
+      <td>${fmt(s.rsi,0)}</td>
+      <td class="${hist>0?"up":hist<0?"down":""}">${fmt(hist,3)}</td>
+      <td class="ma">${s.trend.above50?'<b>&gt;50</b>':'<span class="x">&lt;50</span>'} &middot; ${s.trend.sma200===null?'<span style="color:var(--faint)">n/a</span>':(s.trend.above200?'<b>&gt;200</b>':'<span class="x">&lt;200</span>')}</td>
+      <td><span class="comp-cell"><span class="comp-num">${s.scores.composite}</span><span class="pips">${pips}</span></span></td>
+    </tr>`;
+  }).join("");
+}
+
+fetch(SRC, {cache:"no-store"})
+  .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+  .then(json=>{
+    DATA = json.stocks || [];
+    const d = json.updated ? new Date(json.updated) : null;
+    document.getElementById("meta").innerHTML =
+      `<b>${DATA.length}</b> instruments &middot; updated ` +
+      (d ? d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}) : "—");
+    render();
+  })
+  .catch(err=>{
+    document.getElementById("app").innerHTML =
+      `<div class="error">Couldn't load data (${err.message}). If this is the first deploy, make sure the file lives at <code>data/scores.json</code> next to this page.</div>`;
+    document.getElementById("meta").textContent = "data unavailable";
+  });
+</script>
+</body>
+</html>
