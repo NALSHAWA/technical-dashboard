@@ -30,7 +30,12 @@ const OUTPUT_PATH = path.join(__dirname, "public", "data", "scores.json");
 
 const INTERVAL = "1day";
 const OUTPUT_SIZE = 250;      // bars of history; enough for stable MACD / SMA200
-const BATCH_SIZE = 120;       // Twelve Data allows up to 120 symbols per call
+// Twelve Data allows up to 120 symbols per call, but the Basic (free) plan
+// permits only 8 requests per minute. So we request in small batches and pause
+// between them to stay under the limit. If you upgrade your plan later, you can
+// raise BATCH_SIZE and shorten PAUSE_BETWEEN_BATCHES_MS to make this faster.
+const BATCH_SIZE = 7;
+const PAUSE_BETWEEN_BATCHES_MS = 62 * 1000; // just over a minute between batches
 
 // ---------------------------------------------------------------------------
 // Indicator math
@@ -130,15 +135,33 @@ function scoreInstrument({ price, rsiVal, macdVal, sma50, sma200 }) {
 // Twelve Data fetch
 // ---------------------------------------------------------------------------
 
-async function fetchBatch(symbols) {
+async function fetchBatch(symbols, attempt = 1) {
   const symbolParam = symbols.join(",");
   const url =
     `https://api.twelvedata.com/time_series` +
     `?symbol=${encodeURIComponent(symbolParam)}` +
     `&interval=${INTERVAL}&outputsize=${OUTPUT_SIZE}&apikey=${API_KEY}`;
   const res = await fetch(url);
+
+  // 429 = rate limited. Wait, then retry a few times before giving up.
+  if (res.status === 429) {
+    if (attempt > 4) throw new Error("Twelve Data rate limit: gave up after 4 retries");
+    console.warn(`Rate limited (429). Waiting 65s, then retry (attempt ${attempt})...`);
+    await sleep(65 * 1000);
+    return fetchBatch(symbols, attempt + 1);
+  }
   if (!res.ok) throw new Error(`Twelve Data HTTP ${res.status}`);
+
   const data = await res.json();
+
+  // Twelve Data also signals rate limits inside a normal 200 body as code 429.
+  if (data && data.code === 429) {
+    if (attempt > 4) throw new Error("Twelve Data rate limit: gave up after 4 retries");
+    console.warn(`Rate limited (body code 429). Waiting 65s, then retry (attempt ${attempt})...`);
+    await sleep(65 * 1000);
+    return fetchBatch(symbols, attempt + 1);
+  }
+
   // Single-symbol responses are flat; multi-symbol responses are keyed by symbol.
   if (symbols.length === 1) return { [symbols[0]]: data };
   return data;
@@ -151,6 +174,10 @@ function closesAscending(seriesObj) {
     (a, b) => new Date(a.datetime) - new Date(b.datetime)
   );
   return rows.map((r) => parseFloat(r.close));
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function chunk(arr, size) {
@@ -168,7 +195,9 @@ async function main() {
   const symbols = tickers.map((t) => (typeof t === "string" ? t : t.symbol));
 
   const results = [];
-  for (const group of chunk(symbols, BATCH_SIZE)) {
+  const groups = chunk(symbols, BATCH_SIZE);
+  for (let gi = 0; gi < groups.length; gi++) {
+    const group = groups[gi];
     const batch = await fetchBatch(group);
     for (const sym of group) {
       const seriesObj = batch[sym];
@@ -211,6 +240,11 @@ async function main() {
         },
         scores,
       });
+    }
+    // Pause between batches so we never exceed the Basic plan's per-minute limit.
+    if (gi < groups.length - 1) {
+      console.log(`Processed a batch of ${group.length}; pausing ~1 min for the rate limit...`);
+      await sleep(PAUSE_BETWEEN_BATCHES_MS);
     }
   }
 
