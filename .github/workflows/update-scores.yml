@@ -1,0 +1,41 @@
+name: Update dashboard scores
+
+on:
+  schedule:
+    # 22:00 UTC on weekdays. US market closes 20:00-21:00 UTC depending on DST,
+    # so this runs comfortably after the close and after data settles.
+    # Adjust if you want it earlier/later or during DST shifts.
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
+
+permissions:
+  contents: write          # required so the job can commit scores.json back
+
+jobs:
+  update-scores:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch data and compute scores
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: node fetch-scores.js
+
+      - name: Commit updated scores
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/scores.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update scores $(date -u +%Y-%m-%d)"
+            git push
+          fi
