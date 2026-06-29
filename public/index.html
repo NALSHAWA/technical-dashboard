@@ -1,409 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Technical Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARP Global Capital Technical Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
-  :root {
-    --bg: #0a1019;
-    --panel: #111a28;
-    --panel-2: #0e1622;
-    --border: #1e2a3d;
-    --border-soft: #182333;
-    --text: #e7eef8;
-    --muted: #8595ac;
-    --faint: #5d6b81;
-    --bull: #2fbd7e;
-    --bull-dim: #1c5740;
-    --bear: #ed5a5a;
-    --bear-dim: #5c2630;
-    --watch: #e9a93c;
-    --watch-dim: #5a4520;
-    --accent: #5aa9e6;
-    --mono: "IBM Plex Mono", ui-monospace, monospace;
-    --ui: "Inter", system-ui, -apple-system, sans-serif;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--ui);
-    font-size: 14px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    padding: 0 0 48px;
-  }
-
-  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
-
-  /* Header */
-  header {
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(20,30,46,.6), transparent);
-  }
-  .head-inner {
-    display: flex; align-items: baseline; justify-content: space-between;
-    flex-wrap: wrap; gap: 12px; padding: 22px 0 18px;
-  }
-  .title {
-    font-size: 20px; font-weight: 700; letter-spacing: -.01em;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .title .dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--bull);
-    box-shadow: 0 0 10px var(--bull);
-  }
-  .title .sub { color: var(--faint); font-weight: 500; font-size: 13px; }
-  .meta { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
-  .meta b { color: var(--text); font-weight: 600; }
-
-  /* Summary cards */
-  .grid { display: grid; gap: 14px; margin-top: 22px; }
-  .cards { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 860px){ .cards { grid-template-columns: repeat(2,1fr); } }
-
-  .card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px 18px;
-  }
-  .card .label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
-    color: var(--muted); font-weight: 600; margin-bottom: 8px;
-  }
-  .card .big { font-family: var(--mono); font-size: 28px; font-weight: 600; line-height: 1; }
-  .card .note { font-size: 12px; color: var(--faint); margin-top: 6px; }
-
-  /* Breadth bar */
-  .breadth { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 10px; background: var(--panel-2); }
-  .breadth span { display: block; height: 100%; }
-
-  /* Panels row */
-  .panels { grid-template-columns: 1fr 1fr; }
-  @media (max-width: 860px){ .panels { grid-template-columns: 1fr; } }
-
-  .panel {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px 18px;
-  }
-  .panel h2 {
-    font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
-    color: var(--muted); font-weight: 600; margin-bottom: 12px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .mover { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
-  .mover + .mover { border-top: 1px solid var(--border-soft); }
-  .mover .sym { font-weight: 600; }
-  .mover .val { font-family: var(--mono); font-weight: 500; }
-  .up { color: var(--bull); }
-  .down { color: var(--bear); }
-  .watch-tag {
-    font-family: var(--ui); font-size: 10px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: .05em;
-    padding: 2px 7px; border-radius: 20px; margin-left: 8px;
-  }
-  .tag-ob { background: var(--bear-dim); color: var(--bear); }
-  .tag-os { background: var(--watch-dim); color: var(--watch); }
-  .tag-hot { background: var(--bull-dim); color: var(--bull); }
-  .tag-cold { background: var(--bear-dim); color: var(--bear); }
-  .empty { color: var(--faint); font-size: 13px; font-style: italic; }
-
-  /* Controls */
-  .controls {
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    margin-top: 26px; margin-bottom: 14px;
-  }
-  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
-  .filters button {
-    font-family: var(--ui); font-size: 12px; font-weight: 600;
-    color: var(--muted); background: var(--panel-2);
-    border: 1px solid var(--border); border-radius: 7px;
-    padding: 7px 12px; cursor: pointer; transition: .15s;
-  }
-  .filters button:hover { color: var(--text); border-color: #2c3c54; }
-  .filters button.active { background: var(--accent); color: #05101c; border-color: var(--accent); }
-  .search {
-    margin-left: auto; font-family: var(--mono); font-size: 13px;
-    background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: 7px; padding: 8px 12px; color: var(--text); min-width: 160px;
-  }
-  .search::placeholder { color: var(--faint); }
-  .search:focus { outline: none; border-color: var(--accent); }
-
-  /* Table */
-  .table-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--muted); font-weight: 600; text-align: right;
-    padding: 12px 14px; background: var(--panel-2);
-    border-bottom: 1px solid var(--border); cursor: pointer; white-space: nowrap;
-    user-select: none;
-  }
-  thead th:first-child { text-align: left; }
-  thead th.sorted { color: var(--text); }
-  thead th .arrow { color: var(--accent); font-size: 10px; }
-  tbody td {
-    padding: 11px 14px; text-align: right; font-family: var(--mono);
-    font-size: 13px; border-bottom: 1px solid var(--border-soft); white-space: nowrap;
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: rgba(90,169,230,.05); }
-  td.sym { text-align: left; font-family: var(--ui); font-weight: 600; font-size: 14px; }
-  .ma { color: var(--faint); font-size: 11px; }
-  .ma b { color: var(--bull); font-weight: 600; }
-  .ma .x { color: var(--bear); font-weight: 600; }
-
-  /* Composite pips */
-  .pips { display: inline-flex; gap: 3px; vertical-align: middle; }
-  .pip { width: 7px; height: 16px; border-radius: 2px; background: #1c283a; }
-  .pip.on-bull { background: var(--bull); }
-  .pip.on-watch { background: var(--watch); }
-  .pip.on-bear { background: var(--bear); }
-  .comp-cell { display: inline-flex; align-items: center; gap: 9px; }
-  .comp-num { font-weight: 600; width: 12px; }
-
-  .loading, .error { padding: 60px 20px; text-align: center; color: var(--muted); }
-  .error { color: var(--bear); }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .card, .panel, .table-wrap { animation: rise .4s ease both; }
-    @keyframes rise { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none; } }
-  }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#e2e8f0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,0.03)}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+::selection{background:rgba(99,102,241,0.3)}
+input:focus{border-color:rgba(99,102,241,0.5)!important;box-shadow:0 0 0 2px rgba(99,102,241,0.15)}
 </style>
 </head>
 <body>
-  <header>
-    <div class="wrap head-inner">
-      <div class="title">
-        <span class="dot" id="healthDot"></span>
-        Technical Dashboard <span class="sub">US equities &middot; trend / RSI / MACD composite</span>
-      </div>
-      <div class="meta" id="meta">loading&hellip;</div>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useMemo,useRef,useEffect}=React;
+
+let STOCKS=[];
+let PREV=[];
+let UPDATED=null;
+
+function calcScore(s){let sc=0;if((s.ma50!=null&&s.price>s.ma50))sc+=1;if((s.ma100!=null&&s.price>s.ma100))sc+=0.5;if((s.ma200!=null&&s.price>s.ma200))sc+=0.5;const r14=s.rsi14;if(r14>=40&&r14<=60)sc+=0.75;else if(r14>=30&&r14<40)sc+=0.5;else if(r14<30)sc+=0.75;const r30=s.rsi30;if(r30>=40&&r30<=60)sc+=0.75;else if(r30>=30&&r30<40)sc+=0.5;else if(r30<30)sc+=0.75;if(s.macd>0)sc+=1.5;return Math.min(sc,5)}
+
+function generateBriefing(stocks,prev){
+  const alerts=[];const pm={};
+  prev.forEach(p=>{pm[p.ticker]={...p,score:calcScore(p)}});
+  stocks.forEach(s=>{const p=pm[s.ticker];
+    if(!p){alerts.push({type:"new",icon:"🆕",text:`${s.ticker} added — score ${calcScore(s).toFixed(1)}`,delta:0});return}
+    const os=p.score,ns=calcScore(s),d=ns-os;
+    if(Math.abs(d)>=0.5)alerts.push({type:d>0?"upgrade":"downgrade",icon:d>0?"⬆️":"⬇️",text:`${s.ticker} score ${d>0?"upgraded":"downgraded"} ${os.toFixed(1)} → ${ns.toFixed(1)} (${d>0?"+":""}${d.toFixed(1)})`,delta:d});
+  });
+  return alerts.sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+}
+
+function getWatchTags(s){
+  const tags=[];const thresh=0.02;
+  const r50=s.price/s.ma50-1,r100=s.price/s.ma100-1,r200=s.price/s.ma200-1;
+  if(Math.abs(r50)<=thresh&&Math.abs(r50)>0)tags.push({ma:"50D",dir:r50>0?"↓":"↑"});
+  if(Math.abs(r100)<=thresh&&Math.abs(r100)>0)tags.push({ma:"100D",dir:r100>0?"↓":"↑"});
+  if(Math.abs(r200)<=thresh&&Math.abs(r200)>0)tags.push({ma:"200D",dir:r200>0?"↓":"↑"});
+  return tags;
+}
+
+function scoreColor(v){return v>=4?"#22c55e":v>=2.5?"#f59e0b":"#ef4444"}
+function scoreBg(v){return v>=4?"rgba(34,197,94,0.1)":v>=2.5?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)"}
+function fmt(v){return Math.abs(v)>=10000?v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+function pctColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
+function maColor(p,m){return p>m?"#22c55e":"#ef4444"}
+function rsiColor(v){return v>=70?"#ef4444":v<=30?"#22c55e":"#94a3b8"}
+function macdColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
+
+function HealthGauge({stocks}){
+  const canvasRef=useRef(null);const n=stocks.length;
+  const avgScore=stocks.reduce((a,s)=>a+s.score,0)/n;
+  const pctAboveAll=stocks.filter(s=>(s.ma50!=null&&s.price>s.ma50)&&(s.ma100!=null&&s.price>s.ma100)&&(s.ma200!=null&&s.price>s.ma200)).length/n;
+  const rsiHealthy=stocks.filter(s=>s.rsi14>30&&s.rsi14<70).length/n;
+  const macdPos=stocks.filter(s=>s.macd>0).length/n;
+  const health=((avgScore/5)*0.4+(pctAboveAll)*0.25+(rsiHealthy)*0.15+(macdPos)*0.2)*100;
+  useEffect(()=>{
+    const c=canvasRef.current;if(!c)return;const dpr=window.devicePixelRatio||1;
+    c.width=280*dpr;c.height=160*dpr;c.style.width="280px";c.style.height="160px";
+    const ctx=c.getContext("2d");ctx.scale(dpr,dpr);
+    const cx=140,cy=130,r=100,lw=18;
+    ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI,0);ctx.strokeStyle="rgba(255,255,255,0.06)";ctx.lineWidth=lw;ctx.lineCap="round";ctx.stroke();
+    const angle=-Math.PI+(health/100)*Math.PI;
+    const grad=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+    grad.addColorStop(0,"#ef4444");grad.addColorStop(0.35,"#f59e0b");grad.addColorStop(0.65,"#84cc16");grad.addColorStop(1,"#22c55e");
+    ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI,angle);ctx.strokeStyle=grad;ctx.lineWidth=lw;ctx.lineCap="round";ctx.stroke();
+    const nx=cx+Math.cos(angle)*r,ny=cy+Math.sin(angle)*r;
+    ctx.beginPath();ctx.arc(nx,ny,6,0,Math.PI*2);ctx.fillStyle="#f8fafc";ctx.shadowColor="rgba(248,250,252,0.5)";ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle=health>=60?"#22c55e":health>=40?"#f59e0b":"#ef4444";
+    ctx.font="bold 32px Inter,sans-serif";ctx.textAlign="center";ctx.fillText(Math.round(health),cx,cy-10);
+    ctx.fillStyle="#64748b";ctx.font="11px Inter,sans-serif";ctx.fillText("/ 100",cx,cy+8);
+  },[health]);
+  const sub=[{l:"Avg Score",v:`${avgScore.toFixed(1)} / 5`,pct:avgScore/5},{l:"Above All MAs",v:`${Math.round(pctAboveAll*100)}%`,pct:pctAboveAll},{l:"RSI Healthy",v:`${Math.round(rsiHealthy*100)}%`,pct:rsiHealthy},{l:"MACD Positive",v:`${Math.round(macdPos*100)}%`,pct:macdPos}];
+  return(
+    <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"20px 24px",display:"flex",gap:28,alignItems:"center",flexWrap:"wrap"}}>
+      <div style={{textAlign:"center"}}><div style={{fontSize:11,color:"#64748b",fontWeight:600,letterSpacing:"0.04em",marginBottom:8}}>PORTFOLIO TECHNICAL HEALTH</div><canvas ref={canvasRef} style={{width:280,height:160}}/></div>
+      <div style={{flex:1,minWidth:200}}>{sub.map(s=>(<div key={s.l} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:3}}><span style={{color:"#94a3b8"}}>{s.l}</span><span style={{color:"#e2e8f0",fontWeight:600}}>{s.v}</span></div><div style={{height:5,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${s.pct*100}%`,background:s.pct>=0.6?"#22c55e":s.pct>=0.4?"#f59e0b":"#ef4444",borderRadius:3}}/></div></div>))}<div style={{fontSize:10,color:"#475569",marginTop:8}}>Weighted: Score 40% · MAs 25% · MACD 20% · RSI 15%</div></div>
     </div>
-  </header>
-
-  <main class="wrap">
-    <div id="app">
-      <div class="loading">Loading market data&hellip;</div>
-    </div>
-  </main>
-
-<script>
-const SRC = "./data/scores.json";
-
-function classifyComposite(c){
-  if (c >= 4) return "bull";
-  if (c <= 1) return "bear";
-  return "watch";
-}
-function fmt(n, dp){
-  if (n === null || n === undefined || Number.isNaN(n)) return "—";
-  return Number(n).toFixed(dp === undefined ? 2 : dp);
+  );
 }
 
-let DATA = [];
-let state = { filter: "all", sort: "composite", dir: -1, q: "" };
-
-function watchFlags(s){
-  const flags = [];
-  if (s.rsi !== null && s.rsi >= 70) flags.push({t:"Overbought", c:"tag-ob"});
-  else if (s.rsi !== null && s.rsi <= 30) flags.push({t:"Oversold", c:"tag-os"});
-  if (s.scores.composite >= 5) flags.push({t:"Max strength", c:"tag-hot"});
-  else if (s.scores.composite <= 0) flags.push({t:"Max weakness", c:"tag-cold"});
-  return flags;
+function TopMovers({stocks,prev,onSelect}){
+  const pm={};prev.forEach(p=>{pm[p.ticker]={...p,score:calcScore(p)}});
+  const movers=stocks.map(s=>{const p=pm[s.ticker];return{...s,score:calcScore(s),delta:p?calcScore(s)-p.score:null}}).filter(s=>s.delta!==null&&s.delta!==0).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  const ups=movers.filter(m=>m.delta>0).slice(0,3);const downs=movers.filter(m=>m.delta<0).slice(0,3);
+  const Card=({s})=>(<div onClick={()=>onSelect(s)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8,cursor:"pointer",flex:"1 1 0",minWidth:160}} onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}>
+    <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:700,color:"#f8fafc",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.ticker}</div><div style={{fontSize:10,color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.name}</div></div>
+    <div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:14,fontWeight:800,color:scoreColor(s.score)}}>{s.score.toFixed(1)}</div><div style={{fontSize:11,fontWeight:700,color:s.delta>0?"#22c55e":"#ef4444"}}>{s.delta>0?"+":""}{s.delta.toFixed(1)}</div></div>
+  </div>);
+  if(ups.length===0&&downs.length===0)return null;
+  return(<div style={{display:"flex",gap:16,marginBottom:20,flexWrap:"wrap"}}>
+    {ups.length>0&&<div style={{flex:1,minWidth:280}}><div style={{fontSize:11,fontWeight:600,color:"#22c55e",marginBottom:8,letterSpacing:"0.04em"}}>⬆️ TOP UPGRADES</div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{ups.map(s=><Card key={s.ticker} s={s}/>)}</div></div>}
+    {downs.length>0&&<div style={{flex:1,minWidth:280}}><div style={{fontSize:11,fontWeight:600,color:"#ef4444",marginBottom:8,letterSpacing:"0.04em"}}>⬇️ TOP DOWNGRADES</div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{downs.map(s=><Card key={s.ticker} s={s}/>)}</div></div>}
+  </div>);
 }
 
-function render(){
-  const app = document.getElementById("app");
-  const total = DATA.length;
-  const avg = total ? DATA.reduce((a,b)=>a+b.scores.composite,0)/total : 0;
-  const bull = DATA.filter(s=>s.scores.composite>=4).length;
-  const neutral = DATA.filter(s=>s.scores.composite>1 && s.scores.composite<4).length;
-  const bear = DATA.filter(s=>s.scores.composite<=1).length;
-  const upCount = DATA.filter(s=>s.change_pct>0).length;
+const COLS=[
+{key:"ticker",label:"Ticker",w:100,sticky:true,left:0},{key:"name",label:"Name",w:180,sticky:true,left:100},
+{key:"price",label:"Price",w:95},{key:"d1",label:"%1D",w:68},{key:"m1",label:"%1M",w:72},
+{key:"aboveMa50",label:"> 50D MA",w:75},{key:"aboveMa100",label:"> 100D MA",w:80},{key:"aboveMa200",label:"> 200D MA",w:80},
+{key:"watchCol",label:"Watch Closely",w:110},
+{key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"score",label:"Score",w:100},
+];
 
-  // health dot color
-  const dot = document.getElementById("healthDot");
-  const healthCol = avg>=3 ? "var(--bull)" : avg<=2 ? "var(--bear)" : "var(--watch)";
-  dot.style.background = healthCol; dot.style.boxShadow = "0 0 10px "+healthCol;
+const FILTERS=[{key:"all",label:"All"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"}];
 
-  // movers
-  const byChange = [...DATA].filter(s=>s.change_pct!==null).sort((a,b)=>b.change_pct-a.change_pct);
-  const gainers = byChange.slice(0,5);
-  const losers = byChange.slice(-5).reverse();
+function ScoreDistribution({stocks}){
+  const bk=[{label:"0–1.5",min:0,max:1.5,color:"#ef4444"},{label:"2.0",min:1.5,max:2.5,color:"#f97316"},{label:"2.5–3.0",min:2.5,max:3.5,color:"#f59e0b"},{label:"3.5–4.0",min:3.5,max:4.5,color:"#84cc16"},{label:"4.5–5.0",min:4.5,max:5.1,color:"#22c55e"}];
+  const ct=bk.map(b=>stocks.filter(s=>s.score>=b.min&&s.score<b.max).length);const mx=Math.max(...ct,1);
+  return(<div style={{display:"flex",alignItems:"flex-end",gap:6,height:80}}>{bk.map((b,i)=>(<div key={b.label} style={{display:"flex",flexDirection:"column",alignItems:"center",flex:1}}><span style={{fontSize:11,fontWeight:700,color:b.color,marginBottom:4}}>{ct[i]}</span><div style={{width:"100%",maxWidth:48,height:`${Math.max((ct[i]/mx)*52,3)}px`,background:b.color,borderRadius:"4px 4px 0 0",opacity:0.85}}/><span style={{fontSize:9,color:"#64748b",marginTop:4,whiteSpace:"nowrap"}}>{b.label}</span></div>))}</div>);
+}
 
-  // watch list
-  const watch = DATA.map(s=>({s, f:watchFlags(s)})).filter(x=>x.f.length);
-
-  const pct = v => total ? (v/total*100).toFixed(1) : 0;
-
-  app.innerHTML = `
-    <div class="grid cards">
-      <div class="card">
-        <div class="label">Book breadth</div>
-        <div class="big" style="color:${healthCol}">${avg.toFixed(2)}<span style="font-size:14px;color:var(--faint)"> / 5</span></div>
-        <div class="breadth">
-          <span style="width:${pct(bull)}%;background:var(--bull)"></span>
-          <span style="width:${pct(neutral)}%;background:var(--watch)"></span>
-          <span style="width:${pct(bear)}%;background:var(--bear)"></span>
+function PriceLadder({stock}){
+  const canvasRef=useRef(null);const s=stock;const sc=calcScore(s);
+  useEffect(()=>{
+    const c=canvasRef.current;if(!c)return;const dpr=window.devicePixelRatio||1;const W=520,H=260;
+    c.width=W*dpr;c.height=H*dpr;c.style.width="100%";c.style.maxWidth=W+"px";
+    const ctx=c.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+    const levels=[{val:s.ma200,label:"MA200",color:"#f59e0b"},{val:s.ma100,label:"MA100",color:"#8b5cf6"},{val:s.ma50,label:"MA50",color:"#3b82f6"},{val:s.price,label:"PRICE",color:"#f8fafc",isPrice:true}];
+    const allVlevels=levels.filter(l=>l.val!=null);const allV=allVlevels.map(l=>l.val);const mn=Math.min(...allV),mx=Math.max(...allV);const rng=mx-mn||1,pad=rng*0.15,lo=mn-pad,hi=mx+pad;
+    const cL=80,cR=W-100,cT=30,cB=H-30;
+    ctx.strokeStyle="rgba(255,255,255,0.06)";ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){const y=cT+(cB-cT)*i/4;ctx.beginPath();ctx.moveTo(cL,y);ctx.lineTo(cR,y);ctx.stroke();ctx.fillStyle="#475569";ctx.font="11px Inter,sans-serif";ctx.textAlign="right";ctx.fillText(fmt(hi-(hi-lo)*i/4),cL-10,y+4)}
+    allVlevels.forEach(l=>{const y=cT+(1-(l.val-lo)/(hi-lo))*(cB-cT);if(l.isPrice){ctx.setLineDash([]);ctx.strokeStyle="#f8fafc";ctx.lineWidth=2.5;ctx.shadowColor="rgba(248,250,252,0.4)";ctx.shadowBlur=8;ctx.beginPath();ctx.moveTo(cL,y);ctx.lineTo(cR,y);ctx.stroke();ctx.shadowBlur=0;ctx.beginPath();ctx.arc(cR,y,5,0,Math.PI*2);ctx.fillStyle="#f8fafc";ctx.fill();ctx.beginPath();ctx.arc(cR,y,8,0,Math.PI*2);ctx.strokeStyle="rgba(248,250,252,0.3)";ctx.lineWidth=2;ctx.stroke()}else{ctx.setLineDash([6,4]);ctx.strokeStyle=l.color;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cL,y);ctx.lineTo(cR,y);ctx.stroke()}ctx.setLineDash([]);ctx.fillStyle=l.isPrice?"#f8fafc":l.color;ctx.font=l.isPrice?"bold 12px Inter,sans-serif":"11px Inter,sans-serif";ctx.textAlign="left";ctx.fillText(`${l.label}: ${fmt(l.val)}`,cR+14,y+4)});
+    const py=cT+(1-(s.price-lo)/(hi-lo))*(cB-cT);ctx.beginPath();ctx.moveTo(cL-4,py-6);ctx.lineTo(cL+4,py);ctx.lineTo(cL-4,py+6);ctx.closePath();ctx.fillStyle="#f8fafc";ctx.fill();
+  },[s]);
+  const tT=((s.ma50!=null&&s.price>s.ma50)?1:0)+((s.ma100!=null&&s.price>s.ma100)?0.5:0)+((s.ma200!=null&&s.price>s.ma200)?0.5:0);
+  const r14P=(s.rsi14>=40&&s.rsi14<=60)?0.75:(s.rsi14>=30&&s.rsi14<40)?0.5:s.rsi14<30?0.75:0;
+  const r30P=(s.rsi30>=40&&s.rsi30<=60)?0.75:(s.rsi30>=30&&s.rsi30<40)?0.5:s.rsi30<30?0.75:0;
+  const rT=r14P+r30P,mP=s.macd>0?1.5:0;
+  const Bar=({label,pts,max,color})=>(<div style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}><span style={{color:"#94a3b8"}}>{label}</span><span style={{color,fontWeight:600}}>{pts.toFixed(1)} / {max.toFixed(1)}</span></div><div style={{height:6,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${(pts/max)*100}%`,background:color,borderRadius:3}}/></div></div>);
+  const M=({label,value,color})=>(<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}><span style={{color:"#64748b",fontSize:12}}>{label}</span><span style={{color,fontSize:12,fontWeight:600,fontVariantNumeric:"tabular-nums"}}>{value}</span></div>);
+  return(
+    <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+      <div style={{flex:"1 1 420px",minWidth:320}}><div style={{fontSize:11,color:"#64748b",marginBottom:8,letterSpacing:"0.04em",fontWeight:600}}>PRICE vs MOVING AVERAGES</div><canvas ref={canvasRef} style={{width:"100%",maxWidth:520,height:"auto",aspectRatio:"2/1"}}/></div>
+      <div style={{flex:"1 1 280px",minWidth:240}}>
+        <div style={{fontSize:11,color:"#64748b",marginBottom:12,letterSpacing:"0.04em",fontWeight:600}}>SCORE BREAKDOWN</div>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{fontSize:36,fontWeight:800,color:scoreColor(sc)}}>{sc.toFixed(1)}</div><div style={{fontSize:14,color:"#64748b"}}>/ 5.0</div></div>
+        <Bar label="Trend (Price vs MAs)" pts={tT} max={2} color="#3b82f6"/><Bar label="RSI Momentum" pts={rT} max={1.5} color="#8b5cf6"/><Bar label="MACD Signal" pts={mP} max={1.5} color="#22c55e"/>
+        <div style={{marginTop:16}}>
+          <M label="1D Change" value={`${s.d1>0?"+":""}${s.d1.toFixed(2)}%`} color={pctColor(s.d1)}/><M label="1M Change" value={`${s.m1>0?"+":""}${s.m1.toFixed(2)}%`} color={pctColor(s.m1)}/>
+          <M label="RSI 14D" value={s.rsi14.toFixed(2)} color={rsiColor(s.rsi14)}/><M label="RSI 30D" value={s.rsi30.toFixed(2)} color={rsiColor(s.rsi30)}/>
+          <M label="MACD" value={`${s.macd>0?"+":""}${s.macd.toFixed(2)}`} color={macdColor(s.macd)}/>
+          <M label="vs MA50" value={s.ma50==null?"n/a":`${((s.price/s.ma50-1)*100).toFixed(2)}%`} color={s.ma50==null?"#64748b":maColor(s.price,s.ma50)}/><M label="vs MA100" value={s.ma100==null?"n/a":`${((s.price/s.ma100-1)*100).toFixed(2)}%`} color={s.ma100==null?"#64748b":maColor(s.price,s.ma100)}/><M label="vs MA200" value={s.ma200==null?"n/a":`${((s.price/s.ma200-1)*100).toFixed(2)}%`} color={s.ma200==null?"#64748b":maColor(s.price,s.ma200)}/>
         </div>
-        <div class="note">avg composite across ${total} names</div>
-      </div>
-      <div class="card">
-        <div class="label">Bullish (4&ndash;5)</div>
-        <div class="big up">${bull}</div>
-        <div class="note">${pct(bull)}% of the book</div>
-      </div>
-      <div class="card">
-        <div class="label">Weak (0&ndash;1)</div>
-        <div class="big down">${bear}</div>
-        <div class="note">${pct(bear)}% of the book</div>
-      </div>
-      <div class="card">
-        <div class="label">Up on the day</div>
-        <div class="big">${upCount}<span style="font-size:14px;color:var(--faint)"> / ${total}</span></div>
-        <div class="note">${total-upCount} down or flat</div>
       </div>
     </div>
-
-    <div class="grid panels" style="margin-top:14px">
-      <div class="panel">
-        <h2>Top movers</h2>
-        ${gainers.map(s=>moverRow(s,"up")).join("")}
-        <div style="height:8px"></div>
-        ${losers.map(s=>moverRow(s,"down")).join("")}
-      </div>
-      <div class="panel">
-        <h2>Watch closely</h2>
-        ${watch.length ? watch.map(x=>`
-          <div class="mover">
-            <span class="sym">${x.s.symbol}${x.f.map(f=>`<span class="watch-tag ${f.c}">${f.t}</span>`).join("")}</span>
-            <span class="val">RSI ${fmt(x.s.rsi,0)}</span>
-          </div>`).join("") : `<div class="empty">Nothing at extremes right now.</div>`}
-      </div>
-    </div>
-
-    <div class="controls">
-      <div class="filters">
-        ${filterBtn("all","All")}
-        ${filterBtn("bull","Bullish")}
-        ${filterBtn("neutral","Neutral")}
-        ${filterBtn("bear","Weak")}
-        ${filterBtn("ob","Overbought")}
-        ${filterBtn("os","Oversold")}
-      </div>
-      <input class="search" id="search" placeholder="Filter symbol&hellip;" value="${state.q}" />
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          ${th("symbol","Symbol")}
-          ${th("price","Price")}
-          ${th("change_pct","Chg %")}
-          ${th("rsi","RSI")}
-          ${th("hist","MACD hist")}
-          <th>Trend</th>
-          ${th("composite","Composite")}
-        </tr></thead>
-        <tbody>${rows()}</tbody>
-      </table>
-    </div>
-  `;
-
-  document.getElementById("search").addEventListener("input", e=>{
-    state.q = e.target.value; const tb = document.querySelector("tbody"); if(tb) tb.innerHTML = rows();
-  });
-  document.querySelectorAll(".filters button").forEach(b=>{
-    b.addEventListener("click",()=>{ state.filter = b.dataset.f; render(); });
-  });
-  document.querySelectorAll("thead th[data-k]").forEach(h=>{
-    h.addEventListener("click",()=>{
-      const k = h.dataset.k;
-      if (state.sort===k) state.dir*=-1; else { state.sort=k; state.dir = k==="symbol"?1:-1; }
-      render();
-    });
-  });
+  );
 }
 
-function moverRow(s, dir){
-  return `<div class="mover"><span class="sym">${s.symbol}</span>
-    <span class="val ${dir}">${s.change_pct>0?"+":""}${fmt(s.change_pct)}%</span></div>`;
-}
-function filterBtn(f,label){
-  return `<button data-f="${f}" class="${state.filter===f?"active":""}">${label}</button>`;
-}
-function th(k,label){
-  const on = state.sort===k;
-  const arrow = on ? `<span class="arrow">${state.dir<0?"▼":"▲"}</span>` : "";
-  return `<th data-k="${k}" class="${on?"sorted":""}">${label} ${arrow}</th>`;
-}
+function App(){
+  const[search,setSearch]=useState("");const[sortKey,setSortKey]=useState("score");
+  const[sortDir,setSortDir]=useState(-1);const[filter,setFilter]=useState("all");
+  const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);
 
-function passesFilter(s){
-  const c = s.scores.composite;
-  switch(state.filter){
-    case "bull": return c>=4;
-    case "neutral": return c>1 && c<4;
-    case "bear": return c<=1;
-    case "ob": return s.rsi!==null && s.rsi>=70;
-    case "os": return s.rsi!==null && s.rsi<=30;
-    default: return true;
+  const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),watchTags:getWatchTags(s)}}),[]);
+  const briefing=useMemo(()=>generateBriefing(STOCKS,PREV),[]);
+
+  const filtered=useMemo(()=>{let d=enriched;if(search){const q=search.toLowerCase();d=d.filter(s=>s.ticker.toLowerCase().includes(q)||s.name.toLowerCase().includes(q))}if(filter==="aboveMa")d=d.filter(s=>s.aboveMa50&&s.aboveMa100&&s.aboveMa200);if(filter==="belowMa")d=d.filter(s=>!s.aboveMa50&&!s.aboveMa100&&!s.aboveMa200);if(filter==="strongTech")d=d.filter(s=>s.score>=4);if(filter==="weakTech")d=d.filter(s=>s.score<2);if(filter==="overbought")d=d.filter(s=>s.rsi14>=70||s.rsi30>=70);if(filter==="oversold")d=d.filter(s=>s.rsi14<=30||s.rsi30<=30);if(filter==="macdPos")d=d.filter(s=>s.macd>0);if(filter==="watch")d=d.filter(s=>s.watchTags.length>0);return d},[enriched,search,filter]);
+
+  const sorted=useMemo(()=>[...filtered].sort((a,b)=>{const av=a[sortKey],bv=b[sortKey];if(typeof av==="boolean")return sortDir*((av?1:0)-(bv?1:0));if(typeof av==="string")return sortDir*av.localeCompare(bv);return sortDir*(av-bv)}),[filtered,sortKey,sortDir]);
+
+  function handleSort(key){if(sortKey===key)setSortDir(d=>d*-1);else{setSortKey(key);setSortDir(key==="ticker"||key==="name"?1:-1)}}
+
+  const bb="1px solid rgba(255,255,255,0.04)";
+  const YN=({val})=><span style={{color:val?"#22c55e":"#ef4444",fontWeight:700,fontSize:12}}>{val?"YES":"NO"}</span>;
+  const aBg=t=>t==="downgrade"?"rgba(239,68,68,0.06)":t==="upgrade"?"rgba(34,197,94,0.06)":"rgba(99,102,241,0.06)";
+  const aBo=t=>t==="downgrade"?"rgba(239,68,68,0.15)":t==="upgrade"?"rgba(34,197,94,0.15)":"rgba(99,102,241,0.15)";
+
+  function cellStyle(c,isHead){
+    const base={padding:isHead?"10px 10px":"9px 10px",textAlign:c.key==="ticker"||c.key==="name"?"left":"center",borderBottom:isHead?"1px solid rgba(255,255,255,0.08)":bb,whiteSpace:"nowrap"};
+    if(c.sticky)Object.assign(base,{position:"sticky",left:c.left,zIndex:isHead?4:2,borderRight:c.key==="name"?"1px solid rgba(255,255,255,0.08)":"none"});
+    if(isHead)Object.assign(base,{cursor:"pointer",color:sortKey===c.key?"#a5b4fc":"#64748b",fontWeight:600,fontSize:11,letterSpacing:"0.04em",userSelect:"none",top:0,minWidth:c.w,background:"rgba(10,14,23,1)",zIndex:c.sticky?4:3,position:"sticky"});
+    return base;
   }
+
+  return(
+    <div style={{background:"#0a0e17",color:"#e2e8f0",fontFamily:"'Inter',-apple-system,sans-serif",minHeight:"100vh",padding:24}}>
+      {selected&&(
+        <div onClick={()=>setSelected(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(8px)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:"#0f1420",border:"1px solid rgba(255,255,255,0.1)",borderRadius:16,padding:28,maxWidth:880,width:"100%",maxHeight:"90vh",overflowY:"auto",position:"relative"}}>
+            <button onClick={()=>setSelected(null)} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,0.08)",border:"none",color:"#94a3b8",fontSize:18,width:32,height:32,borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+            <div style={{display:"flex",alignItems:"baseline",gap:12,marginBottom:4}}><h2 style={{margin:0,fontSize:20,fontWeight:700,color:"#f8fafc"}}>{selected.ticker}</h2><span style={{fontSize:13,color:"#64748b"}}>{selected.name}</span></div>
+            <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:24,flexWrap:"wrap"}}>
+              <span style={{fontSize:28,fontWeight:700,color:"#f8fafc"}}>{fmt(selected.price)}</span>
+              <span style={{fontSize:15,fontWeight:600,color:pctColor(selected.d1)}}>{selected.d1>0?"+":""}{selected.d1.toFixed(2)}%</span><span style={{fontSize:12,color:"#64748b"}}>1D</span>
+              <span style={{fontSize:15,fontWeight:600,color:pctColor(selected.m1)}}>{selected.m1>0?"+":""}{selected.m1.toFixed(2)}%</span><span style={{fontSize:12,color:"#64748b"}}>1M</span>
+            </div>
+            <PriceLadder stock={selected}/>
+          </div>
+        </div>
+      )}
+
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:12}}>
+        <div><h1 style={{margin:0,fontSize:22,fontWeight:700,color:"#f8fafc",letterSpacing:"-0.02em"}}>ARP Global Capital Technical Dashboard</h1><p style={{margin:"4px 0 0",fontSize:12,color:"#64748b"}}>{enriched.length} instruments · updated {UPDATED||"—"} · Click any row to inspect</p></div>
+        <div style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.05)",padding:"5px 10px",borderRadius:6}}>Score: <span style={{color:"#22c55e"}}>■</span> 4-5 &nbsp;<span style={{color:"#f59e0b"}}>■</span> 2.5-3.5 &nbsp;<span style={{color:"#ef4444"}}>■</span> 0-2</div>
+      </div>
+
+      <div style={{display:"flex",gap:16,marginBottom:20,flexWrap:"wrap"}}>
+        <div style={{flex:"1 1 420px",minWidth:340}}><HealthGauge stocks={enriched}/></div>
+        <div style={{flex:"0 1 220px",minWidth:200,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"20px 18px",display:"flex",flexDirection:"column",justifyContent:"center"}}>
+          <div style={{fontSize:11,color:"#64748b",fontWeight:600,letterSpacing:"0.04em",marginBottom:12}}>SCORE DISTRIBUTION</div>
+          <ScoreDistribution stocks={enriched}/>
+        </div>
+        <div style={{flex:"1 1 340px",minWidth:280,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+          <button onClick={()=>setAlertsOpen(o=>!o)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:"none",border:"none",cursor:"pointer",color:"#e2e8f0",flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:14}}>📋</span><span style={{fontSize:13,fontWeight:700,letterSpacing:"0.02em"}}>SCORE CHANGES</span><span style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.06)",padding:"2px 8px",borderRadius:10}}>{briefing.length}</span></div>
+            <span style={{fontSize:12,color:"#64748b"}}>{alertsOpen?"▲":"▼"}</span>
+          </button>
+          {alertsOpen&&(<div style={{padding:"0 18px 16px",overflowY:"auto",flex:1}}>{briefing.length===0?<div style={{padding:"12px 0",fontSize:13,color:"#64748b"}}>No score changes.</div>:<div style={{display:"flex",flexDirection:"column",gap:6}}>{briefing.map((a,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 10px",background:aBg(a.type),border:`1px solid ${aBo(a.type)}`,borderRadius:8}}><span style={{fontSize:12,flexShrink:0}}>{a.icon}</span><span style={{fontSize:11.5,color:"#cbd5e1"}}>{a.text}</span></div>))}</div>}</div>)}
+        </div>
+      </div>
+
+      <TopMovers stocks={STOCKS} prev={PREV} onSelect={s=>setSelected({...s,score:calcScore(s),aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),watchTags:getWatchTags(s)})}/>
+
+      <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
+        <input type="text" placeholder="Search ticker or name..." value={search} onChange={e=>setSearch(e.target.value)} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",color:"#e2e8f0",fontSize:13,width:240,outline:"none"}}/>
+        {FILTERS.map(f=>(<button key={f.key} onClick={()=>setFilter(filter===f.key?"all":f.key)} style={{background:filter===f.key?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:filter===f.key?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"6px 12px",color:filter===f.key?"#a5b4fc":"#94a3b8",fontSize:12,cursor:"pointer",whiteSpace:"nowrap"}}>{f.label}</button>))}
+        <span style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>{sorted.length} results</span>
+      </div>
+
+      <div style={{overflowX:"auto",overflowY:"auto",maxHeight:"70vh",borderRadius:10,border:"1px solid rgba(255,255,255,0.08)",position:"relative"}}>
+        <table style={{width:"100%",borderCollapse:"separate",borderSpacing:0,fontSize:12.5}}>
+          <thead style={{position:"sticky",top:0,zIndex:5}}><tr>{COLS.map(c=>(<th key={c.key} onClick={()=>handleSort(c.key)} style={cellStyle(c,true)}>{c.label} {sortKey===c.key?(sortDir>0?"▲":"▼"):""}</th>))}</tr></thead>
+          <tbody>
+            {sorted.map((s,i)=>{const even=i%2===0;const rowBg=even?"#0a0e17":"#0c1019";const wt=s.watchTags;
+              return(<tr key={s.ticker} style={{cursor:"pointer"}}
+                onMouseEnter={e=>e.currentTarget.querySelectorAll("td").forEach(td=>{td.style.background="rgba(99,102,241,0.08)"})}
+                onMouseLeave={e=>e.currentTarget.querySelectorAll("td").forEach(td=>{td.style.background=rowBg})}
+                onClick={()=>setSelected(s)}>
+                <td style={{...cellStyle(COLS[0],false),fontWeight:600,color:"#a5b4fc",background:rowBg}}>{s.ticker}</td>
+                <td style={{...cellStyle(COLS[1],false),color:"#94a3b8",overflow:"hidden",textOverflow:"ellipsis",maxWidth:180,background:rowBg}}>{s.name}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",color:"#f8fafc",fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{fmt(s.price)}</td>
+                <td style={{padding:"9px 10px",textAlign:"right",color:pctColor(s.d1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</td>
+                <td style={{padding:"9px 10px",textAlign:"right",color:pctColor(s.m1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa50}/></td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa100}/></td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa200}/></td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg,fontSize:11}}>
+                  {wt.length>0?wt.map((t,j)=><span key={j} style={{color:t.dir==="↑"?"#22c55e":"#ef4444",marginRight:6,fontWeight:700}}>{t.dir} {t.ma}</span>):<span style={{color:"#1e293b"}}>—</span>}
+                </td>
+                <td style={{padding:"9px 10px",textAlign:"right",color:rsiColor(s.rsi14),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi14.toFixed(2)}</td>
+                <td style={{padding:"9px 10px",textAlign:"right",color:rsiColor(s.rsi30),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi30.toFixed(2)}</td>
+                <td style={{padding:"9px 10px",textAlign:"right",color:macdColor(s.macd),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.macd>0?"+":""}{s.macd.toFixed(2)}</td>
+                <td style={{padding:"9px 10px",textAlign:"right",borderBottom:bb,background:rowBg}}>
+                  <span style={{display:"inline-block",padding:"3px 10px",borderRadius:6,background:scoreBg(s.score),color:scoreColor(s.score),fontWeight:700,fontSize:12}}>{s.score.toFixed(1)}</span>
+                </td>
+              </tr>)})}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{marginTop:20,padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
+        <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:8,letterSpacing:"0.04em"}}>TECHNICAL SCORE METHODOLOGY (0–5)</div>
+        <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.7}}>
+          <strong style={{color:"#e2e8f0"}}>Trend (0–2):</strong> +1.0 if Price &gt; MA50 · +0.5 if Price &gt; MA100 · +0.5 if Price &gt; MA200 &nbsp;|&nbsp;
+          <strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5):</strong> 0.75 per RSI (14D &amp; 30D) if 40–60 or &lt;30 · 0.5 if 30–40 · 0 if &gt;70 &nbsp;|&nbsp;
+          <strong style={{color:"#e2e8f0"}}>MACD (0–1.5):</strong> +1.5 if positive · 0 if negative
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function rows(){
-  let list = DATA.filter(passesFilter);
-  if (state.q.trim()) list = list.filter(s=>s.symbol.toLowerCase().includes(state.q.trim().toLowerCase()));
-  const k = state.sort;
-  list.sort((a,b)=>{
-    let av, bv;
-    if (k==="symbol"){ av=a.symbol; bv=b.symbol; return av<bv?-1*state.dir:av>bv?1*state.dir:0; }
-    if (k==="hist"){ av=a.macd?a.macd.hist:0; bv=b.macd?b.macd.hist:0; }
-    else if (k==="composite"){ av=a.scores.composite; bv=b.scores.composite; }
-    else { av=a[k]; bv=b[k]; }
-    av = av===null?-Infinity:av; bv = bv===null?-Infinity:bv;
-    return (av-bv)*state.dir;
-  });
-  if (!list.length) return `<tr><td colspan="7" class="empty" style="text-align:center;padding:30px">No names match this filter.</td></tr>`;
-  return list.map(s=>{
-    const cls = classifyComposite(s.scores.composite);
-    const pipCls = cls==="bull"?"on-bull":cls==="bear"?"on-bear":"on-watch";
-    const pips = Array.from({length:5},(_,i)=>`<span class="pip ${i<s.scores.composite?pipCls:""}"></span>`).join("");
-    const chg = s.change_pct;
-    const hist = s.macd?s.macd.hist:null;
-    return `<tr>
-      <td class="sym">${s.symbol}</td>
-      <td>${fmt(s.price)}</td>
-      <td class="${chg>0?"up":chg<0?"down":""}">${chg>0?"+":""}${fmt(chg)}%</td>
-      <td>${fmt(s.rsi,0)}</td>
-      <td class="${hist>0?"up":hist<0?"down":""}">${fmt(hist,3)}</td>
-      <td class="ma">${s.trend.above50?'<b>&gt;50</b>':'<span class="x">&lt;50</span>'} &middot; ${s.trend.sma200===null?'<span style="color:var(--faint)">n/a</span>':(s.trend.above200?'<b>&gt;200</b>':'<span class="x">&lt;200</span>')}</td>
-      <td><span class="comp-cell"><span class="comp-num">${s.scores.composite}</span><span class="pips">${pips}</span></span></td>
-    </tr>`;
-  }).join("");
-}
-
-fetch(SRC, {cache:"no-store"})
-  .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-  .then(json=>{
-    DATA = json.stocks || [];
-    const d = json.updated ? new Date(json.updated) : null;
-    document.getElementById("meta").innerHTML =
-      `<b>${DATA.length}</b> instruments &middot; updated ` +
-      (d ? d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}) : "—");
-    render();
+fetch("./data/scores.json",{cache:"no-store"})
+  .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+  .then(j=>{
+    STOCKS=j.stocks||[];PREV=j.prev||[];
+    UPDATED=j.updated?new Date(j.updated).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):null;
+    ReactDOM.render(<App/>,document.getElementById("root"));
   })
-  .catch(err=>{
-    document.getElementById("app").innerHTML =
-      `<div class="error">Couldn't load data (${err.message}). If this is the first deploy, make sure the file lives at <code>data/scores.json</code> next to this page.</div>`;
-    document.getElementById("meta").textContent = "data unavailable";
-  });
+  .catch(e=>{document.getElementById("root").innerHTML='<div style="padding:48px;color:#ef4444;font-family:Inter,sans-serif">Could not load data ('+e.message+'). Make sure data/scores.json sits next to this page.</div>';});
 </script>
 </body>
 </html>
