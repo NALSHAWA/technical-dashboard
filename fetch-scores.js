@@ -2,17 +2,18 @@
 /**
  * fetch-scores.js
  * -----------------------------------------------------------------------------
- * Pulls daily OHLCV from Twelve Data for the tickers in tickers.json,
- * computes RSI(14), MACD(12,26,9) and a trend read, derives a 0-5 composite
- * score, and writes the result to public/data/scores.json.
+ * Pulls daily OHLCV from Twelve Data for every entry in tickers.json and
+ * computes the full field set the ARP dashboard expects:
+ *   price, d1 (1-day %), m1 (1-month %), ma50, ma100, ma200,
+ *   rsi14, rsi30, macd (MACD line).
  *
- * Zero dependencies. Requires Node 18+ (uses the built-in global fetch).
+ * It also carries forward the previous run's results as `prev`, so the
+ * dashboard can show score upgrades / downgrades day over day.
  *
- * Env:
- *   TWELVE_DATA_API_KEY   your Twelve Data key (set as a GitHub Actions secret)
+ * Output: public/data/scores.json   { updated, stocks: [...], prev: [...] }
  *
- * Run locally:
- *   TWELVE_DATA_API_KEY=xxxx node fetch-scores.js
+ * Zero dependencies. Node 18+ (built-in fetch).
+ * Env: TWELVE_DATA_API_KEY
  * -----------------------------------------------------------------------------
  */
 
@@ -29,26 +30,24 @@ const TICKERS_PATH = path.join(__dirname, "tickers.json");
 const OUTPUT_PATH = path.join(__dirname, "public", "data", "scores.json");
 
 const INTERVAL = "1day";
-const OUTPUT_SIZE = 250;      // bars of history; enough for stable MACD / SMA200
-// Twelve Data allows up to 120 symbols per call, but the Basic (free) plan
-// permits only 8 requests per minute. So we request in small batches and pause
-// between them to stay under the limit. If you upgrade your plan later, you can
-// raise BATCH_SIZE and shorten PAUSE_BETWEEN_BATCHES_MS to make this faster.
+const OUTPUT_SIZE = 250;       // enough history for MA200
+const MIN_BARS = 35;           // enough for MACD(12,26,9) and RSI(30)
+
+// Basic (free) plan allows ~8 requests/minute. Request in small batches and
+// pause between them. If you upgrade your Twelve Data plan, raise BATCH_SIZE
+// and shorten PAUSE_BETWEEN_BATCHES_MS to make this run faster.
 const BATCH_SIZE = 7;
-const PAUSE_BETWEEN_BATCHES_MS = 62 * 1000; // just over a minute between batches
+const PAUSE_BETWEEN_BATCHES_MS = 62 * 1000;
 
 // ---------------------------------------------------------------------------
 // Indicator math
 // ---------------------------------------------------------------------------
-
-// Simple moving average of the last `period` values.
 function sma(values, period) {
   if (values.length < period) return null;
   const slice = values.slice(-period);
   return slice.reduce((a, b) => a + b, 0) / period;
 }
 
-// Full EMA series (seeded with the SMA of the first `period` values).
 function emaSeries(values, period) {
   if (values.length < period) return [];
   const k = 2 / (period + 1);
@@ -62,112 +61,64 @@ function emaSeries(values, period) {
   return out;
 }
 
-// RSI using Wilder's smoothing. Returns the latest value.
-function rsi(closes, period = 14) {
+function rsi(closes, period) {
   if (closes.length < period + 1) return null;
-  let gain = 0;
-  let loss = 0;
+  let gain = 0, loss = 0;
   for (let i = 1; i <= period; i++) {
     const d = closes[i] - closes[i - 1];
-    if (d >= 0) gain += d;
-    else loss -= d;
+    if (d >= 0) gain += d; else loss -= d;
   }
-  let avgGain = gain / period;
-  let avgLoss = loss / period;
+  let avgGain = gain / period, avgLoss = loss / period;
   for (let i = period + 1; i < closes.length; i++) {
     const d = closes[i] - closes[i - 1];
-    const g = d > 0 ? d : 0;
-    const l = d < 0 ? -d : 0;
-    avgGain = (avgGain * (period - 1) + g) / period;
-    avgLoss = (avgLoss * (period - 1) + l) / period;
+    avgGain = (avgGain * (period - 1) + (d > 0 ? d : 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + (d < 0 ? -d : 0)) / period;
   }
   if (avgLoss === 0) return 100;
-  const rs = avgGain / avgLoss;
-  return 100 - 100 / (1 + rs);
+  return 100 - 100 / (1 + avgGain / avgLoss);
 }
 
-// MACD(12,26,9). Returns {macd, signal, hist} latest values.
-function macd(closes, fast = 12, slow = 26, signalPeriod = 9) {
-  if (closes.length < slow + signalPeriod) return null;
-  const emaFast = emaSeries(closes, fast);
-  const emaSlow = emaSeries(closes, slow);
-  const macdLine = [];
-  for (let i = 0; i < closes.length; i++) {
-    if (emaFast[i] != null && emaSlow[i] != null) {
-      macdLine[i] = emaFast[i] - emaSlow[i];
-    }
-  }
-  const macdCompact = macdLine.filter((v) => v != null);
-  const signalSeries = emaSeries(macdCompact, signalPeriod);
-  const macdVal = macdCompact[macdCompact.length - 1];
-  const signalVal = signalSeries[signalSeries.length - 1];
-  return { macd: macdVal, signal: signalVal, hist: macdVal - signalVal };
+// Returns the latest MACD line value (EMA12 - EMA26).
+function macdLine(closes, fast = 12, slow = 26) {
+  if (closes.length < slow) return null;
+  const ef = emaSeries(closes, fast);
+  const es = emaSeries(closes, slow);
+  const i = closes.length - 1;
+  if (ef[i] == null || es[i] == null) return null;
+  return ef[i] - es[i];
 }
 
 // ---------------------------------------------------------------------------
-// Composite scoring  ***  TUNE THIS TO MATCH YOUR METHODOLOGY  ***
+// Twelve Data fetch (with rate-limit retry)
 // ---------------------------------------------------------------------------
-// Range 0-5. Trend contributes 0-2, MACD 0-2, RSI 0-1.
-// These thresholds are a sensible starting point; replace with your own rules.
-function scoreInstrument({ price, rsiVal, macdVal, sma50, sma200 }) {
-  let trend = 0;
-  if (sma50 != null && price > sma50) trend += 1;
-  if (sma200 != null && price > sma200) trend += 1;
-
-  let macdScore = 0;
-  if (macdVal) {
-    if (macdVal.macd > macdVal.signal) macdScore += 1; // bullish cross state
-    if (macdVal.macd > 0) macdScore += 1;              // above zero line
-  }
-
-  let rsiScore = 0;
-  if (rsiVal != null && rsiVal > 50 && rsiVal < 70) rsiScore = 1; // constructive, not overbought
-
-  return {
-    trend,
-    macd: macdScore,
-    rsi: rsiScore,
-    composite: trend + macdScore + rsiScore,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Twelve Data fetch
-// ---------------------------------------------------------------------------
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
 async function fetchBatch(symbols, attempt = 1) {
-  const symbolParam = symbols.join(",");
   const url =
     `https://api.twelvedata.com/time_series` +
-    `?symbol=${encodeURIComponent(symbolParam)}` +
+    `?symbol=${encodeURIComponent(symbols.join(","))}` +
     `&interval=${INTERVAL}&outputsize=${OUTPUT_SIZE}&apikey=${API_KEY}`;
   const res = await fetch(url);
 
-  // 429 = rate limited. Wait, then retry a few times before giving up.
   if (res.status === 429) {
-    if (attempt > 4) throw new Error("Twelve Data rate limit: gave up after 4 retries");
-    console.warn(`Rate limited (429). Waiting 65s, then retry (attempt ${attempt})...`);
+    if (attempt > 4) throw new Error("Rate limit: gave up after 4 retries");
+    console.warn(`Rate limited (429). Waiting 65s, retry ${attempt}...`);
     await sleep(65 * 1000);
     return fetchBatch(symbols, attempt + 1);
   }
   if (!res.ok) throw new Error(`Twelve Data HTTP ${res.status}`);
 
   const data = await res.json();
-
-  // Twelve Data also signals rate limits inside a normal 200 body as code 429.
   if (data && data.code === 429) {
-    if (attempt > 4) throw new Error("Twelve Data rate limit: gave up after 4 retries");
-    console.warn(`Rate limited (body code 429). Waiting 65s, then retry (attempt ${attempt})...`);
+    if (attempt > 4) throw new Error("Rate limit: gave up after 4 retries");
+    console.warn(`Rate limited (body 429). Waiting 65s, retry ${attempt}...`);
     await sleep(65 * 1000);
     return fetchBatch(symbols, attempt + 1);
   }
-
-  // Single-symbol responses are flat; multi-symbol responses are keyed by symbol.
   if (symbols.length === 1) return { [symbols[0]]: data };
   return data;
 }
 
-// Twelve Data returns values newest-first; we sort ascending for the math.
 function closesAscending(seriesObj) {
   if (!seriesObj || !seriesObj.values) return null;
   const rows = [...seriesObj.values].sort(
@@ -176,23 +127,35 @@ function closesAscending(seriesObj) {
   return rows.map((r) => parseFloat(r.close));
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function chunk(arr, size) {
   const out = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
 }
 
+function round(n, dp) {
+  if (n == null || Number.isNaN(n)) return null;
+  const f = Math.pow(10, dp);
+  return Math.round(n * f) / f;
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-
 async function main() {
-  const tickers = JSON.parse(fs.readFileSync(TICKERS_PATH, "utf8"));
-  const symbols = tickers.map((t) => (typeof t === "string" ? t : t.symbol));
+  const entries = JSON.parse(fs.readFileSync(TICKERS_PATH, "utf8")).map((t) =>
+    typeof t === "string" ? { symbol: t } : t
+  );
+  const symbols = entries.map((e) => e.symbol);
+  const metaBySymbol = {};
+  entries.forEach((e) => { metaBySymbol[e.symbol] = e; });
+
+  // Carry forward previous run for score-change tracking.
+  let prev = [];
+  try {
+    const existing = JSON.parse(fs.readFileSync(OUTPUT_PATH, "utf8"));
+    prev = existing.stocks || [];
+  } catch (e) { /* first run, no previous file */ }
 
   const results = [];
   const groups = chunk(symbols, BATCH_SIZE);
@@ -206,63 +169,39 @@ async function main() {
         continue;
       }
       const closes = closesAscending(seriesObj);
-      // Need >= 35 bars for MACD(12,26,9) + RSI(14). The 50- and 200-day
-      // moving averages compute only when enough history exists, otherwise
-      // they come back null and the trend score adjusts accordingly. This
-      // lets newly-listed names (e.g. recent ETFs) still be scored.
-      const MIN_BARS = 35;
       if (!closes || closes.length < MIN_BARS) {
-        console.warn(`Skipping ${sym}: only ${closes ? closes.length : 0} bars, need >= ${MIN_BARS}`);
+        console.warn(`Skipping ${sym}: only ${closes ? closes.length : 0} bars`);
         continue;
       }
-
+      const meta = metaBySymbol[sym] || {};
       const price = closes[closes.length - 1];
-      const prev = closes[closes.length - 2];
-      const rsiVal = rsi(closes, 14);
-      const macdVal = macd(closes);
-      const sma50 = sma(closes, 50);
-      const sma200 = sma(closes, 200);
-      const scores = scoreInstrument({ price, rsiVal, macdVal, sma50, sma200 });
+      const prevClose = closes[closes.length - 2];
+      const monthAgo = closes.length >= 22 ? closes[closes.length - 22] : null;
 
       results.push({
-        symbol: sym,
-        price: round(price),
-        change_pct: round(((price - prev) / prev) * 100),
-        rsi: round(rsiVal),
-        macd: macdVal
-          ? { macd: round(macdVal.macd, 4), signal: round(macdVal.signal, 4), hist: round(macdVal.hist, 4) }
-          : null,
-        trend: {
-          sma50: round(sma50),
-          sma200: round(sma200),
-          above50: sma50 != null && price > sma50,
-          above200: sma200 != null && price > sma200,
-        },
-        scores,
+        ticker: meta.ticker || sym,
+        name: meta.name || sym,
+        price: round(price, 2),
+        d1: round(((price - prevClose) / prevClose) * 100, 2),
+        m1: monthAgo ? round(((price - monthAgo) / monthAgo) * 100, 2) : 0,
+        ma50: round(sma(closes, 50), 3),
+        ma100: round(sma(closes, 100), 3),
+        ma200: round(sma(closes, 200), 3),
+        rsi14: round(rsi(closes, 14), 3),
+        rsi30: round(rsi(closes, 30), 3),
+        macd: round(macdLine(closes), 3),
       });
     }
-    // Pause between batches so we never exceed the Basic plan's per-minute limit.
     if (gi < groups.length - 1) {
-      console.log(`Processed a batch of ${group.length}; pausing ~1 min for the rate limit...`);
+      console.log(`Processed a batch of ${group.length}; pausing for rate limit...`);
       await sleep(PAUSE_BETWEEN_BATCHES_MS);
     }
   }
 
-  results.sort((a, b) => b.scores.composite - a.scores.composite);
-
-  const payload = { updated: new Date().toISOString(), stocks: results };
+  const payload = { updated: new Date().toISOString(), stocks: results, prev };
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
   console.log(`Wrote ${results.length} instruments to ${OUTPUT_PATH}`);
 }
 
-function round(n, dp = 2) {
-  if (n == null || Number.isNaN(n)) return null;
-  const f = Math.pow(10, dp);
-  return Math.round(n * f) / f;
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main().catch((err) => { console.error(err); process.exit(1); });
