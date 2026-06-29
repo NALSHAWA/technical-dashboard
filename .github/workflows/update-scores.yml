@@ -8,7 +8,7 @@ on:
   workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
 
 permissions:
-  contents: write          # required so the job can commit scores.json back
+  contents: write          # required so the job can commit data back
 
 jobs:
   update-scores:
@@ -27,16 +27,15 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: node fetch-scores.js
 
-      - name: Commit updated scores
+      - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/scores.json
+          git add public/data/scores.json public/data/history.json
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Update scores $(date -u +%Y-%m-%d)"
-            # Pull anything that landed during our run, then push. Retry once.
+            git commit -m "Update data $(date -u +%Y-%m-%d)"
             git pull --rebase --autostash origin main || true
             git push || (git pull --rebase --autostash origin main && git push)
           fi
