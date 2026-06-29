@@ -78,14 +78,83 @@ function rsi(closes, period) {
   return 100 - 100 / (1 + avgGain / avgLoss);
 }
 
-// Returns the latest MACD line value (EMA12 - EMA26).
-function macdLine(closes, fast = 12, slow = 26) {
-  if (closes.length < slow) return null;
+function maxAbs(arr) {
+  let m = 0;
+  for (const v of arr) if (v != null) { const a = Math.abs(v); if (a > m) m = a; }
+  return m;
+}
+
+// Full two-axis MACD read.
+// Returns { hist, line, score, mom } where:
+//   hist  = latest histogram (MACD line minus signal); the chart's third number
+//   line  = latest MACD line (EMA12-EMA26); the regime axis
+//   score = standalone 0-5 grid score crossing regime (line vs zero) with
+//           momentum (histogram sign + slope over 3 bars)
+//   mom   = histogram-momentum pillar (0-1.5), regime-free, for the composite
+// Guards: a slope below FLAT of the recent histogram magnitude counts as flat
+// (pulls to regime-only); a line within DEAD of the recent line magnitude of
+// zero damps the read toward the neutral midpoint.
+function computeMacd(closes, fast = 12, slow = 26, signalP = 9) {
+  const NONE = { hist: null, line: null, score: null, mom: null };
+  if (closes.length < slow + signalP + 3) return NONE;
   const ef = emaSeries(closes, fast);
   const es = emaSeries(closes, slow);
-  const i = closes.length - 1;
-  if (ef[i] == null || es[i] == null) return null;
-  return ef[i] - es[i];
+  const line = [];
+  for (let i = 0; i < closes.length; i++) {
+    if (ef[i] != null && es[i] != null) line.push(ef[i] - es[i]);
+  }
+  const sig = emaSeries(line, signalP);
+  const hist = [];
+  for (let i = 0; i < line.length; i++) hist.push(sig[i] != null ? line[i] - sig[i] : null);
+  const histValid = hist.filter((h) => h != null);
+  if (histValid.length < 4) return NONE;
+
+  const FLAT = 0.10, DEAD = 0.10, WIN = 20;
+  const lastLine = line[line.length - 1];
+  const lastHist = histValid[histValid.length - 1];
+  const hist3 = histValid[histValid.length - 4]; // 3 bars ago
+
+  const histScale = maxAbs(histValid.slice(-WIN));
+  const lineScale = maxAbs(line.slice(-WIN));
+  const slope = lastHist - hist3;
+  const flatBand = FLAT * histScale;
+  const meaningful = histScale > 1e-8; // dead/flat tape: don't read noise as direction
+  const rising = meaningful && slope > flatBand;
+  const falling = meaningful && slope < -flatBand;
+  const bull = lastLine > 0;
+  const histPos = lastHist > 0;
+
+  // 8-cell grid -> 0-5. Flat slope falls through to regime-only (3 bull / 2 bear).
+  let score;
+  if (bull) {
+    if (rising && histPos) score = 5;
+    else if (falling && histPos) score = 4;
+    else if (rising && !histPos) score = 3;
+    else if (falling && !histPos) score = 2;
+    else score = 3;
+  } else {
+    if (rising && histPos) score = 3;       // fresh bullish cross below zero
+    else if (rising && !histPos) score = 2; // downtrend, tentative improvement
+    else if (falling && histPos) score = 1; // failed bounce
+    else if (falling && !histPos) score = 0;
+    else score = 2;
+  }
+
+  // Histogram-momentum pillar (0-1.5), regime-free, for the composite.
+  let mom;
+  if (rising && histPos) mom = 1.5;
+  else if (falling && histPos) mom = 1.0;
+  else if (rising && !histPos) mom = 0.75;
+  else if (falling && !histPos) mom = 0.0;
+  else mom = 0.75;
+
+  // Zero-line deadband: dampen both toward their neutral midpoints.
+  if (lineScale > 0 && Math.abs(lastLine) < DEAD * lineScale) {
+    score = score * 0.5 + 2.5 * 0.5;
+    mom = mom * 0.5 + 0.75 * 0.5;
+  }
+
+  return { hist: lastHist, line: lastLine, score, mom };
 }
 
 // ---------------------------------------------------------------------------
@@ -177,6 +246,7 @@ async function main() {
       const price = closes[closes.length - 1];
       const prevClose = closes[closes.length - 2];
       const monthAgo = closes.length >= 22 ? closes[closes.length - 22] : null;
+      const md = computeMacd(closes);
 
       results.push({
         ticker: meta.ticker || sym,
@@ -189,7 +259,10 @@ async function main() {
         ma200: round(sma(closes, 200), 3),
         rsi14: round(rsi(closes, 14), 3),
         rsi30: round(rsi(closes, 30), 3),
-        macd: round(macdLine(closes), 3),
+        macd: round(md.hist, 4),
+        macdLine: round(md.line, 4),
+        macdScore: md.score == null ? null : round(md.score, 2),
+        macdMom: md.mom == null ? null : round(md.mom, 3),
       });
     }
     if (gi < groups.length - 1) {
