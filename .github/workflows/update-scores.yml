@@ -4,7 +4,6 @@ on:
   schedule:
     # 22:00 UTC on weekdays. US market closes 20:00-21:00 UTC depending on DST,
     # so this runs comfortably after the close and after data settles.
-    # Adjust if you want it earlier/later or during DST shifts.
     - cron: "0 22 * * 1-5"
   workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
 
@@ -37,5 +36,7 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Update scores $(date -u +%Y-%m-%d)"
-            git push
+            # Pull anything that landed during our run, then push. Retry once.
+            git pull --rebase --autostash origin main || true
+            git push || (git pull --rebase --autostash origin main && git push)
           fi
