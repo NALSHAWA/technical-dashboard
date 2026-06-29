@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0e17;color:#e2e8f0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
@@ -24,6 +25,7 @@ const {useState,useMemo,useRef,useEffect}=React;
 
 let STOCKS=[];
 let PREV=[];
+let HISTORY={};
 let UPDATED=null;
 
 function calcScore(s){let sc=0;if((s.ma50!=null&&s.price>s.ma50))sc+=1;if((s.ma100!=null&&s.price>s.ma100))sc+=0.5;if((s.ma200!=null&&s.price>s.ma200))sc+=0.5;const r14=s.rsi14;if(r14>=40&&r14<=60)sc+=0.75;else if(r14>=30&&r14<40)sc+=0.5;else if(r14<30)sc+=0.75;const r30=s.rsi30;if(r30>=40&&r30<=60)sc+=0.75;else if(r30>=30&&r30<40)sc+=0.5;else if(r30<30)sc+=0.75;sc+=(s.macdMom!=null?s.macdMom:0);return Math.min(sc,5)}
@@ -120,18 +122,38 @@ function ScoreDistribution({stocks}){
 }
 
 function PriceLadder({stock}){
-  const canvasRef=useRef(null);const s=stock;const sc=calcScore(s);
+  const priceRef=useRef(null);const macdRef=useRef(null);const s=stock;const sc=calcScore(s);
   useEffect(()=>{
-    const c=canvasRef.current;if(!c)return;const dpr=window.devicePixelRatio||1;const W=520,H=260;
-    c.width=W*dpr;c.height=H*dpr;c.style.width="100%";c.style.maxWidth=W+"px";
-    const ctx=c.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-    const levels=[{val:s.ma200,label:"MA200",color:"#f59e0b"},{val:s.ma100,label:"MA100",color:"#8b5cf6"},{val:s.ma50,label:"MA50",color:"#3b82f6"},{val:s.price,label:"PRICE",color:"#f8fafc",isPrice:true}];
-    const allVlevels=levels.filter(l=>l.val!=null);const allV=allVlevels.map(l=>l.val);const mn=Math.min(...allV),mx=Math.max(...allV);const rng=mx-mn||1,pad=rng*0.15,lo=mn-pad,hi=mx+pad;
-    const cL=80,cR=W-100,cT=30,cB=H-30;
-    ctx.strokeStyle="rgba(255,255,255,0.06)";ctx.lineWidth=1;
-    for(let i=0;i<=4;i++){const y=cT+(cB-cT)*i/4;ctx.beginPath();ctx.moveTo(cL,y);ctx.lineTo(cR,y);ctx.stroke();ctx.fillStyle="#475569";ctx.font="11px Inter,sans-serif";ctx.textAlign="right";ctx.fillText(fmt(hi-(hi-lo)*i/4),cL-10,y+4)}
-    allVlevels.forEach(l=>{const y=cT+(1-(l.val-lo)/(hi-lo))*(cB-cT);if(l.isPrice){ctx.setLineDash([]);ctx.strokeStyle="#f8fafc";ctx.lineWidth=2.5;ctx.shadowColor="rgba(248,250,252,0.4)";ctx.shadowBlur=8;ctx.beginPath();ctx.moveTo(cL,y);ctx.lineTo(cR,y);ctx.stroke();ctx.shadowBlur=0;ctx.beginPath();ctx.arc(cR,y,5,0,Math.PI*2);ctx.fillStyle="#f8fafc";ctx.fill();ctx.beginPath();ctx.arc(cR,y,8,0,Math.PI*2);ctx.strokeStyle="rgba(248,250,252,0.3)";ctx.lineWidth=2;ctx.stroke()}else{ctx.setLineDash([6,4]);ctx.strokeStyle=l.color;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cL,y);ctx.lineTo(cR,y);ctx.stroke()}ctx.setLineDash([]);ctx.fillStyle=l.isPrice?"#f8fafc":l.color;ctx.font=l.isPrice?"bold 12px Inter,sans-serif":"11px Inter,sans-serif";ctx.textAlign="left";ctx.fillText(`${l.label}: ${fmt(l.val)}`,cR+14,y+4)});
-    const py=cT+(1-(s.price-lo)/(hi-lo))*(cB-cT);ctx.beginPath();ctx.moveTo(cL-4,py-6);ctx.lineTo(cL+4,py);ctx.lineTo(cL-4,py+6);ctx.closePath();ctx.fillStyle="#f8fafc";ctx.fill();
+    if(!priceRef.current)return;
+    priceRef.current.innerHTML="";if(macdRef.current)macdRef.current.innerHTML="";
+    const hist=(typeof HISTORY!=="undefined"&&HISTORY[s.ticker])?HISTORY[s.ticker]:null;
+    if(!hist||hist.length<2||typeof LightweightCharts==="undefined"){
+      priceRef.current.innerHTML='<div style="color:#64748b;font-size:12px;padding:24px 0">Price history will appear after the next nightly update.</div>';
+      return;
+    }
+    const dates=hist.map(r=>r[0]);const closes=hist.map(r=>r[1]);
+    const SHOW=252;const start=Math.max(0,closes.length-SHOW);
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)"},timeScale:{borderColor:"rgba(255,255,255,0.08)"},crosshair:{mode:0}};
+    const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||500,height:260}));
+    const area=pc.addAreaSeries({lineColor:"#5aa9e6",topColor:"rgba(90,169,230,0.22)",bottomColor:"rgba(90,169,230,0.02)",lineWidth:2,priceLineVisible:false});
+    area.setData(closes.slice(start).map((v,i)=>({time:dates[start+i],value:v})));
+    function smaLine(p,color){const out=[];for(let i=0;i<closes.length;i++){if(i<p-1)continue;let sum=0;for(let k=i-p+1;k<=i;k++)sum+=closes[k];if(i>=start)out.push({time:dates[i],value:sum/p});}if(out.length)pc.addLineSeries({color:color,lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(out);}
+    smaLine(50,"#3b82f6");smaLine(100,"#8b5cf6");smaLine(200,"#f59e0b");
+    pc.timeScale().fitContent();
+    let mc=null;
+    if(macdRef.current){
+      mc=LightweightCharts.createChart(macdRef.current,Object.assign({},opts,{width:macdRef.current.clientWidth||500,height:90}));
+      function ema(arr,p){const k=2/(p+1);const o=[];let prev=null;for(let i=0;i<arr.length;i++){if(i<p-1){o.push(null);continue;}if(prev==null){let sum=0;for(let j=i-p+1;j<=i;j++)sum+=arr[j];prev=sum/p;}else{prev=arr[i]*k+prev*(1-k);}o.push(prev);}return o;}
+      const e12=ema(closes,12),e26=ema(closes,26);const line=closes.map((_,i)=>(e12[i]!=null&&e26[i]!=null)?e12[i]-e26[i]:null);
+      const lc=line.filter(v=>v!=null);const sig=ema(lc,9);let si=0;const histVals=closes.map((_,i)=>{if(line[i]==null)return null;const sg=sig[si++];return sg==null?null:line[i]-sg;});
+      const hd=[];for(let i=start;i<closes.length;i++){if(histVals[i]!=null)hd.push({time:dates[i],value:histVals[i],color:histVals[i]>=0?"#22c55e":"#ef4444"});}
+      mc.addHistogramSeries({priceLineVisible:false,lastValueVisible:false}).setData(hd);
+      mc.timeScale().fitContent();
+      try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)mc.timeScale().setVisibleLogicalRange(r);});}catch(e){}
+    }
+    const onResize=function(){if(priceRef.current)pc.applyOptions({width:priceRef.current.clientWidth});if(mc&&macdRef.current)mc.applyOptions({width:macdRef.current.clientWidth});};
+    window.addEventListener("resize",onResize);
+    return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}try{if(mc)mc.remove();}catch(e){}};
   },[s]);
   const tT=((s.ma50!=null&&s.price>s.ma50)?1:0)+((s.ma100!=null&&s.price>s.ma100)?0.5:0)+((s.ma200!=null&&s.price>s.ma200)?0.5:0);
   const r14P=(s.rsi14>=40&&s.rsi14<=60)?0.75:(s.rsi14>=30&&s.rsi14<40)?0.5:s.rsi14<30?0.75:0;
@@ -141,7 +163,7 @@ function PriceLadder({stock}){
   const M=({label,value,color})=>(<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}><span style={{color:"#64748b",fontSize:12}}>{label}</span><span style={{color,fontSize:12,fontWeight:600,fontVariantNumeric:"tabular-nums"}}>{value}</span></div>);
   return(
     <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
-      <div style={{flex:"1 1 420px",minWidth:320}}><div style={{fontSize:11,color:"#64748b",marginBottom:8,letterSpacing:"0.04em",fontWeight:600}}>PRICE vs MOVING AVERAGES</div><canvas ref={canvasRef} style={{width:"100%",maxWidth:520,height:"auto",aspectRatio:"2/1"}}/></div>
+      <div style={{flex:"1 1 460px",minWidth:320}}><div style={{fontSize:11,color:"#64748b",marginBottom:8,letterSpacing:"0.04em",fontWeight:600}}>PRICE · 1Y &nbsp;<span style={{color:"#3b82f6"}}>MA50</span> <span style={{color:"#8b5cf6"}}>MA100</span> <span style={{color:"#f59e0b"}}>MA200</span></div><div ref={priceRef} style={{width:"100%",height:260}}/><div style={{fontSize:11,color:"#64748b",margin:"12px 0 6px",letterSpacing:"0.04em",fontWeight:600}}>MACD HISTOGRAM</div><div ref={macdRef} style={{width:"100%",height:90}}/></div>
       <div style={{flex:"1 1 280px",minWidth:240}}>
         <div style={{fontSize:11,color:"#64748b",marginBottom:12,letterSpacing:"0.04em",fontWeight:600}}>SCORE BREAKDOWN</div>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{fontSize:36,fontWeight:800,color:scoreColor(sc)}}>{sc.toFixed(1)}</div><div style={{fontSize:14,color:"#64748b"}}>/ 5.0</div></div>
@@ -278,8 +300,9 @@ fetch("./data/scores.json",{cache:"no-store"})
   .then(j=>{
     STOCKS=j.stocks||[];PREV=j.prev||[];
     UPDATED=j.updated?new Date(j.updated).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):null;
-    ReactDOM.render(<App/>,document.getElementById("root"));
+    return fetch("./data/history.json",{cache:"no-store"}).then(r=>r.ok?r.json():{series:{}}).catch(function(){return {series:{}};});
   })
+  .then(function(h){HISTORY=(h&&h.series)?h.series:{};ReactDOM.render(<App/>,document.getElementById("root"));})
   .catch(e=>{document.getElementById("root").innerHTML='<div style="padding:48px;color:#ef4444;font-family:Inter,sans-serif">Could not load data ('+e.message+'). Make sure data/scores.json sits next to this page.</div>';});
 </script>
 </body>
