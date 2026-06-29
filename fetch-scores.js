@@ -28,10 +28,12 @@ if (!API_KEY) {
 
 const TICKERS_PATH = path.join(__dirname, "tickers.json");
 const OUTPUT_PATH = path.join(__dirname, "public", "data", "scores.json");
+const HISTORY_PATH = path.join(__dirname, "public", "data", "history.json");
 
 const INTERVAL = "1day";
-const OUTPUT_SIZE = 250;       // enough history for MA200
-const MIN_BARS = 35;           // enough for MACD(12,26,9) and RSI(30)
+const OUTPUT_SIZE = 460;        // ~1y to display (252) plus MA200 lookback
+const HISTORY_KEEP = 460;       // bars stored per name for the chart
+const MIN_BARS = 35;            // enough for MACD(12,26,9) and RSI(30)
 
 // Basic (free) plan allows ~8 requests/minute. Request in small batches and
 // pause between them. If you upgrade your Twelve Data plan, raise BATCH_SIZE
@@ -188,12 +190,16 @@ async function fetchBatch(symbols, attempt = 1) {
   return data;
 }
 
-function closesAscending(seriesObj) {
+function rowsAscending(seriesObj) {
   if (!seriesObj || !seriesObj.values) return null;
-  const rows = [...seriesObj.values].sort(
+  return [...seriesObj.values].sort(
     (a, b) => new Date(a.datetime) - new Date(b.datetime)
   );
-  return rows.map((r) => parseFloat(r.close));
+}
+
+function closesAscending(seriesObj) {
+  const rows = rowsAscending(seriesObj);
+  return rows ? rows.map((r) => parseFloat(r.close)) : null;
 }
 
 function chunk(arr, size) {
@@ -227,6 +233,7 @@ async function main() {
   } catch (e) { /* first run, no previous file */ }
 
   const results = [];
+  const historyOut = {};
   const groups = chunk(symbols, BATCH_SIZE);
   for (let gi = 0; gi < groups.length; gi++) {
     const group = groups[gi];
@@ -237,7 +244,8 @@ async function main() {
         console.warn(`Skipping ${sym}: ${seriesObj.message}`);
         continue;
       }
-      const closes = closesAscending(seriesObj);
+      const rows = rowsAscending(seriesObj);
+      const closes = rows ? rows.map((r) => parseFloat(r.close)) : null;
       if (!closes || closes.length < MIN_BARS) {
         console.warn(`Skipping ${sym}: only ${closes ? closes.length : 0} bars`);
         continue;
@@ -264,6 +272,11 @@ async function main() {
         macdScore: md.score == null ? null : round(md.score, 2),
         macdMom: md.mom == null ? null : round(md.mom, 3),
       });
+
+      // [date, close] series for the chart, keyed by the same ticker as scores.
+      historyOut[meta.ticker || sym] = rows
+        .slice(-HISTORY_KEEP)
+        .map((r) => [r.datetime, round(parseFloat(r.close), 2)]);
     }
     if (gi < groups.length - 1) {
       console.log(`Processed a batch of ${group.length}; pausing for rate limit...`);
@@ -275,6 +288,10 @@ async function main() {
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
   console.log(`Wrote ${results.length} instruments to ${OUTPUT_PATH}`);
+
+  const history = { updated: new Date().toISOString(), series: historyOut };
+  fs.writeFileSync(HISTORY_PATH, JSON.stringify(history));
+  console.log(`Wrote price history for ${Object.keys(historyOut).length} instruments to ${HISTORY_PATH}`);
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
