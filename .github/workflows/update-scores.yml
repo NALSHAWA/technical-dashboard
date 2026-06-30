@@ -2,9 +2,9 @@ name: Update dashboard scores
 
 on:
   schedule:
-    # 22:00 UTC on weekdays. US market closes 20:00-21:00 UTC depending on DST,
-    # so this runs comfortably after the close and after data settles.
-    - cron: "0 22 * * 1-5"
+    # 22:37 UTC on weekdays (off the top of the hour, which GitHub skips more often).
+    # US close is 20:00-21:00 UTC depending on DST, so this is safely after it.
+    - cron: "37 22 * * 1-5"
   workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
 
 permissions:
