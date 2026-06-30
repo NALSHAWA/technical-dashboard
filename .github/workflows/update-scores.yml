@@ -2,13 +2,17 @@ name: Update dashboard scores
 
 on:
   schedule:
-    # 22:37 UTC on weekdays (off the top of the hour, which GitHub skips more often).
-    # US close is 20:00-21:00 UTC depending on DST, so this is safely after it.
+    # Every 30 minutes during US market hours, weekdays. Covers both EDT
+    # (13:30-20:00 UTC) and EST (14:30-21:00 UTC). These runs use QUICK mode
+    # (daily data + scores only) to stay under the data-request cap.
+    - cron: "*/30 13-21 * * 1-5"
+    # Full nightly run at 22:37 UTC (off the top of the hour). Refetches the
+    # 15-minute intraday series for the 1D/3D/1W charts.
     - cron: "37 22 * * 1-5"
-  workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
+  workflow_dispatch: {}   # manual trigger from the Actions tab = full run
 
 permissions:
-  contents: write          # required so the job can commit data back
+  contents: write
 
 jobs:
   update-scores:
@@ -27,15 +31,16 @@ jobs:
       - name: Fetch data and compute scores
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+          # Market-hours 30-min runs = quick (daily only). Nightly + manual = full.
+          FETCH_MODE: ${{ github.event.schedule == '*/30 13-21 * * 1-5' && 'quick' || 'full' }}
         run: node fetch-scores.js
 
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # The data files are fully regenerated each run, so they should always
-          # win over whatever is on the remote. We never merge them: align to the
-          # latest remote main, then overwrite the data with our fresh version.
+          # Data files are fully regenerated each run, so they always win over
+          # the remote: align to latest main, then overwrite with our fresh data.
           mkdir -p /tmp/fresh
           cp public/data/scores.json /tmp/fresh/scores.json
           cp public/data/history.json /tmp/fresh/history.json
@@ -48,6 +53,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Update data $(date -u +%Y-%m-%d)"
+            git commit -m "Update data $(date -u +%Y-%m-%dT%H:%MZ)"
             git push origin HEAD:main
           fi
