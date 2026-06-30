@@ -110,6 +110,7 @@ const COLS=[
 {key:"ticker",label:"Ticker",w:100,sticky:true,left:0},{key:"name",label:"Name",w:180,sticky:true,left:100},
 {key:"price",label:"Price",w:95},{key:"d1",label:"%1D",w:68},{key:"m1",label:"%1M",w:72},
 {key:"aboveMa50",label:"> 50DMA",w:75},{key:"aboveMa100",label:"> 100DMA",w:80},{key:"aboveMa200",label:"> 200DMA",w:80},
+{key:"rel921",label:"9>21",w:62},{key:"rel2150",label:"21>50",w:64},{key:"rel50200",label:"50>200",w:68},
 {key:"watchCol",label:"Watch Closely",w:110},
 {key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"macdScore",label:"MACD 0-5",w:78},{key:"score",label:"Score",w:100},
 ];
@@ -213,6 +214,9 @@ function PriceLadder({stock}){
   const r14P=(s.rsi14>=40&&s.rsi14<=60)?0.75:(s.rsi14>=30&&s.rsi14<40)?0.5:s.rsi14<30?0.75:0;
   const r30P=(s.rsi30>=40&&s.rsi30<=60)?0.75:(s.rsi30>=30&&s.rsi30<40)?0.5:s.rsi30<30?0.75:0;
   const rT=r14P+r30P,mP=(s.macdMom!=null?s.macdMom:0);
+  const r921=(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null;
+  const r2150=(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null;
+  const r50200=(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null;
   const Bar=({label,pts,max,color})=>(<div style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}><span style={{color:"#94a3b8"}}>{label}</span><span style={{color,fontWeight:600}}>{pts.toFixed(1)} / {max.toFixed(1)}</span></div><div style={{height:6,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${(pts/max)*100}%`,background:color,borderRadius:3}}/></div></div>);
   const M=({label,value,color})=>(<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}><span style={{color:"#64748b",fontSize:12}}>{label}</span><span style={{color,fontSize:12,fontWeight:600,fontVariantNumeric:"tabular-nums"}}>{value}</span></div>);
   const isIntra=(TFS.find(t=>t.k===tf)||{}).intra;
@@ -238,6 +242,12 @@ function PriceLadder({stock}){
               <M label="MACD" value={`${s.macd>0?"+":""}${s.macd.toFixed(2)}`} color={macdColor(s.macd)}/><M label="MACD State (0-5)" value={s.macdScore!=null?s.macdScore.toFixed(1):"n/a"} color={s.macdScore!=null?scoreColor(s.macdScore):"#64748b"}/>
               <M label="vs 50DMA" value={s.ma50==null?"n/a":`${((s.price/s.ma50-1)*100).toFixed(2)}%`} color={s.ma50==null?"#64748b":maColor(s.price,s.ma50)}/><M label="vs 100DMA" value={s.ma100==null?"n/a":`${((s.price/s.ma100-1)*100).toFixed(2)}%`} color={s.ma100==null?"#64748b":maColor(s.price,s.ma100)}/><M label="vs 200DMA" value={s.ma200==null?"n/a":`${((s.price/s.ma200-1)*100).toFixed(2)}%`} color={s.ma200==null?"#64748b":maColor(s.price,s.ma200)}/>
             </div>
+            <div style={{marginTop:16}}>
+              <div style={{fontSize:11,color:"#64748b",marginBottom:8,letterSpacing:"0.04em",fontWeight:600}}>MA STACK (shorter vs longer)</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {[["9DMA / 21DMA",r921],["21DMA / 50DMA",r2150],["50DMA / 200DMA",r50200]].map(function(p,i){const v=p[1];return(<span key={i} style={{fontSize:11.5,fontWeight:700,padding:"5px 11px",borderRadius:6,background:v==null?"rgba(255,255,255,0.05)":v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v==null?"#64748b":v?"#22c55e":"#ef4444"}}>{p[0]} {v==null?"n/a":v?"\u2191":"\u2193"}</span>);})}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -250,7 +260,7 @@ function App(){
   const[sortDir,setSortDir]=useState(-1);const[filter,setFilter]=useState("all");
   const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);
 
-  const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),watchTags:getWatchTags(s)}}),[]);
+  const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),rel921:(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null,rel2150:(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null,rel50200:(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null,watchTags:getWatchTags(s)}}),[]);
   const briefing=useMemo(()=>generateBriefing(STOCKS,PREV),[]);
 
   const filtered=useMemo(()=>{let d=enriched;if(search){const q=search.toLowerCase();d=d.filter(s=>s.ticker.toLowerCase().includes(q)||s.name.toLowerCase().includes(q))}if(filter==="aboveMa")d=d.filter(s=>s.aboveMa50&&s.aboveMa100&&s.aboveMa200);if(filter==="belowMa")d=d.filter(s=>!s.aboveMa50&&!s.aboveMa100&&!s.aboveMa200);if(filter==="strongTech")d=d.filter(s=>s.score>=4);if(filter==="weakTech")d=d.filter(s=>s.score<2);if(filter==="overbought")d=d.filter(s=>s.rsi14>=70||s.rsi30>=70);if(filter==="oversold")d=d.filter(s=>s.rsi14<=30||s.rsi30<=30);if(filter==="macdPos")d=d.filter(s=>s.macd>0);if(filter==="watch")d=d.filter(s=>s.watchTags.length>0);return d},[enriched,search,filter]);
@@ -261,6 +271,7 @@ function App(){
 
   const bb="1px solid rgba(255,255,255,0.04)";
   const YN=({val})=><span style={{color:val?"#22c55e":"#ef4444",fontWeight:700,fontSize:12}}>{val?"YES":"NO"}</span>;
+  const Rel=({val})=>val==null?<span style={{color:"#475569"}}>—</span>:<span style={{color:val?"#22c55e":"#ef4444",fontWeight:700,fontSize:13}}>{val?"\u2191":"\u2193"}</span>;
   const aBg=t=>t==="downgrade"?"rgba(239,68,68,0.06)":t==="upgrade"?"rgba(34,197,94,0.06)":"rgba(99,102,241,0.06)";
   const aBo=t=>t==="downgrade"?"rgba(239,68,68,0.15)":t==="upgrade"?"rgba(34,197,94,0.15)":"rgba(99,102,241,0.15)";
 
@@ -333,6 +344,9 @@ function App(){
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa50}/></td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa100}/></td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa200}/></td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><Rel val={s.rel921}/></td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><Rel val={s.rel2150}/></td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><Rel val={s.rel50200}/></td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg,fontSize:11}}>
                   {wt.length>0?wt.map((t,j)=><span key={j} style={{color:t.dir==="↑"?"#22c55e":"#ef4444",marginRight:6,fontWeight:700}}>{t.dir} {t.ma}</span>):<span style={{color:"#1e293b"}}>—</span>}
                 </td>
