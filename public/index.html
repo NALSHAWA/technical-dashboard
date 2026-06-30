@@ -138,9 +138,9 @@ function PriceLadder({stock}){
     }
     const times=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
     const SHOW=cfg.n;const start=Math.max(0,closes.length-SHOW);
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)"},timeScale:{borderColor:"rgba(255,255,255,0.08)",timeVisible:cfg.intra,secondsVisible:false},crosshair:{mode:0}};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)"},timeScale:{borderColor:"rgba(255,255,255,0.08)",timeVisible:cfg.intra,secondsVisible:false},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||500,height:300}));
-    const area=pc.addAreaSeries({lineColor:"#5aa9e6",topColor:"rgba(90,169,230,0.22)",bottomColor:"rgba(90,169,230,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
+    const area=pc.addAreaSeries({lineColor:"#5aa9e6",topColor:"rgba(90,169,230,0.22)",bottomColor:"rgba(90,169,230,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:true});
     area.setData(closes.slice(start).map((v,i)=>({time:times[start+i],value:v})));
     const priceMap={};for(let i=start;i<closes.length;i++)priceMap[times[i]]=closes[i];
     const map50={},map100={},map200={};
@@ -148,9 +148,9 @@ function PriceLadder({stock}){
     let last50=null,last100=null,last200=null;
     if(!cfg.intra){
       const a50=smaArr(50,map50),a100=smaArr(100,map100),a200=smaArr(200,map200);
-      if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;}
-      if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;}
-      if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;}
+      if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:true}).setData(a50);last50=a50[a50.length-1].value;}
+      if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:true}).setData(a100);last100=a100[a100.length-1].value;}
+      if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:true}).setData(a200);last200=a200[a200.length-1].value;}
     }
     pc.timeScale().fitContent();
     const macdMap={};let lastMacd=null;let mc=null;
@@ -161,7 +161,7 @@ function PriceLadder({stock}){
       const lc=line.filter(v=>v!=null);const sig=ema(lc,9);let si=0;const histVals=closes.map((_,i)=>{if(line[i]==null)return null;const sg=sig[si++];return sg==null?null:line[i]-sg;});
       const hd=[];for(let i=start;i<closes.length;i++){if(histVals[i]!=null){hd.push({time:times[i],value:histVals[i],color:histVals[i]>=0?"#22c55e":"#ef4444"});macdMap[times[i]]=histVals[i];}}
       if(hd.length)lastMacd=hd[hd.length-1].value;
-      mc.addHistogramSeries({priceLineVisible:false,lastValueVisible:false}).setData(hd);
+      mc.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(hd);
       mc.timeScale().fitContent();
       try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)mc.timeScale().setVisibleLogicalRange(r);});}catch(e){}
     }
