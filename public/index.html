@@ -109,7 +109,7 @@ function TopMovers({stocks,prev,onSelect}){
 const COLS=[
 {key:"ticker",label:"Ticker",w:100,sticky:true,left:0},{key:"name",label:"Name",w:180,sticky:true,left:100},
 {key:"price",label:"Price",w:95},{key:"d1",label:"%1D",w:68},{key:"m1",label:"%1M",w:72},
-{key:"aboveMa50",label:"> 50D MA",w:75},{key:"aboveMa100",label:"> 100D MA",w:80},{key:"aboveMa200",label:"> 200D MA",w:80},
+{key:"aboveMa50",label:"> 50DMA",w:75},{key:"aboveMa100",label:"> 100DMA",w:80},{key:"aboveMa200",label:"> 200DMA",w:80},
 {key:"watchCol",label:"Watch Closely",w:110},
 {key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"macdScore",label:"MACD 0-5",w:78},{key:"score",label:"Score",w:100},
 ];
@@ -123,7 +123,7 @@ function ScoreDistribution({stocks}){
 }
 
 function PriceLadder({stock}){
-  const priceRef=useRef(null);const macdRef=useRef(null);const legendRef=useRef(null);const s=stock;const sc=calcScore(s);
+  const priceRef=useRef(null);const macdRef=useRef(null);const legendRef=useRef(null);const priceGutterRef=useRef(null);const macdGutterRef=useRef(null);const s=stock;const sc=calcScore(s);
   const TFS=[{k:"1Y",n:252,intra:false},{k:"6M",n:126,intra:false},{k:"3M",n:63,intra:false},{k:"1M",n:21,intra:false},{k:"1W",n:130,intra:true},{k:"3D",n:78,intra:true},{k:"1D",n:26,intra:true}];
   const [tf,setTf]=useState("1Y");
   useEffect(()=>{
@@ -138,9 +138,9 @@ function PriceLadder({stock}){
     }
     const times=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
     const SHOW=cfg.n;const start=Math.max(0,closes.length-SHOW);
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)"},timeScale:{borderColor:"rgba(255,255,255,0.08)",timeVisible:cfg.intra,secondsVisible:false},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60},timeScale:{borderColor:"rgba(255,255,255,0.08)",timeVisible:cfg.intra,secondsVisible:false},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||500,height:300}));
-    const area=pc.addAreaSeries({lineColor:"#5aa9e6",topColor:"rgba(90,169,230,0.22)",bottomColor:"rgba(90,169,230,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:true});
+    const area=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
     area.setData(closes.slice(start).map((v,i)=>({time:times[start+i],value:v})));
     const priceMap={};for(let i=start;i<closes.length;i++)priceMap[times[i]]=closes[i];
     const map50={},map100={},map200={};
@@ -148,12 +148,12 @@ function PriceLadder({stock}){
     let last50=null,last100=null,last200=null;
     if(!cfg.intra){
       const a50=smaArr(50,map50),a100=smaArr(100,map100),a200=smaArr(200,map200);
-      if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:true}).setData(a50);last50=a50[a50.length-1].value;}
-      if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:true}).setData(a100);last100=a100[a100.length-1].value;}
-      if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:true}).setData(a200);last200=a200[a200.length-1].value;}
+      if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;}
+      if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;}
+      if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;}
     }
     pc.timeScale().fitContent();
-    const macdMap={};let lastMacd=null;let mc=null;
+    const macdMap={};let lastMacd=null;let mc=null;let histSeries=null;
     if(macdRef.current){
       mc=LightweightCharts.createChart(macdRef.current,Object.assign({},opts,{width:macdRef.current.clientWidth||500,height:110}));
       const ema=function(arr,p){const k=2/(p+1);const o=[];let prev=null;for(let i=0;i<arr.length;i++){if(i<p-1){o.push(null);continue;}if(prev==null){let sum=0;for(let j=i-p+1;j<=i;j++)sum+=arr[j];prev=sum/p;}else{prev=arr[i]*k+prev*(1-k);}o.push(prev);}return o;};
@@ -161,7 +161,7 @@ function PriceLadder({stock}){
       const lc=line.filter(v=>v!=null);const sig=ema(lc,9);let si=0;const histVals=closes.map((_,i)=>{if(line[i]==null)return null;const sg=sig[si++];return sg==null?null:line[i]-sg;});
       const hd=[];for(let i=start;i<closes.length;i++){if(histVals[i]!=null){hd.push({time:times[i],value:histVals[i],color:histVals[i]>=0?"#22c55e":"#ef4444"});macdMap[times[i]]=histVals[i];}}
       if(hd.length)lastMacd=hd[hd.length-1].value;
-      mc.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(hd);
+      histSeries=mc.addHistogramSeries({priceLineVisible:false,lastValueVisible:false});histSeries.setData(hd);
       mc.timeScale().fitContent();
       try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)mc.timeScale().setVisibleLogicalRange(r);});}catch(e){}
     }
@@ -172,12 +172,12 @@ function PriceLadder({stock}){
       if(!legendRef.current)return;
       const pv=(t!=null&&priceMap[t]!=null)?priceMap[t]:lastPrice;
       const mv=(t!=null&&macdMap[t]!=null)?macdMap[t]:lastMacd;
-      let html=item("#5aa9e6","Price",fmtN(pv));
+      let html=item("#e2e8f0","Price",fmtN(pv));
       if(!cfg.intra){
         const v50=(t!=null&&map50[t]!=null)?map50[t]:last50;
         const v100=(t!=null&&map100[t]!=null)?map100[t]:last100;
         const v200=(t!=null&&map200[t]!=null)?map200[t]:last200;
-        html+=item("#3b82f6","MA50",fmtN(v50))+item("#8b5cf6","MA100",fmtN(v100))+item("#f59e0b","MA200",fmtN(v200));
+        html+=item("#3b82f6","50DMA",fmtN(v50))+item("#8b5cf6","100DMA",fmtN(v100))+item("#f59e0b","200DMA",fmtN(v200));
       }
       html+=item(mv!=null&&mv>=0?"#22c55e":"#ef4444","MACD",mv==null?"\u2014":mv.toFixed(3));
       legendRef.current.innerHTML=html;
@@ -185,9 +185,23 @@ function PriceLadder({stock}){
     renderLegend(null);
     pc.subscribeCrosshairMove(function(param){renderLegend(param&&param.time!=null?param.time:null);});
     if(mc)mc.subscribeCrosshairMove(function(param){renderLegend(param&&param.time!=null?param.time:null);});
-    const onResize=function(){if(priceRef.current)pc.applyOptions({width:priceRef.current.clientWidth});if(mc&&macdRef.current)mc.applyOptions({width:macdRef.current.clientWidth});};
+    function tagEl(gut,val,color){const el=document.createElement("div");el.textContent=val;el.style.cssText="position:absolute;right:2px;top:"+(0)+"px;font-size:10px;font-weight:700;color:"+color+";background:rgba(10,14,23,0.85);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gut.appendChild(el);return el;}
+    function placeTags(){
+      if(priceGutterRef.current){
+        priceGutterRef.current.innerHTML="";
+        const tg=[{v:lastPrice,c:"#e2e8f0"}];
+        if(!cfg.intra){if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});}
+        tg.forEach(function(o){let y=null;try{y=area.priceToCoordinate(o.v);}catch(e){}if(y==null)return;tagEl(priceGutterRef.current,fmtN(o.v),o.c).style.top=(y-8)+"px";});
+      }
+      if(macdGutterRef.current){
+        macdGutterRef.current.innerHTML="";
+        if(mc&&histSeries&&lastMacd!=null){let y=null;try{y=histSeries.priceToCoordinate(lastMacd);}catch(e){}if(y!=null)tagEl(macdGutterRef.current,lastMacd.toFixed(3),lastMacd>=0?"#22c55e":"#ef4444").style.top=(y-8)+"px";}
+      }
+    }
+    requestAnimationFrame(function(){requestAnimationFrame(placeTags);});
+    const onResize=function(){if(priceRef.current)pc.applyOptions({width:priceRef.current.clientWidth});if(mc&&macdRef.current)mc.applyOptions({width:macdRef.current.clientWidth});requestAnimationFrame(placeTags);};
     window.addEventListener("resize",onResize);
-    return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}try{if(mc)mc.remove();}catch(e){}};
+    return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}try{if(mc)mc.remove();}catch(e){}if(priceGutterRef.current)priceGutterRef.current.innerHTML="";if(macdGutterRef.current)macdGutterRef.current.innerHTML="";};
   },[s,tf]);
   const tT=((s.ma50!=null&&s.price>s.ma50)?1:0)+((s.ma100!=null&&s.price>s.ma100)?0.5:0)+((s.ma200!=null&&s.price>s.ma200)?0.5:0);
   const r14P=(s.rsi14>=40&&s.rsi14<=60)?0.75:(s.rsi14>=30&&s.rsi14<40)?0.5:s.rsi14<30?0.75:0;
@@ -201,9 +215,9 @@ function PriceLadder({stock}){
       <div style={{display:"flex",gap:5,marginBottom:8,flexWrap:"wrap"}}>{TFS.map(t=>(<button key={t.k} onClick={()=>setTf(t.k)} style={{background:tf===t.k?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:tf===t.k?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:tf===t.k?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t.k}</button>))}</div>
       <div style={{fontSize:11,color:"#64748b",margin:"2px 0 6px",letterSpacing:"0.04em",fontWeight:600}}>PRICE · {tf}{isIntra?" · intraday":""}</div>
       <div ref={legendRef} style={{fontSize:12,marginBottom:8,minHeight:18}}/>
-      <div ref={priceRef} style={{width:"100%",height:300}}/>
+      <div style={{display:"flex",width:"100%"}}><div ref={priceRef} style={{flex:1,minWidth:0,height:300}}/><div ref={priceGutterRef} style={{position:"relative",width:58,flexShrink:0,height:300}}/></div>
       <div style={{fontSize:11,color:"#64748b",margin:"14px 0 6px",letterSpacing:"0.04em",fontWeight:600}}>MACD HISTOGRAM{isIntra?" (intraday)":""}</div>
-      <div ref={macdRef} style={{width:"100%",height:110}}/>
+      <div style={{display:"flex",width:"100%"}}><div ref={macdRef} style={{flex:1,minWidth:0,height:110}}/><div ref={macdGutterRef} style={{position:"relative",width:58,flexShrink:0,height:110}}/></div>
       <div style={{marginTop:22,paddingTop:18,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
         <div style={{fontSize:11,color:"#64748b",marginBottom:14,letterSpacing:"0.04em",fontWeight:600}}>SCORE BREAKDOWN</div>
         <div style={{display:"flex",gap:32,flexWrap:"wrap"}}>
@@ -216,7 +230,7 @@ function PriceLadder({stock}){
               <M label="1D Change" value={`${s.d1>0?"+":""}${s.d1.toFixed(2)}%`} color={pctColor(s.d1)}/><M label="1M Change" value={`${s.m1>0?"+":""}${s.m1.toFixed(2)}%`} color={pctColor(s.m1)}/>
               <M label="RSI 14D" value={s.rsi14.toFixed(2)} color={rsiColor(s.rsi14)}/><M label="RSI 30D" value={s.rsi30.toFixed(2)} color={rsiColor(s.rsi30)}/>
               <M label="MACD" value={`${s.macd>0?"+":""}${s.macd.toFixed(2)}`} color={macdColor(s.macd)}/><M label="MACD State (0-5)" value={s.macdScore!=null?s.macdScore.toFixed(1):"n/a"} color={s.macdScore!=null?scoreColor(s.macdScore):"#64748b"}/>
-              <M label="vs MA50" value={s.ma50==null?"n/a":`${((s.price/s.ma50-1)*100).toFixed(2)}%`} color={s.ma50==null?"#64748b":maColor(s.price,s.ma50)}/><M label="vs MA100" value={s.ma100==null?"n/a":`${((s.price/s.ma100-1)*100).toFixed(2)}%`} color={s.ma100==null?"#64748b":maColor(s.price,s.ma100)}/><M label="vs MA200" value={s.ma200==null?"n/a":`${((s.price/s.ma200-1)*100).toFixed(2)}%`} color={s.ma200==null?"#64748b":maColor(s.price,s.ma200)}/>
+              <M label="vs 50DMA" value={s.ma50==null?"n/a":`${((s.price/s.ma50-1)*100).toFixed(2)}%`} color={s.ma50==null?"#64748b":maColor(s.price,s.ma50)}/><M label="vs 100DMA" value={s.ma100==null?"n/a":`${((s.price/s.ma100-1)*100).toFixed(2)}%`} color={s.ma100==null?"#64748b":maColor(s.price,s.ma100)}/><M label="vs 200DMA" value={s.ma200==null?"n/a":`${((s.price/s.ma200-1)*100).toFixed(2)}%`} color={s.ma200==null?"#64748b":maColor(s.price,s.ma200)}/>
             </div>
           </div>
         </div>
@@ -331,7 +345,7 @@ function App(){
       <div style={{marginTop:20,padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
         <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:8,letterSpacing:"0.04em"}}>TECHNICAL SCORE METHODOLOGY (0–5)</div>
         <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.7}}>
-          <strong style={{color:"#e2e8f0"}}>Trend (0–2):</strong> +1.0 if Price &gt; MA50 · +0.5 if Price &gt; MA100 · +0.5 if Price &gt; MA200 &nbsp;|&nbsp;
+          <strong style={{color:"#e2e8f0"}}>Trend (0–2):</strong> +1.0 if Price &gt; 50DMA · +0.5 if Price &gt; 100DMA · +0.5 if Price &gt; 200DMA &nbsp;|&nbsp;
           <strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5):</strong> 0.75 per RSI (14D &amp; 30D) if 40–60 or &lt;30 · 0.5 if 30–40 · 0 if &gt;70 &nbsp;|&nbsp;
           <strong style={{color:"#e2e8f0"}}>MACD Momentum (0–1.5):</strong> histogram axis only — rising &amp; + = 1.5 · falling &amp; + = 1.0 · rising &amp; − = 0.75 · falling &amp; − = 0 · flat or near zero-line → neutral
         </div>
