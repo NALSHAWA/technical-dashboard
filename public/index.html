@@ -128,7 +128,7 @@ const COLS=[
 {key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"macdScore",label:"MACD 0-5",w:78},{key:"score",label:"Score",w:100},{key:"sata",label:"SATA",w:90},
 ];
 
-const FILTERS=[{key:"all",label:"All"},{key:"charts",label:"\ud83d\udcc8 Charts"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"}];
+const FILTERS=[{key:"all",label:"All"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"},{key:"sataStrong",label:"SATA Strong (7-10)"},{key:"sataNeutral",label:"SATA Neutral (4-6)"},{key:"sataWeak",label:"SATA Weak (0-3)"}];
 
 function ScoreDistribution({stocks}){
   const bk=[{label:"0–1.5",min:0,max:1.5,color:"#ef4444"},{label:"2.0",min:1.5,max:2.5,color:"#f97316"},{label:"2.5–3.0",min:2.5,max:3.5,color:"#f59e0b"},{label:"3.5–4.0",min:3.5,max:4.5,color:"#84cc16"},{label:"4.5–5.0",min:4.5,max:5.1,color:"#22c55e"}];
@@ -333,12 +333,12 @@ function ChartGallery({stocks}){
 function App(){
   const[search,setSearch]=useState("");const[sortKey,setSortKey]=useState("score");
   const[sortDir,setSortDir]=useState(-1);const[filter,setFilter]=useState("all");
-  const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);
+  const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);const[view,setView]=useState("table");
 
   const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),rel921:(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null,rel2150:(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null,rel50200:(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null,watchTags:getWatchTags(s)}}),[]);
   const briefing=useMemo(()=>generateBriefing(STOCKS,PREV),[]);
 
-  const filtered=useMemo(()=>{let d=enriched;if(search){const q=search.toLowerCase();d=d.filter(s=>s.ticker.toLowerCase().includes(q)||s.name.toLowerCase().includes(q))}if(filter==="aboveMa")d=d.filter(s=>s.aboveMa50&&s.aboveMa100&&s.aboveMa200);if(filter==="belowMa")d=d.filter(s=>!s.aboveMa50&&!s.aboveMa100&&!s.aboveMa200);if(filter==="strongTech")d=d.filter(s=>s.score>=4);if(filter==="weakTech")d=d.filter(s=>s.score<2);if(filter==="overbought")d=d.filter(s=>s.rsi14>=70||s.rsi30>=70);if(filter==="oversold")d=d.filter(s=>s.rsi14<=30||s.rsi30<=30);if(filter==="macdPos")d=d.filter(s=>s.macd>0);if(filter==="watch")d=d.filter(s=>s.watchTags.length>0);return d},[enriched,search,filter]);
+  const filtered=useMemo(()=>{let d=enriched;if(search){const q=search.toLowerCase();d=d.filter(s=>s.ticker.toLowerCase().includes(q)||s.name.toLowerCase().includes(q))}if(filter==="aboveMa")d=d.filter(s=>s.aboveMa50&&s.aboveMa100&&s.aboveMa200);if(filter==="belowMa")d=d.filter(s=>!s.aboveMa50&&!s.aboveMa100&&!s.aboveMa200);if(filter==="strongTech")d=d.filter(s=>s.score>=4);if(filter==="weakTech")d=d.filter(s=>s.score<2);if(filter==="overbought")d=d.filter(s=>s.rsi14>=70||s.rsi30>=70);if(filter==="oversold")d=d.filter(s=>s.rsi14<=30||s.rsi30<=30);if(filter==="macdPos")d=d.filter(s=>s.macd>0);if(filter==="watch")d=d.filter(s=>s.watchTags.length>0);if(filter==="sataStrong")d=d.filter(s=>s.sata!=null&&s.sata>=7);if(filter==="sataNeutral")d=d.filter(s=>s.sata!=null&&s.sata>=4&&s.sata<=6);if(filter==="sataWeak")d=d.filter(s=>s.sata!=null&&s.sata<=3);return d},[enriched,search,filter]);
 
   const sorted=useMemo(()=>[...filtered].sort((a,b)=>{const av=a[sortKey],bv=b[sortKey];if(typeof av==="boolean")return sortDir*((av?1:0)-(bv?1:0));if(typeof av==="string")return sortDir*av.localeCompare(bv);return sortDir*(av-bv)}),[filtered,sortKey,sortDir]);
 
@@ -379,7 +379,11 @@ function App(){
         <div style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.05)",padding:"5px 10px",borderRadius:6}}>Score: <span style={{color:"#22c55e"}}>■</span> 4-5 &nbsp;<span style={{color:"#f59e0b"}}>■</span> 2.5-3.5 &nbsp;<span style={{color:"#ef4444"}}>■</span> 0-2</div>
       </div>
 
-      {filter!=="charts"&&(<React.Fragment>
+      <div style={{display:"flex",gap:4,marginBottom:20,borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
+        {[["table","Table"],["charts","Charts"]].map(function(t){const active=view===t[0];return(<button key={t[0]} onClick={()=>setView(t[0])} style={{background:"none",border:"none",borderBottom:active?"2px solid #6366f1":"2px solid transparent",color:active?"#a5b4fc":"#94a3b8",fontSize:14,fontWeight:600,padding:"8px 20px",cursor:"pointer",marginBottom:-1}}>{t[1]}</button>);})}
+      </div>
+
+      {view==="table"&&(<React.Fragment>
       <div style={{display:"flex",gap:16,marginBottom:20,flexWrap:"wrap"}}>
         <div style={{flex:"1 1 420px",minWidth:340}}><HealthGauge stocks={enriched}/></div>
         <div style={{flex:"0 1 220px",minWidth:200,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"20px 18px",display:"flex",flexDirection:"column",justifyContent:"center"}}>
@@ -401,10 +405,10 @@ function App(){
       <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
         <input type="text" placeholder="Search ticker or name..." value={search} onChange={e=>setSearch(e.target.value)} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",color:"#e2e8f0",fontSize:13,width:240,outline:"none"}}/>
         {FILTERS.map(f=>(<button key={f.key} onClick={()=>setFilter(filter===f.key?"all":f.key)} style={{background:filter===f.key?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:filter===f.key?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"6px 12px",color:filter===f.key?"#a5b4fc":"#94a3b8",fontSize:12,cursor:"pointer",whiteSpace:"nowrap"}}>{f.label}</button>))}
-        <span style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>{sorted.length} {filter==="charts"?"charts":"results"}</span>
+        <span style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>{sorted.length} {view==="charts"?"charts":"results"}</span>
       </div>
 
-      {filter==="charts"?<ChartGallery stocks={sorted}/>:(<React.Fragment>
+      {view==="charts"?<ChartGallery stocks={sorted}/>:(<React.Fragment>
       <div style={{overflowX:"auto",overflowY:"auto",maxHeight:"70vh",borderRadius:10,border:"1px solid rgba(255,255,255,0.08)",position:"relative"}}>
         <table style={{width:"100%",borderCollapse:"separate",borderSpacing:0,fontSize:12.5}}>
           <thead style={{position:"sticky",top:0,zIndex:5}}><tr>{COLS.map(c=>(<th key={c.key} onClick={()=>handleSort(c.key)} style={cellStyle(c,true)}>{c.label} {sortKey===c.key?(sortDir>0?"▲":"▼"):""}</th>))}</tr></thead>
