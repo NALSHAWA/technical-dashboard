@@ -26,6 +26,10 @@ if (!API_KEY) {
   process.exit(1);
 }
 
+// QUICK mode: refresh daily data/scores only and skip the intraday fetch.
+// Used by the every-30-minutes market-hours runs to stay under the data cap.
+const QUICK = process.env.FETCH_MODE === "quick";
+
 const TICKERS_PATH = path.join(__dirname, "tickers.json");
 const OUTPUT_PATH = path.join(__dirname, "public", "data", "scores.json");
 const HISTORY_PATH = path.join(__dirname, "public", "data", "history.json");
@@ -295,23 +299,33 @@ async function main() {
   }
 
   // Second pass: 15-minute intraday bars for the short timeframes (1W/3D/1D).
-  const intradayOut = {};
-  for (let gi = 0; gi < groups.length; gi++) {
-    const group = groups[gi];
-    const batch = await fetchBatch(group, INTRADAY_INTERVAL, INTRADAY_SIZE);
-    for (const sym of group) {
-      const seriesObj = batch[sym];
-      if (seriesObj && seriesObj.status === "error") continue;
-      const rows = rowsAscending(seriesObj);
-      if (!rows || !rows.length) continue;
-      const meta = metaBySymbol[sym] || {};
-      intradayOut[meta.ticker || sym] = rows
-        .slice(-INTRADAY_KEEP)
-        .map((r) => [epochSec(r.datetime), round(parseFloat(r.close), 2)]);
-    }
-    if (gi < groups.length - 1) {
-      console.log(`Intraday batch of ${group.length}; pausing for rate limit...`);
-      await sleep(PAUSE_BETWEEN_BATCHES_MS);
+  // Skipped in QUICK mode (intraday market-hours refresh) to stay under the
+  // data-request cap; the prior run's intraday series is preserved instead.
+  let intradayOut = {};
+  if (QUICK) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(HISTORY_PATH, "utf8"));
+      intradayOut = existing.intraday || {};
+    } catch (e) { /* no prior history file yet */ }
+    console.log(`QUICK mode: skipped intraday fetch, preserved ${Object.keys(intradayOut).length} intraday series.`);
+  } else {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const group = groups[gi];
+      const batch = await fetchBatch(group, INTRADAY_INTERVAL, INTRADAY_SIZE);
+      for (const sym of group) {
+        const seriesObj = batch[sym];
+        if (seriesObj && seriesObj.status === "error") continue;
+        const rows = rowsAscending(seriesObj);
+        if (!rows || !rows.length) continue;
+        const meta = metaBySymbol[sym] || {};
+        intradayOut[meta.ticker || sym] = rows
+          .slice(-INTRADAY_KEEP)
+          .map((r) => [epochSec(r.datetime), round(parseFloat(r.close), 2)]);
+      }
+      if (gi < groups.length - 1) {
+        console.log(`Intraday batch of ${group.length}; pausing for rate limit...`);
+        await sleep(PAUSE_BETWEEN_BATCHES_MS);
+      }
     }
   }
 
