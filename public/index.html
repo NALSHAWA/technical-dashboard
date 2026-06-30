@@ -354,9 +354,9 @@ function App(){
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa50}/></td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa100}/></td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa200}/></td>
-                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><Rel val={s.rel921}/></td>
-                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><Rel val={s.rel2150}/></td>
-                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><Rel val={s.rel50200}/></td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel921==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel921}/>}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel2150==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel2150}/>}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel50200==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel50200}/>}</td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg,fontSize:11}}>
                   {wt.length>0?wt.map((t,j)=><span key={j} style={{color:t.dir==="↑"?"#22c55e":"#ef4444",marginRight:6,fontWeight:700}}>{t.dir} {t.ma}</span>):<span style={{color:"#1e293b"}}>—</span>}
                 </td>
