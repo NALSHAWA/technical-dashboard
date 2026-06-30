@@ -65,7 +65,7 @@ function scoreColor(v){return v>=4?"#22c55e":v>=2.5?"#f59e0b":"#ef4444"}
 function scoreBg(v){return v>=4?"rgba(34,197,94,0.1)":v>=2.5?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)"}
 function sataColor(v){return v>=7?"#22c55e":v>=4?"#f59e0b":"#ef4444"}
 function sataBg(v){return v>=7?"rgba(34,197,94,0.1)":v>=4?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)"}
-const SATA_LABELS=["Close above 50DMA","Close above 150DMA","Close above 200DMA","50DMA above 150DMA","150DMA above 200DMA","50DMA rising","150DMA rising","200DMA rising","Mansfield RS above zero","Within 25% of 52-week high"];
+const SATA_LABELS=["Close above 10W MA","Close above 30W MA","Close above 40W MA","30W MA rising","Mansfield RS above zero","Momentum positive","Momentum rising","Breakout (13-week high)","Volume accumulation","Minimal overhead resistance"];
 function fmt(v){return Math.abs(v)>=10000?v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
 function pctColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
 function maColor(p,m){return p>m?"#22c55e":"#ef4444"}
