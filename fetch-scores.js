@@ -76,37 +76,74 @@ function maRising(values, period, lookback) {
   return now > before;
 }
 
-// Mansfield RS above zero: stock/benchmark ratio above its own 200-day MA.
-function mansfieldAboveZero(rows, benchByDate) {
-  const rs = [];
+// Resample ascending daily rows into weekly OHLCV bars (Monday-anchored).
+function toWeekly(rows) {
+  const map = new Map();
   for (const r of rows) {
-    const b = benchByDate[r.datetime];
-    if (b != null && b !== 0) rs.push(parseFloat(r.close) / b);
+    const d = new Date(r.datetime.slice(0, 10) + "T00:00:00Z");
+    const day = d.getUTCDay();              // 0 Sun .. 6 Sat
+    const shift = day === 0 ? -6 : 1 - day; // back to Monday
+    const monday = new Date(d);
+    monday.setUTCDate(d.getUTCDate() + shift);
+    const key = monday.toISOString().slice(0, 10);
+    const o = parseFloat(r.open), h = parseFloat(r.high), l = parseFloat(r.low),
+          c = parseFloat(r.close), v = parseFloat(r.volume) || 0;
+    const w = map.get(key);
+    if (!w) map.set(key, { t: key, o, h, l, c, v });
+    else { w.h = Math.max(w.h, h); w.l = Math.min(w.l, l); w.c = c; w.v += v; }
   }
-  if (rs.length < 200) return false;
-  const rsMA = sma(rs, 200);
-  return rsMA != null && rs[rs.length - 1] > rsMA;
+  return [...map.values()].sort((a, b) => (a.t < b.t ? -1 : 1));
 }
 
-// The ten SATA (Stage Analysis Technical Attributes) checks, each 0/1.
-function computeSata(closes, rows, benchByDate) {
-  const price = closes[closes.length - 1];
-  const ma50 = sma(closes, 50), ma150 = sma(closes, 150), ma200 = sma(closes, 200);
-  const win = closes.slice(-252);
-  const high52 = win.length ? Math.max(...win) : null;
+// Weekly Stage Analysis Technical Attributes (SATA), 10 bands, each 0/1.
+// Faithful reconstruction of the stageanalysis.net methodology (closed-source);
+// thresholds are documented and tunable.
+function computeSataWeekly(rows, benchWeeklyByKey) {
+  const wk = toWeekly(rows);
+  if (wk.length < 41) return null;          // need ~40 weeks of weekly history
+  const C = wk.map(b => b.c), H = wk.map(b => b.h), V = wk.map(b => b.v);
+  const n = C.length - 1, close = C[n];
+  const ma10 = sma(C, 10), ma30 = sma(C, 30), ma40 = sma(C, 40);
+  const ma30prev = smaAtOffset(C, 30, 5);   // 30W MA five weeks ago
+
+  // Mansfield RS: stock/benchmark ratio vs its own 52-week average, > 0 = outperforming.
+  const ratio = wk.map(b => { const a = benchWeeklyByKey[b.t]; return (a != null && a !== 0) ? b.c / a : null; });
+  const rclean = ratio.filter(v => v != null);
+  let mans = null;
+  if (rclean.length >= 52) {
+    const rma = sma(rclean, 52);
+    if (rma) mans = (rclean[rclean.length - 1] / rma - 1) * 100;
+  }
+
+  // Momentum: 12-week rate of change, positive and rising.
+  const roc = (i) => (i >= 12 && C[i - 12] > 0) ? (C[i] / C[i - 12] - 1) : null;
+  const rocNow = roc(n), rocPrev = roc(n - 1);
+
+  // Volume: accumulation = avg volume on up-weeks > avg on down-weeks (last 10 weeks).
+  let upV = 0, upN = 0, dnV = 0, dnN = 0;
+  for (let i = Math.max(1, n - 9); i <= n; i++) {
+    if (C[i] > C[i - 1]) { upV += V[i]; upN++; }
+    else if (C[i] < C[i - 1]) { dnV += V[i]; dnN++; }
+  }
+  const accumulation = (upN && dnN) ? (upV / upN) > (dnV / dnN) : (upN >= dnN);
+
+  const hi52 = Math.max(...H.slice(-52));               // 52-week high
+  const prior13 = C.slice(Math.max(0, n - 13), n);      // prior 13 weekly closes
+  const hc13 = prior13.length ? Math.max(...prior13) : close;
+
   const comp = [
-    ma50 != null && price > ma50,                     // 1. close > 50DMA
-    ma150 != null && price > ma150,                   // 2. close > 150DMA
-    ma200 != null && price > ma200,                   // 3. close > 200DMA
-    ma50 != null && ma150 != null && ma50 > ma150,    // 4. 50DMA > 150DMA
-    ma150 != null && ma200 != null && ma150 > ma200,  // 5. 150DMA > 200DMA
-    maRising(closes, 50, 5),                          // 6. 50DMA rising
-    maRising(closes, 150, 5),                         // 7. 150DMA rising
-    maRising(closes, 200, 5),                         // 8. 200DMA rising
-    mansfieldAboveZero(rows, benchByDate),            // 9. Mansfield RS > 0
-    high52 != null && high52 > 0 && price >= 0.75 * high52, // 10. within 25% of 52-wk high
+    ma10 != null && close > ma10,                              // 1 close > 10W MA
+    ma30 != null && close > ma30,                              // 2 close > 30W MA
+    ma40 != null && close > ma40,                              // 3 close > 40W MA
+    ma30 != null && ma30prev != null && ma30 > ma30prev,       // 4 30W MA rising
+    mans != null && mans > 0,                                  // 5 Mansfield RS > 0
+    rocNow != null && rocNow > 0,                              // 6 momentum positive
+    rocNow != null && rocPrev != null && rocNow > rocPrev,     // 7 momentum rising
+    close >= hc13,                                             // 8 breakout (>= 13W high close)
+    accumulation,                                              // 9 volume accumulation
+    hi52 > 0 && close >= 0.92 * hi52,                          // 10 minimal overhead (within 8% of 52W high)
   ].map(Boolean);
-  return { score: comp.reduce((a, b) => a + (b ? 1 : 0), 0), comp };
+  return { score: comp.reduce((a, b) => a + (b ? 1 : 0), 0), comp, mans };
 }
 
 function emaSeries(values, period) {
@@ -300,12 +337,12 @@ async function main() {
   const historyOut = {};
 
   // Benchmark series for Mansfield relative strength (one extra request).
-  let benchByDate = {};
+  let benchWeeklyByKey = {};
   try {
     const bBatch = await fetchBatch([BENCHMARK], INTERVAL, OUTPUT_SIZE);
     const bRows = rowsAscending(bBatch[BENCHMARK]);
-    if (bRows) for (const r of bRows) benchByDate[r.datetime] = parseFloat(r.close);
-    console.log(`Fetched benchmark ${BENCHMARK}: ${Object.keys(benchByDate).length} bars.`);
+    if (bRows) { const bw = toWeekly(bRows); for (const b of bw) benchWeeklyByKey[b.t] = b.c; }
+    console.log(`Fetched benchmark ${BENCHMARK}: ${Object.keys(benchWeeklyByKey).length} weekly bars.`);
   } catch (e) {
     console.warn(`Benchmark ${BENCHMARK} fetch failed; Mansfield RS scores 0 this run. ${e.message}`);
   }
@@ -331,7 +368,7 @@ async function main() {
       const prevClose = closes[closes.length - 2];
       const monthAgo = closes.length >= 22 ? closes[closes.length - 22] : null;
       const md = computeMacd(closes);
-      const sataRes = computeSata(closes, rows, benchByDate);
+      const sataRes = computeSataWeekly(rows, benchWeeklyByKey);
 
       results.push({
         ticker: meta.ticker || sym,
@@ -351,8 +388,9 @@ async function main() {
         macdLine: round(md.line, 4),
         macdScore: md.score == null ? null : round(md.score, 2),
         macdMom: md.mom == null ? null : round(md.mom, 3),
-        sata: sataRes.score,
-        sataComp: sataRes.comp,
+        sata: sataRes ? sataRes.score : null,
+        sataComp: sataRes ? sataRes.comp : null,
+        mansfield: sataRes && sataRes.mans != null ? round(sataRes.mans, 2) : null,
       });
 
       // [date, close] series for the chart, keyed by the same ticker as scores.
