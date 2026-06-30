@@ -29,7 +29,17 @@ let HISTORY={};
 let INTRADAY={};
 let UPDATED=null;
 
-function calcScore(s){let sc=0;if((s.ma50!=null&&s.price>s.ma50))sc+=1;if((s.ma100!=null&&s.price>s.ma100))sc+=0.5;if((s.ma200!=null&&s.price>s.ma200))sc+=0.5;const r14=s.rsi14;if(r14>=40&&r14<=60)sc+=0.75;else if(r14>=30&&r14<40)sc+=0.5;else if(r14<30)sc+=0.75;const r30=s.rsi30;if(r30>=40&&r30<=60)sc+=0.75;else if(r30>=30&&r30<40)sc+=0.5;else if(r30<30)sc+=0.75;sc+=(s.macdMom!=null?s.macdMom:0);return Math.min(sc,5)}
+function trendScore(s){
+  // Price location (0-1): >50DMA 0.5, >100DMA 0.25, >200DMA 0.25. Unavailable MA -> neutral (half weight).
+  function loc(ma,w){return ma==null?w/2:(s.price>ma?w:0);}
+  const location=loc(s.ma50,0.5)+loc(s.ma100,0.25)+loc(s.ma200,0.25);
+  // MA alignment (0-1): 9>21 0.3, 21>50 0.3, 50>200 0.4. Unavailable pair -> neutral (half weight).
+  function al(a,b,w){return (a==null||b==null)?w/2:(a>b?w:0);}
+  const alignment=al(s.ma9,s.ma21,0.3)+al(s.ma21,s.ma50,0.3)+al(s.ma50,s.ma200,0.4);
+  return {location:location,alignment:alignment,total:location+alignment};
+}
+
+function calcScore(s){let sc=trendScore(s).total;const r14=s.rsi14;if(r14>=40&&r14<=60)sc+=0.75;else if(r14>=30&&r14<40)sc+=0.5;else if(r14<30)sc+=0.75;const r30=s.rsi30;if(r30>=40&&r30<=60)sc+=0.75;else if(r30>=30&&r30<40)sc+=0.5;else if(r30<30)sc+=0.75;sc+=(s.macdMom!=null?s.macdMom:0);return Math.min(sc,5)}
 
 function generateBriefing(stocks,prev){
   const alerts=[];const pm={};
@@ -210,7 +220,7 @@ function PriceLadder({stock}){
     window.addEventListener("resize",onResize);
     return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}try{if(mc)mc.remove();}catch(e){}if(priceGutterRef.current)priceGutterRef.current.innerHTML="";if(macdGutterRef.current)macdGutterRef.current.innerHTML="";};
   },[s,tf]);
-  const tT=((s.ma50!=null&&s.price>s.ma50)?1:0)+((s.ma100!=null&&s.price>s.ma100)?0.5:0)+((s.ma200!=null&&s.price>s.ma200)?0.5:0);
+  const ts=trendScore(s);
   const r14P=(s.rsi14>=40&&s.rsi14<=60)?0.75:(s.rsi14>=30&&s.rsi14<40)?0.5:s.rsi14<30?0.75:0;
   const r30P=(s.rsi30>=40&&s.rsi30<=60)?0.75:(s.rsi30>=30&&s.rsi30<40)?0.5:s.rsi30<30?0.75:0;
   const rT=r14P+r30P,mP=(s.macdMom!=null?s.macdMom:0);
@@ -233,7 +243,7 @@ function PriceLadder({stock}){
         <div style={{display:"flex",gap:32,flexWrap:"wrap"}}>
           <div style={{flex:"1 1 280px"}}>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{fontSize:40,fontWeight:800,color:scoreColor(sc)}}>{sc.toFixed(1)}</div><div style={{fontSize:14,color:"#64748b"}}>/ 5.0</div></div>
-            <Bar label="Trend (Price vs MAs)" pts={tT} max={2} color="#3b82f6"/><Bar label="RSI Momentum" pts={rT} max={1.5} color="#8b5cf6"/><Bar label="MACD Momentum" pts={mP} max={1.5} color="#22c55e"/>
+            <Bar label="Price Location" pts={ts.location} max={1} color="#3b82f6"/><Bar label="MA Alignment" pts={ts.alignment} max={1} color="#6366f1"/><Bar label="RSI Momentum" pts={rT} max={1.5} color="#8b5cf6"/><Bar label="MACD Momentum" pts={mP} max={1.5} color="#22c55e"/>
           </div>
           <div style={{flex:"1 1 360px"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:24}}>
@@ -365,11 +375,11 @@ function App(){
       <div style={{marginTop:20,padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
         <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:8,letterSpacing:"0.04em"}}>TECHNICAL SCORE METHODOLOGY (0–5)</div>
         <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.7}}>
-          <strong style={{color:"#e2e8f0"}}>Trend (0–2):</strong> +1.0 if Price &gt; 50DMA · +0.5 if Price &gt; 100DMA · +0.5 if Price &gt; 200DMA &nbsp;|&nbsp;
+          <strong style={{color:"#e2e8f0"}}>Trend / Structure (0–2):</strong> Price Location (0–1): +0.5 &gt; 50DMA · +0.25 &gt; 100DMA · +0.25 &gt; 200DMA. MA Alignment (0–1): +0.3 if 9&gt;21DMA · +0.3 if 21&gt;50DMA · +0.4 if 50&gt;200DMA. Unavailable terms score the neutral midpoint. &nbsp;|&nbsp;
           <strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5):</strong> 0.75 per RSI (14D &amp; 30D) if 40–60 or &lt;30 · 0.5 if 30–40 · 0 if &gt;70 &nbsp;|&nbsp;
           <strong style={{color:"#e2e8f0"}}>MACD Momentum (0–1.5):</strong> histogram axis only — rising &amp; + = 1.5 · falling &amp; + = 1.0 · rising &amp; − = 0.75 · falling &amp; − = 0 · flat or near zero-line → neutral
         </div>
-        <div style={{fontSize:11,color:"#64748b",marginTop:10,lineHeight:1.6}}><strong style={{color:"#94a3b8"}}>MACD State (0–5)</strong> shown per name is the full regime×momentum grid (MACD line vs zero crossed with histogram sign &amp; 3-bar slope). The composite deliberately uses only the histogram-momentum axis above, so regime is owned by the Trend pillar and not double-counted.</div>
+        <div style={{fontSize:11,color:"#64748b",marginTop:10,lineHeight:1.6}}><strong style={{color:"#94a3b8"}}>MACD State (0–5)</strong> shown per name is the full regime×momentum grid (MACD line vs zero crossed with histogram sign &amp; 3-bar slope). The composite deliberately uses only the histogram-momentum axis above, so regime is owned by the Trend / Structure pillar and not double-counted.</div>
       </div>
     </div>
   );
