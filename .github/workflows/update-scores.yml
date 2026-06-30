@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -31,11 +33,21 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # The data files are fully regenerated each run, so they should always
+          # win over whatever is on the remote. We never merge them: align to the
+          # latest remote main, then overwrite the data with our fresh version.
+          mkdir -p /tmp/fresh
+          cp public/data/scores.json /tmp/fresh/scores.json
+          cp public/data/history.json /tmp/fresh/history.json
+          git fetch origin main
+          git reset --hard origin/main
+          mkdir -p public/data
+          cp /tmp/fresh/scores.json public/data/scores.json
+          cp /tmp/fresh/history.json public/data/history.json
           git add public/data/scores.json public/data/history.json
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
             git commit -m "Update data $(date -u +%Y-%m-%d)"
-            git pull --rebase --autostash origin main || true
-            git push || (git pull --rebase --autostash origin main && git push)
+            git push origin HEAD:main
           fi
