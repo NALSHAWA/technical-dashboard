@@ -32,7 +32,10 @@ const HISTORY_PATH = path.join(__dirname, "public", "data", "history.json");
 
 const INTERVAL = "1day";
 const OUTPUT_SIZE = 460;        // ~1y to display (252) plus MA200 lookback
-const HISTORY_KEEP = 460;       // bars stored per name for the chart
+const HISTORY_KEEP = 460;       // daily bars stored per name for the chart
+const INTRADAY_INTERVAL = "15min";
+const INTRADAY_SIZE = 260;      // ~10 trading days of 15-min bars
+const INTRADAY_KEEP = 260;      // intraday bars stored per name (covers 1D/3D/1W)
 const MIN_BARS = 35;            // enough for MACD(12,26,9) and RSI(30)
 
 // Basic (free) plan allows ~8 requests/minute. Request in small batches and
@@ -164,18 +167,18 @@ function computeMacd(closes, fast = 12, slow = 26, signalP = 9) {
 // ---------------------------------------------------------------------------
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
-async function fetchBatch(symbols, attempt = 1) {
+async function fetchBatch(symbols, interval, size, attempt = 1) {
   const url =
     `https://api.twelvedata.com/time_series` +
     `?symbol=${encodeURIComponent(symbols.join(","))}` +
-    `&interval=${INTERVAL}&outputsize=${OUTPUT_SIZE}&apikey=${API_KEY}`;
+    `&interval=${interval}&outputsize=${size}&apikey=${API_KEY}`;
   const res = await fetch(url);
 
   if (res.status === 429) {
     if (attempt > 4) throw new Error("Rate limit: gave up after 4 retries");
     console.warn(`Rate limited (429). Waiting 65s, retry ${attempt}...`);
     await sleep(65 * 1000);
-    return fetchBatch(symbols, attempt + 1);
+    return fetchBatch(symbols, interval, size, attempt + 1);
   }
   if (!res.ok) throw new Error(`Twelve Data HTTP ${res.status}`);
 
@@ -184,10 +187,15 @@ async function fetchBatch(symbols, attempt = 1) {
     if (attempt > 4) throw new Error("Rate limit: gave up after 4 retries");
     console.warn(`Rate limited (body 429). Waiting 65s, retry ${attempt}...`);
     await sleep(65 * 1000);
-    return fetchBatch(symbols, attempt + 1);
+    return fetchBatch(symbols, interval, size, attempt + 1);
   }
   if (symbols.length === 1) return { [symbols[0]]: data };
   return data;
+}
+
+// Intraday datetime ("2026-06-29 15:45:00") -> epoch seconds for the chart.
+function epochSec(dt) {
+  return Math.floor(new Date(dt.replace(" ", "T") + "Z").getTime() / 1000);
 }
 
 function rowsAscending(seriesObj) {
@@ -237,7 +245,7 @@ async function main() {
   const groups = chunk(symbols, BATCH_SIZE);
   for (let gi = 0; gi < groups.length; gi++) {
     const group = groups[gi];
-    const batch = await fetchBatch(group);
+    const batch = await fetchBatch(group, INTERVAL, OUTPUT_SIZE);
     for (const sym of group) {
       const seriesObj = batch[sym];
       if (seriesObj && seriesObj.status === "error") {
@@ -262,6 +270,8 @@ async function main() {
         price: round(price, 2),
         d1: round(((price - prevClose) / prevClose) * 100, 2),
         m1: monthAgo ? round(((price - monthAgo) / monthAgo) * 100, 2) : 0,
+        ma9: round(sma(closes, 9), 3),
+        ma21: round(sma(closes, 21), 3),
         ma50: round(sma(closes, 50), 3),
         ma100: round(sma(closes, 100), 3),
         ma200: round(sma(closes, 200), 3),
@@ -284,14 +294,35 @@ async function main() {
     }
   }
 
+  // Second pass: 15-minute intraday bars for the short timeframes (1W/3D/1D).
+  const intradayOut = {};
+  for (let gi = 0; gi < groups.length; gi++) {
+    const group = groups[gi];
+    const batch = await fetchBatch(group, INTRADAY_INTERVAL, INTRADAY_SIZE);
+    for (const sym of group) {
+      const seriesObj = batch[sym];
+      if (seriesObj && seriesObj.status === "error") continue;
+      const rows = rowsAscending(seriesObj);
+      if (!rows || !rows.length) continue;
+      const meta = metaBySymbol[sym] || {};
+      intradayOut[meta.ticker || sym] = rows
+        .slice(-INTRADAY_KEEP)
+        .map((r) => [epochSec(r.datetime), round(parseFloat(r.close), 2)]);
+    }
+    if (gi < groups.length - 1) {
+      console.log(`Intraday batch of ${group.length}; pausing for rate limit...`);
+      await sleep(PAUSE_BETWEEN_BATCHES_MS);
+    }
+  }
+
   const payload = { updated: new Date().toISOString(), stocks: results, prev };
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
   console.log(`Wrote ${results.length} instruments to ${OUTPUT_PATH}`);
 
-  const history = { updated: new Date().toISOString(), series: historyOut };
+  const history = { updated: new Date().toISOString(), series: historyOut, intraday: intradayOut };
   fs.writeFileSync(HISTORY_PATH, JSON.stringify(history));
-  console.log(`Wrote price history for ${Object.keys(historyOut).length} instruments to ${HISTORY_PATH}`);
+  console.log(`Wrote history (${Object.keys(historyOut).length} daily, ${Object.keys(intradayOut).length} intraday) to ${HISTORY_PATH}`);
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
