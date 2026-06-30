@@ -125,7 +125,7 @@ const COLS=[
 {key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"macdScore",label:"MACD 0-5",w:78},{key:"score",label:"Score",w:100},
 ];
 
-const FILTERS=[{key:"all",label:"All"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"}];
+const FILTERS=[{key:"all",label:"All"},{key:"charts",label:"\ud83d\udcc8 Charts"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"}];
 
 function ScoreDistribution({stocks}){
   const bk=[{label:"0–1.5",min:0,max:1.5,color:"#ef4444"},{label:"2.0",min:1.5,max:2.5,color:"#f97316"},{label:"2.5–3.0",min:2.5,max:3.5,color:"#f59e0b"},{label:"3.5–4.0",min:3.5,max:4.5,color:"#84cc16"},{label:"4.5–5.0",min:4.5,max:5.1,color:"#22c55e"}];
@@ -265,6 +265,66 @@ function PriceLadder({stock}){
   );
 }
 
+function MiniChart({stock}){
+  const priceRef=useRef(null);const legendRef=useRef(null);const gutterRef=useRef(null);const s=stock;
+  useEffect(()=>{
+    if(!priceRef.current)return;
+    priceRef.current.innerHTML="";if(gutterRef.current)gutterRef.current.innerHTML="";
+    const data=(typeof HISTORY!=="undefined"&&HISTORY[s.ticker])?HISTORY[s.ticker]:null;
+    if(!data||data.length<2||typeof LightweightCharts==="undefined"){
+      priceRef.current.innerHTML='<div style="color:#64748b;font-size:11px;padding:16px 0">No price history yet.</div>';
+      if(legendRef.current)legendRef.current.innerHTML="";
+      return;
+    }
+    const dates=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
+    const SHOW=252;const start=Math.max(0,closes.length-SHOW);
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:10},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:54},timeScale:{borderColor:"rgba(255,255,255,0.08)"},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||420,height:200}));
+    const area=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
+    area.setData(closes.slice(start).map((v,i)=>({time:dates[start+i],value:v})));
+    function smaArr(p){const out=[];for(let i=0;i<closes.length;i++){if(i<p-1)continue;let sum=0;for(let k=i-p+1;k<=i;k++)sum+=closes[k];if(i>=start)out.push({time:dates[i],value:sum/p});}return out;}
+    const a50=smaArr(50),a100=smaArr(100),a200=smaArr(200);
+    let last50=null,last100=null,last200=null;
+    if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;}
+    if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;}
+    if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;}
+    pc.timeScale().fitContent();
+    function ema(arr,p){const k=2/(p+1);const o=[];let prev=null;for(let i=0;i<arr.length;i++){if(i<p-1){o.push(null);continue;}if(prev==null){let sum=0;for(let j=i-p+1;j<=i;j++)sum+=arr[j];prev=sum/p;}else{prev=arr[i]*k+prev*(1-k);}o.push(prev);}return o;}
+    const e12=ema(closes,12),e26=ema(closes,26);const line=closes.map((_,i)=>(e12[i]!=null&&e26[i]!=null)?e12[i]-e26[i]:null);
+    const lc=line.filter(v=>v!=null);const sig=ema(lc,9);let si=0;const histVals=closes.map((_,i)=>{if(line[i]==null)return null;const sg=sig[si++];return sg==null?null:line[i]-sg;});
+    let lastMacd=null;for(let i=closes.length-1;i>=0;i--){if(histVals[i]!=null){lastMacd=histVals[i];break;}}
+    const lastPrice=closes[closes.length-1];
+    function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+    function item(color,label,val){return '<span style="margin-right:12px;white-space:nowrap"><span style="color:'+color+'">'+label+'</span> <b style="color:#e2e8f0;font-weight:600">'+val+'</b></span>';}
+    if(legendRef.current)legendRef.current.innerHTML=item("#e2e8f0","Price",fmtN(lastPrice))+item("#3b82f6","50DMA",fmtN(last50))+item("#8b5cf6","100DMA",fmtN(last100))+item("#f59e0b","200DMA",fmtN(last200))+item(lastMacd!=null&&lastMacd>=0?"#22c55e":"#ef4444","MACD",lastMacd==null?"\u2014":lastMacd.toFixed(3));
+    function placeTags(){
+      if(!gutterRef.current)return;gutterRef.current.innerHTML="";
+      const tg=[{v:lastPrice,c:"#e2e8f0"}];if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});
+      const H=14,GAP=15,maxTop=200-H;const items=[];
+      tg.forEach(function(o){let y=null;try{y=area.priceToCoordinate(o.v);}catch(e){}if(y==null)return;items.push({v:o.v,c:o.c,top:y-Math.round(H/2)});});
+      items.sort(function(a,b){return a.top-b.top;});
+      for(let i=1;i<items.length;i++){if(items[i].top<items[i-1].top+GAP)items[i].top=items[i-1].top+GAP;}
+      if(items.length){const over=(items[items.length-1].top+H)-maxTop;if(over>0)items.forEach(function(o){o.top-=over;});if(items[0].top<0){const d=-items[0].top;items.forEach(function(o){o.top+=d;});}}
+      items.forEach(function(o){const el=document.createElement("div");el.textContent=fmtN(o.v);el.style.cssText="position:absolute;right:2px;top:"+o.top+"px;font-size:10px;font-weight:700;color:"+o.c+";background:rgba(10,14,23,0.85);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gutterRef.current.appendChild(el);});
+    }
+    requestAnimationFrame(function(){requestAnimationFrame(placeTags);});
+    const onResize=function(){if(priceRef.current)pc.applyOptions({width:priceRef.current.clientWidth});requestAnimationFrame(placeTags);};
+    window.addEventListener("resize",onResize);
+    return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}if(gutterRef.current)gutterRef.current.innerHTML="";};
+  },[s]);
+  return(
+    <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px 16px"}}>
+      <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:6}}><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name}</span></div>
+      <div ref={legendRef} style={{fontSize:11,marginBottom:6,minHeight:16}}/>
+      <div style={{display:"flex",width:"100%"}}><div ref={priceRef} style={{flex:1,minWidth:0,height:200}}/><div ref={gutterRef} style={{position:"relative",width:54,flexShrink:0,height:200}}/></div>
+    </div>
+  );
+}
+
+function ChartGallery({stocks}){
+  return(<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(440px,1fr))",gap:16}}>{stocks.map(s=><MiniChart key={s.ticker} stock={s}/>)}</div>);
+}
+
 function App(){
   const[search,setSearch]=useState("");const[sortKey,setSortKey]=useState("score");
   const[sortDir,setSortDir]=useState(-1);const[filter,setFilter]=useState("all");
@@ -314,6 +374,7 @@ function App(){
         <div style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.05)",padding:"5px 10px",borderRadius:6}}>Score: <span style={{color:"#22c55e"}}>■</span> 4-5 &nbsp;<span style={{color:"#f59e0b"}}>■</span> 2.5-3.5 &nbsp;<span style={{color:"#ef4444"}}>■</span> 0-2</div>
       </div>
 
+      {filter!=="charts"&&(<React.Fragment>
       <div style={{display:"flex",gap:16,marginBottom:20,flexWrap:"wrap"}}>
         <div style={{flex:"1 1 420px",minWidth:340}}><HealthGauge stocks={enriched}/></div>
         <div style={{flex:"0 1 220px",minWidth:200,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"20px 18px",display:"flex",flexDirection:"column",justifyContent:"center"}}>
@@ -330,13 +391,15 @@ function App(){
       </div>
 
       <TopMovers stocks={STOCKS} prev={PREV} onSelect={s=>setSelected({...s,score:calcScore(s),aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),watchTags:getWatchTags(s)})}/>
+      </React.Fragment>)}
 
       <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
         <input type="text" placeholder="Search ticker or name..." value={search} onChange={e=>setSearch(e.target.value)} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",color:"#e2e8f0",fontSize:13,width:240,outline:"none"}}/>
         {FILTERS.map(f=>(<button key={f.key} onClick={()=>setFilter(filter===f.key?"all":f.key)} style={{background:filter===f.key?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:filter===f.key?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"6px 12px",color:filter===f.key?"#a5b4fc":"#94a3b8",fontSize:12,cursor:"pointer",whiteSpace:"nowrap"}}>{f.label}</button>))}
-        <span style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>{sorted.length} results</span>
+        <span style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>{sorted.length} {filter==="charts"?"charts":"results"}</span>
       </div>
 
+      {filter==="charts"?<ChartGallery stocks={sorted}/>:(<React.Fragment>
       <div style={{overflowX:"auto",overflowY:"auto",maxHeight:"70vh",borderRadius:10,border:"1px solid rgba(255,255,255,0.08)",position:"relative"}}>
         <table style={{width:"100%",borderCollapse:"separate",borderSpacing:0,fontSize:12.5}}>
           <thead style={{position:"sticky",top:0,zIndex:5}}><tr>{COLS.map(c=>(<th key={c.key} onClick={()=>handleSort(c.key)} style={cellStyle(c,true)}>{c.label} {sortKey===c.key?(sortDir>0?"▲":"▼"):""}</th>))}</tr></thead>
@@ -381,6 +444,7 @@ function App(){
         </div>
         <div style={{fontSize:11,color:"#64748b",marginTop:10,lineHeight:1.6}}><strong style={{color:"#94a3b8"}}>MACD State (0–5)</strong> shown per name is the full regime×momentum grid (MACD line vs zero crossed with histogram sign &amp; 3-bar slope). The composite deliberately uses only the histogram-momentum axis above, so regime is owned by the Trend / Structure pillar and not double-counted.</div>
       </div>
+      </React.Fragment>)}
     </div>
   );
 }
