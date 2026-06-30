@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-30T07:15:55.027Z",
+  "updated": "2026-06-30T10:30:12.085Z",
   "stocks": [
     {
       "ticker": "LLY US",
@@ -11,13 +11,27 @@
       "ma21": 1126.931,
       "ma50": 1037.819,
       "ma100": 1007.385,
+      "ma150": 1022.991,
       "ma200": 978.29,
       "rsi14": 74.606,
       "rsi30": 66.337,
       "macd": 3.8763,
       "macdLine": 34.847,
       "macdScore": 5,
-      "macdMom": 1.5
+      "macdMom": 1.5,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "NU US",
@@ -29,13 +43,27 @@
       "ma21": 12.405,
       "ma50": 13.198,
       "ma100": 14.237,
+      "ma150": 15.19,
       "ma200": 15.314,
       "rsi14": 56.295,
       "rsi30": 48.803,
       "macd": 0.1484,
       "macdLine": -0.0348,
       "macdScore": 2.75,
-      "macdMom": 1.125
+      "macdMom": 1.125,
+      "sata": 0,
+      "sataComp": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
     },
     {
       "ticker": "HOOD US",
@@ -47,13 +75,27 @@
       "ma21": 94.083,
       "ma50": 85.52,
       "ma100": 80.426,
+      "ma150": 92.431,
       "ma200": 102.501,
       "rsi14": 59.76,
       "rsi30": 57.244,
       "macd": -0.0071,
       "macdLine": 5.0398,
       "macdScore": 2,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 3,
+      "sataComp": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false
+      ]
     },
     {
       "ticker": "IBM US",
@@ -65,13 +107,27 @@
       "ma21": 278.878,
       "ma50": 253.46,
       "ma100": 252.39,
+      "ma150": 269.122,
       "ma200": 273.829,
       "rsi14": 56.579,
       "rsi30": 54.633,
       "macd": -1.481,
       "macdLine": 2.2113,
       "macdScore": 3,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 6,
+      "sataComp": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
     },
     {
       "ticker": "BTDR US",
@@ -83,13 +139,27 @@
       "ma21": 17.764,
       "ma50": 15.137,
       "ma100": 12.216,
+      "ma150": 12.229,
       "ma200": 13.893,
       "rsi14": 45.749,
       "rsi30": 52.095,
       "macd": -0.394,
       "macdLine": 0.4196,
       "macdScore": 2,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 8,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false
+      ]
     },
     {
       "ticker": "HUT US",
@@ -101,13 +171,27 @@
       "ma21": 120.772,
       "ma50": 104.462,
       "ma100": 79.068,
+      "ma150": 69.327,
       "ma200": 62.547,
       "rsi14": 53.085,
       "rsi30": 57.218,
       "macd": -1.3601,
       "macdLine": 3.9934,
       "macdScore": 3,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "TSLA US",
@@ -119,13 +203,27 @@
       "ma21": 402.043,
       "ma50": 405.224,
       "ma100": 397.832,
+      "ma150": 413.337,
       "ma200": 418.285,
       "rsi14": 54.015,
       "rsi30": 51.708,
       "macd": -1.1306,
       "macdLine": -5.7867,
       "macdScore": 2,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 4,
+      "sataComp": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
     },
     {
       "ticker": "CCJ US",
@@ -137,13 +235,27 @@
       "ma21": 106.747,
       "ma50": 111.716,
       "ma100": 112.853,
+      "ma150": 108.95,
       "ma200": 103.826,
       "rsi14": 44.642,
       "rsi30": 46.431,
       "macd": 0.1923,
       "macdLine": -1.6217,
       "macdScore": 1,
-      "macdMom": 1
+      "macdMom": 1,
+      "sata": 5,
+      "sataComp": [
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
     },
     {
       "ticker": "ASML US",
@@ -155,13 +267,27 @@
       "ma21": 1789.512,
       "ma50": 1623.019,
       "ma100": 1509.767,
+      "ma150": 1401.113,
       "ma200": 1299.236,
       "rsi14": 58.681,
       "rsi30": 58.726,
       "macd": -9.3479,
       "macdLine": 65.8667,
       "macdScore": 3,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "CF US",
@@ -173,13 +299,27 @@
       "ma21": 108.419,
       "ma50": 116.461,
       "ma100": 115.082,
+      "ma150": 104.048,
       "ma200": 99.505,
       "rsi14": 40.286,
       "rsi30": 44.459,
       "macd": 0.2228,
       "macdLine": -3.7576,
       "macdScore": 3,
-      "macdMom": 1.5
+      "macdMom": 1.5,
+      "sata": 7,
+      "sataComp": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
     },
     {
       "ticker": "TSM US",
@@ -191,13 +331,27 @@
       "ma21": 434.993,
       "ma50": 414.478,
       "ma100": 383.933,
+      "ma150": 359.154,
       "ma200": 341.142,
       "rsi14": 58.316,
       "rsi30": 57.799,
       "macd": -0.2983,
       "macdLine": 9.3146,
       "macdScore": 2,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "OIH US",
@@ -209,13 +363,27 @@
       "ma21": 407.6,
       "ma50": 422.915,
       "ma100": 406.69,
+      "ma150": 373.846,
       "ma200": 347.526,
       "rsi14": 31.938,
       "rsi30": 40.358,
       "macd": -4.2038,
       "macdLine": -14.4749,
       "macdScore": 2,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 7,
+      "sataComp": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "NVDA US",
@@ -227,13 +395,27 @@
       "ma21": 207.156,
       "ma50": 210.018,
       "ma100": 196.383,
+      "ma150": 192.181,
       "ma200": 190.728,
       "rsi14": 40.084,
       "rsi30": 46.198,
       "macd": -1.809,
       "macdLine": -4.0541,
       "macdScore": 0,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 8,
+      "sataComp": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ]
     },
     {
       "ticker": "CRWV US",
@@ -245,13 +427,27 @@
       "ma21": 106.254,
       "ma50": 110.355,
       "ma100": 98.961,
+      "ma150": 93.704,
       "ma200": 100.554,
       "rsi14": 40.812,
       "rsi30": 46.455,
       "macd": -1.2471,
       "macdLine": -2.2207,
       "macdScore": 0,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 4,
+      "sataComp": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ]
     },
     {
       "ticker": "C US",
@@ -263,13 +459,27 @@
       "ma21": 137.98,
       "ma50": 131.527,
       "ma100": 123.033,
+      "ma150": 119.719,
       "ma200": 114.738,
       "rsi14": 62.295,
       "rsi30": 61.612,
       "macd": -0.0147,
       "macdLine": 4.272,
       "macdScore": 2,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "SEI US",
@@ -281,13 +491,27 @@
       "ma21": 75.198,
       "ma50": 73.671,
       "ma100": 64.642,
+      "ma150": 59.861,
       "ma200": 56.274,
       "rsi14": 55.337,
       "rsi30": 55.561,
       "macd": 0.1199,
       "macdLine": 1.9203,
       "macdScore": 4,
-      "macdMom": 1
+      "macdMom": 1,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "BWXT US",
@@ -299,13 +523,27 @@
       "ma21": 195.11,
       "ma50": 204.562,
       "ma100": 206.039,
+      "ma150": 200.193,
       "ma200": 197.858,
       "rsi14": 40.282,
       "rsi30": 44.673,
       "macd": 0.5752,
       "macdLine": -0.3368,
       "macdScore": 1.75,
-      "macdMom": 0.875
+      "macdMom": 0.875,
+      "sata": 5,
+      "sataComp": [
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
     },
     {
       "ticker": "WOLF US",
@@ -317,13 +555,27 @@
       "ma21": 51.396,
       "ma50": 48.28,
       "ma100": 33.43,
+      "ma150": 28.624,
       "ma200": null,
       "rsi14": 44.421,
       "rsi30": 49.745,
       "macd": -1.1474,
       "macdLine": -1.3704,
       "macdScore": 2,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 4,
+      "sataComp": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false
+      ]
     },
     {
       "ticker": "FSLR US",
@@ -335,13 +587,27 @@
       "ma21": 270.949,
       "ma50": 242.537,
       "ma100": 224.32,
+      "ma150": 234.23,
       "ma200": 234.614,
       "rsi14": 39.008,
       "rsi30": 47.269,
       "macd": -6.1378,
       "macdLine": -2.9708,
       "macdScore": 2,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 3,
+      "sataComp": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ]
     },
     {
       "ticker": "LRCX US",
@@ -353,13 +619,27 @@
       "ma21": 358.325,
       "ma50": 313.344,
       "ma100": 271.936,
+      "ma150": 243.885,
       "ma200": 218.709,
       "rsi14": 63.679,
       "rsi30": 63.127,
       "macd": 1.5181,
       "macdLine": 25.1318,
       "macdScore": 3,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "AMAT US",
@@ -371,13 +651,27 @@
       "ma21": 553.838,
       "ma50": 474.304,
       "ma100": 415.333,
+      "ma150": 370.586,
       "ma200": 332.009,
       "rsi14": 70.191,
       "rsi30": 68.511,
       "macd": 8.7931,
       "macdLine": 54.7362,
       "macdScore": 5,
-      "macdMom": 1.5
+      "macdMom": 1.5,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "BE US",
@@ -389,13 +683,27 @@
       "ma21": 283.794,
       "ma50": 274.996,
       "ma100": 214.833,
+      "ma150": 181.6,
       "ma200": 161.548,
       "rsi14": 48.228,
       "rsi30": 52.067,
       "macd": -2.1401,
       "macdLine": 6.9948,
       "macdScore": 2,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 10,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "CEPT US",
@@ -407,13 +715,27 @@
       "ma21": 11.883,
       "ma50": 11.954,
       "ma100": 11.538,
+      "ma150": 11.48,
       "ma200": 11.432,
       "rsi14": 60.647,
       "rsi30": 56.342,
       "macd": -0.0114,
       "macdLine": -0.2737,
       "macdScore": 2,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 9,
+      "sataComp": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ]
     },
     {
       "ticker": "XME US",
@@ -425,13 +747,27 @@
       "ma21": 118.056,
       "ma50": 118.604,
       "ma100": 116.215,
+      "ma150": 114.028,
       "ma200": 109.415,
       "rsi14": 34.815,
       "rsi30": 42.745,
       "macd": -1.5091,
       "macdLine": -3.1441,
       "macdScore": 2,
-      "macdMom": 0.75
+      "macdMom": 0.75,
+      "sata": 5,
+      "sataComp": [
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
     },
     {
       "ticker": "DRAM US",
@@ -443,13 +779,27 @@
       "ma21": 67.918,
       "ma50": 55.615,
       "ma100": null,
+      "ma150": null,
       "ma200": null,
       "rsi14": 57.166,
       "rsi30": 61.593,
       "macd": -0.3379,
       "macdLine": 5.2682,
       "macdScore": 2,
-      "macdMom": 0
+      "macdMom": 0,
+      "sata": 3,
+      "sataComp": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true
+      ]
     }
   ],
   "prev": [
