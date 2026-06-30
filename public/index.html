@@ -191,7 +191,13 @@ function PriceLadder({stock}){
         priceGutterRef.current.innerHTML="";
         const tg=[{v:lastPrice,c:"#e2e8f0"}];
         if(!cfg.intra){if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});}
-        tg.forEach(function(o){let y=null;try{y=area.priceToCoordinate(o.v);}catch(e){}if(y==null)return;tagEl(priceGutterRef.current,fmtN(o.v),o.c).style.top=(y-8)+"px";});
+        const H=15,GAP=16,maxTop=300-H;
+        const items=[];
+        tg.forEach(function(o){let y=null;try{y=area.priceToCoordinate(o.v);}catch(e){}if(y==null)return;items.push({v:o.v,c:o.c,top:y-Math.round(H/2)});});
+        items.sort(function(a,b){return a.top-b.top;});
+        for(let i=1;i<items.length;i++){if(items[i].top<items[i-1].top+GAP)items[i].top=items[i-1].top+GAP;}
+        if(items.length){const over=(items[items.length-1].top+H)-maxTop;if(over>0)items.forEach(function(o){o.top-=over;});if(items[0].top<0){const d=-items[0].top;items.forEach(function(o){o.top+=d;});}}
+        items.forEach(function(o){tagEl(priceGutterRef.current,fmtN(o.v),o.c).style.top=Math.max(0,Math.min(maxTop,o.top))+"px";});
       }
       if(macdGutterRef.current){
         macdGutterRef.current.innerHTML="";
