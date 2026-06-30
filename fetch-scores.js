@@ -30,6 +30,9 @@ if (!API_KEY) {
 // Used by the every-30-minutes market-hours runs to stay under the data cap.
 const QUICK = process.env.FETCH_MODE === "quick";
 
+// Benchmark for Mansfield relative strength (MSCI ACWI ETF).
+const BENCHMARK = "ACWI";
+
 const TICKERS_PATH = path.join(__dirname, "tickers.json");
 const OUTPUT_PATH = path.join(__dirname, "public", "data", "scores.json");
 const HISTORY_PATH = path.join(__dirname, "public", "data", "history.json");
@@ -55,6 +58,55 @@ function sma(values, period) {
   if (values.length < period) return null;
   const slice = values.slice(-period);
   return slice.reduce((a, b) => a + b, 0) / period;
+}
+
+// SMA of the `period` window ending `offset` bars before the latest bar.
+function smaAtOffset(values, period, offset) {
+  if (values.length < period + offset) return null;
+  const end = values.length - offset;
+  const slice = values.slice(end - period, end);
+  return slice.reduce((a, b) => a + b, 0) / period;
+}
+
+// Is the `period` MA higher than it was `lookback` bars ago? (default 1 week)
+function maRising(values, period, lookback) {
+  const now = sma(values, period);
+  const before = smaAtOffset(values, period, lookback || 5);
+  if (now == null || before == null) return false;
+  return now > before;
+}
+
+// Mansfield RS above zero: stock/benchmark ratio above its own 200-day MA.
+function mansfieldAboveZero(rows, benchByDate) {
+  const rs = [];
+  for (const r of rows) {
+    const b = benchByDate[r.datetime];
+    if (b != null && b !== 0) rs.push(parseFloat(r.close) / b);
+  }
+  if (rs.length < 200) return false;
+  const rsMA = sma(rs, 200);
+  return rsMA != null && rs[rs.length - 1] > rsMA;
+}
+
+// The ten SATA (Stage Analysis Technical Attributes) checks, each 0/1.
+function computeSata(closes, rows, benchByDate) {
+  const price = closes[closes.length - 1];
+  const ma50 = sma(closes, 50), ma150 = sma(closes, 150), ma200 = sma(closes, 200);
+  const win = closes.slice(-252);
+  const high52 = win.length ? Math.max(...win) : null;
+  const comp = [
+    ma50 != null && price > ma50,                     // 1. close > 50DMA
+    ma150 != null && price > ma150,                   // 2. close > 150DMA
+    ma200 != null && price > ma200,                   // 3. close > 200DMA
+    ma50 != null && ma150 != null && ma50 > ma150,    // 4. 50DMA > 150DMA
+    ma150 != null && ma200 != null && ma150 > ma200,  // 5. 150DMA > 200DMA
+    maRising(closes, 50, 5),                          // 6. 50DMA rising
+    maRising(closes, 150, 5),                         // 7. 150DMA rising
+    maRising(closes, 200, 5),                         // 8. 200DMA rising
+    mansfieldAboveZero(rows, benchByDate),            // 9. Mansfield RS > 0
+    high52 != null && high52 > 0 && price >= 0.75 * high52, // 10. within 25% of 52-wk high
+  ].map(Boolean);
+  return { score: comp.reduce((a, b) => a + (b ? 1 : 0), 0), comp };
 }
 
 function emaSeries(values, period) {
@@ -246,6 +298,18 @@ async function main() {
 
   const results = [];
   const historyOut = {};
+
+  // Benchmark series for Mansfield relative strength (one extra request).
+  let benchByDate = {};
+  try {
+    const bBatch = await fetchBatch([BENCHMARK], INTERVAL, OUTPUT_SIZE);
+    const bRows = rowsAscending(bBatch[BENCHMARK]);
+    if (bRows) for (const r of bRows) benchByDate[r.datetime] = parseFloat(r.close);
+    console.log(`Fetched benchmark ${BENCHMARK}: ${Object.keys(benchByDate).length} bars.`);
+  } catch (e) {
+    console.warn(`Benchmark ${BENCHMARK} fetch failed; Mansfield RS scores 0 this run. ${e.message}`);
+  }
+
   const groups = chunk(symbols, BATCH_SIZE);
   for (let gi = 0; gi < groups.length; gi++) {
     const group = groups[gi];
@@ -267,6 +331,7 @@ async function main() {
       const prevClose = closes[closes.length - 2];
       const monthAgo = closes.length >= 22 ? closes[closes.length - 22] : null;
       const md = computeMacd(closes);
+      const sataRes = computeSata(closes, rows, benchByDate);
 
       results.push({
         ticker: meta.ticker || sym,
@@ -278,6 +343,7 @@ async function main() {
         ma21: round(sma(closes, 21), 3),
         ma50: round(sma(closes, 50), 3),
         ma100: round(sma(closes, 100), 3),
+        ma150: round(sma(closes, 150), 3),
         ma200: round(sma(closes, 200), 3),
         rsi14: round(rsi(closes, 14), 3),
         rsi30: round(rsi(closes, 30), 3),
@@ -285,6 +351,8 @@ async function main() {
         macdLine: round(md.line, 4),
         macdScore: md.score == null ? null : round(md.score, 2),
         macdMom: md.mom == null ? null : round(md.mom, 3),
+        sata: sataRes.score,
+        sataComp: sataRes.comp,
       });
 
       // [date, close] series for the chart, keyed by the same ticker as scores.
