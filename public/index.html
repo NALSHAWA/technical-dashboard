@@ -278,7 +278,7 @@ function MiniChart({stock}){
     }
     const dates=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
     const SHOW=252;const start=Math.max(0,closes.length-SHOW);
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:10},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:54},timeScale:{borderColor:"rgba(255,255,255,0.08)"},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:10},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:54,scaleMargins:{top:0.12,bottom:0.08}},timeScale:{borderColor:"rgba(255,255,255,0.08)"},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||420,height:200}));
     const area=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
     area.setData(closes.slice(start).map((v,i)=>({time:dates[start+i],value:v})));
@@ -289,14 +289,10 @@ function MiniChart({stock}){
     if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;}
     if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;}
     pc.timeScale().fitContent();
-    function ema(arr,p){const k=2/(p+1);const o=[];let prev=null;for(let i=0;i<arr.length;i++){if(i<p-1){o.push(null);continue;}if(prev==null){let sum=0;for(let j=i-p+1;j<=i;j++)sum+=arr[j];prev=sum/p;}else{prev=arr[i]*k+prev*(1-k);}o.push(prev);}return o;}
-    const e12=ema(closes,12),e26=ema(closes,26);const line=closes.map((_,i)=>(e12[i]!=null&&e26[i]!=null)?e12[i]-e26[i]:null);
-    const lc=line.filter(v=>v!=null);const sig=ema(lc,9);let si=0;const histVals=closes.map((_,i)=>{if(line[i]==null)return null;const sg=sig[si++];return sg==null?null:line[i]-sg;});
-    let lastMacd=null;for(let i=closes.length-1;i>=0;i--){if(histVals[i]!=null){lastMacd=histVals[i];break;}}
     const lastPrice=closes[closes.length-1];
     function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
     function item(color,label,val){return '<span style="margin-right:12px;white-space:nowrap"><span style="color:'+color+'">'+label+'</span> <b style="color:#e2e8f0;font-weight:600">'+val+'</b></span>';}
-    if(legendRef.current)legendRef.current.innerHTML=item("#e2e8f0","Price",fmtN(lastPrice))+item("#3b82f6","50DMA",fmtN(last50))+item("#8b5cf6","100DMA",fmtN(last100))+item("#f59e0b","200DMA",fmtN(last200))+item(lastMacd!=null&&lastMacd>=0?"#22c55e":"#ef4444","MACD",lastMacd==null?"\u2014":lastMacd.toFixed(3));
+    if(legendRef.current)legendRef.current.innerHTML=item("#e2e8f0","Price",fmtN(lastPrice))+item("#3b82f6","50DMA",fmtN(last50))+item("#8b5cf6","100DMA",fmtN(last100))+item("#f59e0b","200DMA",fmtN(last200));
     function placeTags(){
       if(!gutterRef.current)return;gutterRef.current.innerHTML="";
       const tg=[{v:lastPrice,c:"#e2e8f0"}];if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});
