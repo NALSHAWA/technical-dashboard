@@ -115,9 +115,9 @@ function computeSataWeekly(rows, benchWeeklyByKey) {
     if (rma) mans = (rclean[rclean.length - 1] / rma - 1) * 100;
   }
 
-  // Momentum: 12-week rate of change, positive and rising.
+  // Momentum: 12-week rate of change, positive and durably rising (vs 3 weeks ago).
   const roc = (i) => (i >= 12 && C[i - 12] > 0) ? (C[i] / C[i - 12] - 1) : null;
-  const rocNow = roc(n), rocPrev = roc(n - 1);
+  const rocNow = roc(n), rocPrev = roc(n - 3);
 
   // Volume: accumulation = avg volume on up-weeks > avg on down-weeks (last 10 weeks).
   let upV = 0, upN = 0, dnV = 0, dnN = 0;
@@ -128,8 +128,7 @@ function computeSataWeekly(rows, benchWeeklyByKey) {
   const accumulation = (upN && dnN) ? (upV / upN) > (dnV / dnN) : (upN >= dnN);
 
   const hi52 = Math.max(...H.slice(-52));               // 52-week high
-  const prior13 = C.slice(Math.max(0, n - 13), n);      // prior 13 weekly closes
-  const hc13 = prior13.length ? Math.max(...prior13) : close;
+  const hh13 = n >= 1 ? Math.max(...H.slice(Math.max(0, n - 13), n)) : H[n]; // prior 13-week high
 
   const comp = [
     ma10 != null && close > ma10,                              // 1 close > 10W MA
@@ -138,8 +137,8 @@ function computeSataWeekly(rows, benchWeeklyByKey) {
     ma30 != null && ma30prev != null && ma30 > ma30prev,       // 4 30W MA rising
     mans != null && mans > 0,                                  // 5 Mansfield RS > 0
     rocNow != null && rocNow > 0,                              // 6 momentum positive
-    rocNow != null && rocPrev != null && rocNow > rocPrev,     // 7 momentum rising
-    close >= hc13,                                             // 8 breakout (>= 13W high close)
+    rocNow != null && rocPrev != null && rocNow > rocPrev,     // 7 momentum rising (vs 3 weeks ago)
+    H[n] > hh13,                                               // 8 breakout: new 13-week high
     accumulation,                                              // 9 volume accumulation
     hi52 > 0 && close >= 0.92 * hi52,                          // 10 minimal overhead (within 8% of 52W high)
   ].map(Boolean);
