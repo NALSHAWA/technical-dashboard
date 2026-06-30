@@ -63,6 +63,9 @@ function getWatchTags(s){
 
 function scoreColor(v){return v>=4?"#22c55e":v>=2.5?"#f59e0b":"#ef4444"}
 function scoreBg(v){return v>=4?"rgba(34,197,94,0.1)":v>=2.5?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)"}
+function sataColor(v){return v>=7?"#22c55e":v>=4?"#f59e0b":"#ef4444"}
+function sataBg(v){return v>=7?"rgba(34,197,94,0.1)":v>=4?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)"}
+const SATA_LABELS=["Close above 50DMA","Close above 150DMA","Close above 200DMA","50DMA above 150DMA","150DMA above 200DMA","50DMA rising","150DMA rising","200DMA rising","Mansfield RS above zero","Within 25% of 52-week high"];
 function fmt(v){return Math.abs(v)>=10000?v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
 function pctColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
 function maColor(p,m){return p>m?"#22c55e":"#ef4444"}
@@ -122,7 +125,7 @@ const COLS=[
 {key:"aboveMa50",label:"> 50DMA",w:75},{key:"aboveMa100",label:"> 100DMA",w:80},{key:"aboveMa200",label:"> 200DMA",w:80},
 {key:"rel921",label:"9>21",w:62},{key:"rel2150",label:"21>50",w:64},{key:"rel50200",label:"50>200",w:68},
 {key:"watchCol",label:"Watch Closely",w:110},
-{key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"macdScore",label:"MACD 0-5",w:78},{key:"score",label:"Score",w:100},
+{key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"macd",label:"MACD",w:85},{key:"macdScore",label:"MACD 0-5",w:78},{key:"score",label:"Score",w:100},{key:"sata",label:"SATA",w:90},
 ];
 
 const FILTERS=[{key:"all",label:"All"},{key:"charts",label:"\ud83d\udcc8 Charts"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"}];
@@ -260,6 +263,12 @@ function PriceLadder({stock}){
             </div>
           </div>
         </div>
+        {s.sataComp&&(<div style={{marginTop:18,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+          <div style={{fontSize:11,color:"#64748b",marginBottom:10,letterSpacing:"0.04em",fontWeight:600}}>SATA BREAKDOWN \u2014 <span style={{color:sataColor(s.sata)}}>{s.sata}/10</span></div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",rowGap:6,columnGap:18}}>
+            {SATA_LABELS.map(function(lbl,i){const ok=s.sataComp[i];return(<div key={i} style={{fontSize:12,color:ok?"#22c55e":"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}><span style={{fontWeight:700}}>{ok?"\u2713":"\u2717"}</span> {lbl}</div>);})}
+          </div>
+        </div>)}
       </div>
     </div>
   );
@@ -426,6 +435,7 @@ function App(){
                 <td style={{padding:"9px 10px",textAlign:"right",borderBottom:bb,background:rowBg}}>
                   <span style={{display:"inline-block",padding:"3px 10px",borderRadius:6,background:scoreBg(s.score),color:scoreColor(s.score),fontWeight:700,fontSize:12}}>{s.score.toFixed(1)}</span>
                 </td>
+                <td style={{padding:"9px 10px",textAlign:"right",borderBottom:bb,background:rowBg}}>{s.sata!=null?<span style={{display:"inline-block",padding:"3px 9px",borderRadius:6,background:sataBg(s.sata),color:sataColor(s.sata),fontWeight:700,fontSize:12}}>{s.sata}/10</span>:<span style={{color:"#475569"}}>—</span>}</td>
               </tr>)})}
           </tbody>
         </table>
