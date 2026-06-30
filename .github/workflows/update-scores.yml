@@ -2,14 +2,15 @@ name: Update dashboard scores
 
 on:
   schedule:
-    # Every 30 minutes during US market hours, weekdays. Covers both EDT
-    # (13:30-20:00 UTC) and EST (14:30-21:00 UTC). These runs use QUICK mode
-    # (daily data + scores only) to stay under the data-request cap.
+    # Every 30 minutes during the US session (13:00-21:00 UTC = 5pm-1am Dubai),
+    # when prices actually move. QUICK mode (daily + scores only).
     - cron: "*/30 13-21 * * 1-5"
-    # Full nightly run at 22:37 UTC (off the top of the hour). Refetches the
-    # 15-minute intraday series for the 1D/3D/1W charts.
+    # Hourly through the Dubai morning/afternoon (04:00-12:00 UTC = 8am-4pm Dubai),
+    # when the US market is closed and prices are static. QUICK mode.
+    - cron: "0 4-12 * * 1-5"
+    # Full nightly run at 22:37 UTC, refetches the 15-min intraday series.
     - cron: "37 22 * * 1-5"
-  workflow_dispatch: {}   # manual trigger from the Actions tab = full run
+  workflow_dispatch: {}   # manual trigger = full run
 
 permissions:
   contents: write
@@ -31,16 +32,14 @@ jobs:
       - name: Fetch data and compute scores
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-          # Market-hours 30-min runs = quick (daily only). Nightly + manual = full.
-          FETCH_MODE: ${{ github.event.schedule == '*/30 13-21 * * 1-5' && 'quick' || 'full' }}
+          # Full on the nightly run and manual triggers; quick for all intraday runs.
+          FETCH_MODE: ${{ (github.event.schedule == '37 22 * * 1-5' || github.event_name == 'workflow_dispatch') && 'full' || 'quick' }}
         run: node fetch-scores.js
 
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Data files are fully regenerated each run, so they always win over
-          # the remote: align to latest main, then overwrite with our fresh data.
           mkdir -p /tmp/fresh
           cp public/data/scores.json /tmp/fresh/scores.json
           cp public/data/history.json /tmp/fresh/history.json
