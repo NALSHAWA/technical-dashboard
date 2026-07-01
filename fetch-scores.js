@@ -326,10 +326,16 @@ async function main() {
   entries.forEach((e) => { metaBySymbol[e.symbol] = e; });
 
   // Carry forward previous run for score-change tracking.
+  // prev24h is a daily snapshot updated only on full (nightly) runs so the
+  // upgrades/downgrades panel always shows 24-hour moves, not 30-min ticks.
   let prev = [];
+  let prev24h = [];
   try {
     const existing = JSON.parse(fs.readFileSync(OUTPUT_PATH, "utf8"));
     prev = existing.stocks || [];
+    prev24h = QUICK
+      ? (existing.prev24h || existing.stocks || [])   // quick: preserve yesterday's snapshot
+      : (existing.prev24h || existing.stocks || []);   // full:  yesterday's snapshot stays as-is until we overwrite below
   } catch (e) { /* first run, no previous file */ }
 
   const results = [];
@@ -437,7 +443,12 @@ async function main() {
     }
   }
 
-  const payload = { updated: new Date().toISOString(), stocks: results, prev };
+  const payload = {
+    updated: new Date().toISOString(),
+    stocks: results,
+    prev,
+    prev24h: QUICK ? prev24h : results,  // full run: today's close becomes tomorrow's 24h baseline
+  };
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(payload, null, 2));
   console.log(`Wrote ${results.length} instruments to ${OUTPUT_PATH}`);
