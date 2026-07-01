@@ -368,6 +368,7 @@ async function main() {
       const monthAgo = closes.length >= 22 ? closes[closes.length - 22] : null;
       const md = computeMacd(closes);
       const sataRes = computeSataWeekly(rows, benchWeeklyByKey);
+      const h52 = Math.max(...closes.slice(-252));
 
       results.push({
         ticker: meta.ticker || sym,
@@ -390,12 +391,14 @@ async function main() {
         sata: sataRes ? sataRes.score : null,
         sataComp: sataRes ? sataRes.comp : null,
         mansfield: sataRes && sataRes.mans != null ? round(sataRes.mans, 2) : null,
+        high52w: round(h52, 2),
+        pct52w: round(((price / h52) - 1) * 100, 2),
       });
 
-      // [date, close] series for the chart, keyed by the same ticker as scores.
+      // [date, close, volume] series for the chart.
       historyOut[meta.ticker || sym] = rows
         .slice(-HISTORY_KEEP)
-        .map((r) => [r.datetime, round(parseFloat(r.close), 2)]);
+        .map((r) => [r.datetime, round(parseFloat(r.close), 2), Math.round(parseFloat(r.volume) || 0)]);
     }
     if (gi < groups.length - 1) {
       console.log(`Processed a batch of ${group.length}; pausing for rate limit...`);
