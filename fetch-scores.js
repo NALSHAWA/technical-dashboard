@@ -5,7 +5,7 @@
  * Pulls daily OHLCV from Twelve Data for every entry in tickers.json and
  * computes the full field set the ARP dashboard expects:
  *   price, d1 (1-day %), m1 (1-month %), ma50, ma100, ma200,
- *   rsi14, rsi30, macd (MACD line).
+ *   rsi14, rsi21, macd (MACD line).
  *
  * It also carries forward the previous run's results as `prev`, so the
  * dashboard can show score upgrades / downgrades day over day.
@@ -389,7 +389,7 @@ async function main() {
         ma150: round(sma(closes, 150), 3),
         ma200: round(sma(closes, 200), 3),
         rsi14: round(rsi(closes, 14), 3),
-        rsi30: round(rsi(closes, 30), 3),
+        rsi21: round(rsi(closes, 21), 3),
         macd: round(md.hist, 4),
         macdLine: round(md.line, 4),
         macdScore: md.score == null ? null : round(md.score, 2),
@@ -404,7 +404,7 @@ async function main() {
       // [date, close, volume] series for the chart.
       historyOut[meta.ticker || sym] = rows
         .slice(-HISTORY_KEEP)
-        .map((r) => [r.datetime, round(parseFloat(r.close), 2), Math.round(parseFloat(r.volume) || 0)]);
+        .map((r) => [r.datetime, round(parseFloat(r.open), 2), round(parseFloat(r.high), 2), round(parseFloat(r.low), 2), round(parseFloat(r.close), 2), Math.round(parseFloat(r.volume) || 0)]);
     }
     if (gi < groups.length - 1) {
       console.log(`Processed a batch of ${group.length}; pausing for rate limit...`);
