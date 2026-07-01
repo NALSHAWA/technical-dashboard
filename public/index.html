@@ -71,7 +71,7 @@ const SATA_LABELS=["Close above 10W MA","Close above 30W MA","Close above 40W MA
 function fmt(v){return Math.abs(v)>=10000?v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
 function pctColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
 function maColor(p,m){return p>m?"#22c55e":"#ef4444"}
-function rsiColor(v){return v>=70?"#22c55e":v>=60?"#86efac":v<=30?"#ef4444":v<=40?"#fca5a5":"#94a3b8"}
+function rsiColor(v){return v>=60?"#22c55e":v<=40?"#ef4444":"#94a3b8"}
 function macdColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
 
 function HealthGauge({stocks}){
@@ -127,7 +127,7 @@ const COLS=[
 {key:"aboveMa50",label:"> 50DMA",w:75},{key:"aboveMa100",label:"> 100DMA",w:80},{key:"aboveMa200",label:"> 200DMA",w:80},
 {key:"rel921",label:"9>21",w:62},{key:"rel2150",label:"21>50",w:64},{key:"rel50200",label:"50>200",w:68},
 {key:"watchCol",label:"Watch Closely",w:110},
-{key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"mansfield",label:"Mansfield RS",w:100},{key:"score",label:"Score",w:100},{key:"sata",label:"SATA",w:90},
+{key:"rsi14",label:"RSI 14D",w:72},{key:"rsi30",label:"RSI 30D",w:72},{key:"mansfield",label:"Mansfield RS",w:100},{key:"score",label:"22V Score",w:110},{key:"sata",label:"SATA Score",w:105},
 ];
 
 const FILTERS=[{key:"all",label:"All"},{key:"aboveMa",label:"Above All MAs"},{key:"belowMa",label:"Below All MAs"},{key:"strongTech",label:"Score ≥ 4"},{key:"weakTech",label:"Score < 2"},{key:"overbought",label:"Overbought"},{key:"oversold",label:"Oversold"},{key:"macdPos",label:"MACD Positive"},{key:"watch",label:"👁 Watch Closely"},{key:"sataStrong",label:"SATA Strong (7-10)"},{key:"sataNeutral",label:"SATA Neutral (4-6)"},{key:"sataWeak",label:"SATA Weak (0-3)"}];
@@ -505,9 +505,9 @@ function App(){
                 <td style={{...cellStyle(COLS[0],false),fontWeight:600,color:"#a5b4fc",background:rowBg}}>{s.ticker}</td>
                 <td style={{...cellStyle(COLS[1],false),color:"#94a3b8",overflow:"hidden",textOverflow:"ellipsis",maxWidth:180,background:rowBg}}>{s.name}</td>
                 <td style={{padding:"9px 10px",textAlign:"center",color:"#f8fafc",fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{fmt(s.price)}</td>
-                <td style={{padding:"9px 10px",textAlign:"right",color:pctColor(s.d1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</td>
-                <td style={{padding:"9px 10px",textAlign:"right",color:pctColor(s.m1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</td>
-                <td style={{padding:"9px 10px",textAlign:"right",color:pct52wColor(s.pct52w),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.pct52w!=null?s.pct52w.toFixed(2)+"%":"—"}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",color:pctColor(s.d1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</td>
+                <td style={{padding:"9px 10px",textAlign:"center",color:pctColor(s.m1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</td>
+                <td style={{padding:"9px 10px",textAlign:"center",color:pct52wColor(s.pct52w),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.pct52w!=null?s.pct52w.toFixed(2)+"%":"—"}</td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa50}/></td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa100}/></td>
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa200}/></td>
@@ -517,26 +517,42 @@ function App(){
                 <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg,fontSize:11}}>
                   {wt.length>0?wt.map((t,j)=><span key={j} style={{color:t.dir==="↑"?"#22c55e":"#ef4444",marginRight:6,fontWeight:700}}>{t.dir} {t.ma}</span>):<span style={{color:"#1e293b"}}>—</span>}
                 </td>
-                <td style={{padding:"9px 10px",textAlign:"right",color:rsiColor(s.rsi14),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi14.toFixed(2)}</td>
-                <td style={{padding:"9px 10px",textAlign:"right",color:rsiColor(s.rsi30),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi30.toFixed(2)}</td>
-                <td style={{padding:"9px 10px",textAlign:"right",color:mansfieldColor(s.mansfield),fontWeight:600,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.mansfield!=null?s.mansfield.toFixed(2):"—"}</td>
-                <td style={{padding:"9px 10px",textAlign:"right",borderBottom:bb,background:rowBg}}>
+                <td style={{padding:"9px 10px",textAlign:"center",color:rsiColor(s.rsi14),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi14.toFixed(2)}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",color:rsiColor(s.rsi30),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi30.toFixed(2)}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",color:mansfieldColor(s.mansfield),fontWeight:600,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.mansfield!=null?s.mansfield.toFixed(2):"—"}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}>
                   <span style={{display:"inline-block",padding:"3px 10px",borderRadius:6,background:scoreBg(s.score),color:scoreColor(s.score),fontWeight:700,fontSize:12}}>{s.score.toFixed(1)}</span>
                 </td>
-                <td style={{padding:"9px 10px",textAlign:"right",borderBottom:bb,background:rowBg}}>{s.sata!=null?<span style={{display:"inline-block",padding:"3px 9px",borderRadius:6,background:sataBg(s.sata),color:sataColor(s.sata),fontWeight:700,fontSize:12}}>{s.sata}/10</span>:<span style={{color:"#475569"}}>—</span>}</td>
+                <td style={{padding:"9px 10px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.sata!=null?<span style={{display:"inline-block",padding:"3px 9px",borderRadius:6,background:sataBg(s.sata),color:sataColor(s.sata),fontWeight:700,fontSize:12}}>{s.sata}/10</span>:<span style={{color:"#475569"}}>—</span>}</td>
               </tr>)})}
           </tbody>
         </table>
       </div>
 
-      <div style={{marginTop:20,padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
-        <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:8,letterSpacing:"0.04em"}}>TECHNICAL SCORE METHODOLOGY (0–5)</div>
-        <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.7}}>
-          <strong style={{color:"#e2e8f0"}}>Trend / Structure (0–2):</strong> Price Location (0–1): +0.5 &gt; 50DMA · +0.25 &gt; 100DMA · +0.25 &gt; 200DMA. MA Alignment (0–1): +0.3 if 9&gt;21DMA · +0.3 if 21&gt;50DMA · +0.4 if 50&gt;200DMA. Unavailable terms score the neutral midpoint. &nbsp;|&nbsp;
-          <strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5):</strong> per RSI (14D &amp; 30D): strong (&gt;70) +0.75 · solid (60–70) +0.5 · neutral (40–60) +0.25 · weak (&lt;40) +0 &nbsp;|&nbsp;
-          <strong style={{color:"#e2e8f0"}}>MACD Momentum (0–1.5):</strong> histogram axis only — rising &amp; + = 1.5 · falling &amp; + = 1.0 · rising &amp; − = 0.75 · falling &amp; − = 0 · flat or near zero-line → neutral
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginTop:20}}>
+        <div style={{padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
+          <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:10,letterSpacing:"0.04em"}}>22V SCORE METHODOLOGY (0–5)</div>
+          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.8}}>
+            <div><strong style={{color:"#e2e8f0"}}>Trend / Structure (0–2)</strong></div>
+            <div style={{paddingLeft:10,marginBottom:6}}>Price Location (0–1): +0.5 above 50DMA · +0.25 above 100DMA · +0.25 above 200DMA<br/>MA Alignment (0–1): +0.3 if 9&gt;21DMA · +0.3 if 21&gt;50DMA · +0.4 if 50&gt;200DMA · unavailable terms score neutral midpoint</div>
+            <div><strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5)</strong></div>
+            <div style={{paddingLeft:10,marginBottom:6}}>Per RSI 14D and RSI 30D: &gt;60 (strong) +0.75 · 40–60 (neutral) +0.25 · &lt;40 (weak) +0</div>
+            <div><strong style={{color:"#e2e8f0"}}>MACD Momentum (0–1.5)</strong></div>
+            <div style={{paddingLeft:10}}>Histogram momentum only — rising &amp; positive +1.5 · falling &amp; positive +1.0 · rising &amp; negative +0.75 · falling &amp; negative +0 · flat or near zero-line → neutral. MACD regime is captured by the Trend pillar to avoid double-counting.</div>
+          </div>
         </div>
-        <div style={{fontSize:11,color:"#64748b",marginTop:10,lineHeight:1.6}}><strong style={{color:"#94a3b8"}}>MACD State (0–5)</strong> shown per name is the full regime×momentum grid (MACD line vs zero crossed with histogram sign &amp; 3-bar slope). The composite deliberately uses only the histogram-momentum axis above, so regime is owned by the Trend / Structure pillar and not double-counted.</div>
+        <div style={{padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
+          <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:10,letterSpacing:"0.04em"}}>SATA SCORE METHODOLOGY (0–10)</div>
+          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.8}}>
+            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Price / Moving Averages (4 pts)</strong> · Close above 10W MA · Close above 30W MA · Close above 40W MA · 30W MA rising</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Mansfield RS (1 pt)</strong> · Stock/ACWI ratio above its own 52-week moving average</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Momentum (2 pts)</strong> · 12-week rate of change positive · 12-week RoC rising (vs 3 weeks ago)</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Breakout (1 pt)</strong> · Weekly high exceeds the prior 13-week high</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Volume (1 pt)</strong> · Average up-week volume exceeds average down-week volume (last 10 weeks)</div>
+            <div><strong style={{color:"#e2e8f0"}}>Overhead Resistance (1 pt)</strong> · Close within 8% of 52-week high</div>
+            <div style={{marginTop:8,fontSize:11,color:"#64748b"}}>Zones: 7–10 Strong (Stage 2) · 4–6 Neutral (Stage 1/3) · 0–3 Weak (Stage 4). Computed on weekly bars resampled from daily data. Benchmark: ACWI.</div>
+          </div>
+        </div>
       </div>
       </React.Fragment>)}
     </div>
