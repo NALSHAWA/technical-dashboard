@@ -274,7 +274,7 @@ function PriceLadder({stock}){
   );
 }
 
-function MiniChart({stock,sortKey}){
+function MiniChart({stock,sortKey,onExpand}){
   const priceRef=useRef(null);const legendRef=useRef(null);const gutterRef=useRef(null);const s=stock;
   useEffect(()=>{
     if(!priceRef.current)return;
@@ -319,21 +319,89 @@ function MiniChart({stock,sortKey}){
   },[s]);
   return(
     <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px 16px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{s.name}</span>{(()=>{const k=sortKey;if(k==="sata"||!k||k==="ticker"||k==="name"){return s.sata!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:sataBg(s.sata),color:sataColor(s.sata),flexShrink:0}}>{s.sata}/10</span>:null;}if(k==="score"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.score),color:scoreColor(s.score),flexShrink:0}}>{s.score.toFixed(1)}</span>;}if(k==="rsi14"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi14),flexShrink:0}}>RSI14 {s.rsi14.toFixed(1)}</span>;}if(k==="rsi30"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi30),flexShrink:0}}>RSI30 {s.rsi30.toFixed(1)}</span>;}if(k==="macd"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:macdColor(s.macd),flexShrink:0}}>MACD {s.macd>0?"+":""}{s.macd.toFixed(2)}</span>;}if(k==="macdScore"){return s.macdScore!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.macdScore),color:scoreColor(s.macdScore),flexShrink:0}}>MACD {s.macdScore.toFixed(1)}</span>:null;}if(k==="d1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.d1),flexShrink:0}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</span>;}if(k==="m1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.m1),flexShrink:0}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</span>;}if(k==="price"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:"#e2e8f0",flexShrink:0}}>{fmt(s.price)}</span>;}const boolMap={aboveMa50:">50DMA",aboveMa100:">100DMA",aboveMa200:">200DMA",rel921:"9>21",rel2150:"21>50",rel50200:"50>200"};if(boolMap[k]){const v=s[k];return v==null?null:<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v?"#22c55e":"#ef4444",flexShrink:0}}>{boolMap[k]} {v?"YES":"NO"}</span>;}if(k==="watchCol"){return s.watchTags&&s.watchTags.length?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,0.12)",color:"#f59e0b",flexShrink:0}}>{s.watchTags.map(t=>t.ma+t.dir).join(" ")}</span>:null;}return null;})()}</div>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap",cursor:"pointer"}} onClick={()=>onExpand&&onExpand(s)} title="Click to expand"><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{s.name}</span>{(()=>{const k=sortKey;if(k==="sata"||!k||k==="ticker"||k==="name"){return s.sata!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:sataBg(s.sata),color:sataColor(s.sata),flexShrink:0}}>{s.sata}/10</span>:null;}if(k==="score"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.score),color:scoreColor(s.score),flexShrink:0}}>{s.score.toFixed(1)}</span>;}if(k==="rsi14"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi14),flexShrink:0}}>RSI14 {s.rsi14.toFixed(1)}</span>;}if(k==="rsi30"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi30),flexShrink:0}}>RSI30 {s.rsi30.toFixed(1)}</span>;}if(k==="macd"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:macdColor(s.macd),flexShrink:0}}>MACD {s.macd>0?"+":""}{s.macd.toFixed(2)}</span>;}if(k==="macdScore"){return s.macdScore!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.macdScore),color:scoreColor(s.macdScore),flexShrink:0}}>MACD {s.macdScore.toFixed(1)}</span>:null;}if(k==="d1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.d1),flexShrink:0}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</span>;}if(k==="m1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.m1),flexShrink:0}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</span>;}if(k==="price"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:"#e2e8f0",flexShrink:0}}>{fmt(s.price)}</span>;}const boolMap={aboveMa50:">50DMA",aboveMa100:">100DMA",aboveMa200:">200DMA",rel921:"9>21",rel2150:"21>50",rel50200:"50>200"};if(boolMap[k]){const v=s[k];return v==null?null:<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v?"#22c55e":"#ef4444",flexShrink:0}}>{boolMap[k]} {v?"YES":"NO"}</span>;}if(k==="watchCol"){return s.watchTags&&s.watchTags.length?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,0.12)",color:"#f59e0b",flexShrink:0}}>{s.watchTags.map(t=>t.ma+t.dir).join(" ")}</span>:null;}return null;})()}</div>
       <div ref={legendRef} style={{fontSize:11,marginBottom:6,minHeight:16}}/>
       <div style={{display:"flex",width:"100%"}}><div ref={priceRef} style={{flex:1,minWidth:0,height:200}}/><div ref={gutterRef} style={{position:"relative",width:54,flexShrink:0,height:200}}/></div>
     </div>
   );
 }
 
-function ChartGallery({stocks,sortKey}){
-  return(<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(440px,1fr))",gap:16}}>{stocks.map(s=><MiniChart key={s.ticker} stock={s} sortKey={sortKey}/>)}</div>);
+function ChartModal({stock,onClose}){
+  const priceRef=useRef(null);const gutterRef=useRef(null);const s=stock;
+  const TFS=[{k:"1Y",n:252},{k:"6M",n:126},{k:"3M",n:63},{k:"1M",n:21},{k:"1W",n:5},{k:"YTD",n:null}];
+  const [tf,setTf]=useState("1Y");
+  useEffect(()=>{const h=(e)=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return ()=>document.removeEventListener("keydown",h);},[]);
+  useEffect(()=>{
+    if(!priceRef.current)return;
+    priceRef.current.innerHTML="";if(gutterRef.current)gutterRef.current.innerHTML="";
+    const data=(typeof HISTORY!=="undefined"&&HISTORY[s.ticker])?HISTORY[s.ticker]:null;
+    if(!data||data.length<2||typeof LightweightCharts==="undefined"){
+      priceRef.current.innerHTML='<div style="color:#64748b;font-size:12px;padding:24px 0">Price history will appear after the next nightly update.</div>';return;
+    }
+    const times=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
+    const cfg=TFS.find(t=>t.k===tf)||TFS[0];
+    let start;
+    if(cfg.n==null){const ytd=new Date().getFullYear()+"-01-01";const i=times.findIndex(t=>t>=ytd);start=i>=0?i:0;}
+    else{start=Math.max(0,closes.length-cfg.n);}
+    const showMAs=cfg.n==null||cfg.n>=21;
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60},timeScale:{borderColor:"rgba(255,255,255,0.08)",tickMarkFormatter:(t)=>{const M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(t+"T00:00:00Z");return M[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||800,height:380}));
+    const area=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
+    area.setData(closes.slice(start).map((v,i)=>({time:times[start+i],value:v})));
+    let last50=null,last100=null,last200=null;
+    function smaArr(p){const out=[];for(let i=0;i<closes.length;i++){if(i<p-1)continue;let sum=0;for(let k=i-p+1;k<=i;k++)sum+=closes[k];if(i>=start)out.push({time:times[i],value:sum/p});}return out;}
+    if(showMAs){
+      const a50=smaArr(50);if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;}
+      const a100=smaArr(100);if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;}
+      const a200=smaArr(200);if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;}
+    }
+    pc.timeScale().fitContent();
+    function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+    function placeTags(){
+      if(!gutterRef.current||!showMAs)return;gutterRef.current.innerHTML="";
+      const H=15,GAP=16,maxTop=380-H;
+      const tg=[{v:closes[closes.length-1],c:"#e2e8f0"}];
+      if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});
+      const items=[];tg.forEach(function(o){let y=null;try{y=area.priceToCoordinate(o.v);}catch(e){}if(y==null)return;items.push({v:o.v,c:o.c,top:y-Math.round(H/2)});});
+      items.sort(function(a,b){return a.top-b.top;});
+      for(let i=1;i<items.length;i++){if(items[i].top<items[i-1].top+GAP)items[i].top=items[i-1].top+GAP;}
+      if(items.length){const over=(items[items.length-1].top+H)-maxTop;if(over>0)items.forEach(function(o){o.top-=over;});if(items[0].top<0){const d=-items[0].top;items.forEach(function(o){o.top+=d;});}}
+      items.forEach(function(o){const el=document.createElement("div");el.textContent=fmtN(o.v);el.style.cssText="position:absolute;right:2px;top:"+Math.max(0,Math.min(maxTop,o.top))+"px;font-size:10px;font-weight:700;color:"+o.c+";background:rgba(10,14,23,0.85);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gutterRef.current.appendChild(el);});
+    }
+    requestAnimationFrame(function(){requestAnimationFrame(placeTags);});
+    const onResize=function(){if(priceRef.current)pc.applyOptions({width:priceRef.current.clientWidth});requestAnimationFrame(placeTags);};
+    window.addEventListener("resize",onResize);
+    return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}if(gutterRef.current)gutterRef.current.innerHTML="";};
+  },[s,tf]);
+  const maLegend=<span> &nbsp;<span style={{color:"#3b82f6"}}>50DMA</span> <span style={{color:"#8b5cf6"}}>100DMA</span> <span style={{color:"#f59e0b"}}>200DMA</span></span>;
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
+      <div style={{background:"#0a0e17",border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:24,width:"min(92vw,880px)"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <div><span style={{fontSize:18,fontWeight:700,color:"#a5b4fc",marginRight:10}}>{s.ticker}</span><span style={{fontSize:13,color:"#64748b"}}>{s.name}</span></div>
+          <button onClick={onClose} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#94a3b8",fontSize:13,padding:"4px 12px",cursor:"pointer"}}>&#x2715; Close</button>
+        </div>
+        <div style={{display:"flex",gap:5,marginBottom:10,flexWrap:"wrap"}}>
+          {TFS.map(t=>{const active=tf===t.k;return(<button key={t.k} onClick={()=>setTf(t.k)} style={{background:active?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:active?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t.k}</button>);})}
+        </div>
+        <div style={{fontSize:11,color:"#64748b",marginBottom:8,letterSpacing:"0.04em",fontWeight:600}}>PRICE &middot; {tf}{tf!=="1W"&&maLegend}</div>
+        <div style={{display:"flex",width:"100%"}}>
+          <div ref={priceRef} style={{flex:1,minWidth:0,height:380}}/>
+          <div ref={gutterRef} style={{position:"relative",width:58,flexShrink:0,height:380}}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChartGallery({stocks,sortKey,onExpand}){
+  return(<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(440px,1fr))",gap:16}}>{stocks.map(s=><MiniChart key={s.ticker} stock={s} sortKey={sortKey} onExpand={onExpand}/>)}</div>);
 }
 
 function App(){
   const[search,setSearch]=useState("");const[sortKey,setSortKey]=useState("score");
   const[sortDir,setSortDir]=useState(-1);const[filter,setFilter]=useState("all");
-  const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);const[view,setView]=useState("table");
+  const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);const[view,setView]=useState("table");const[chartModal,setChartModal]=useState(null);
 
   const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),rel921:(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null,rel2150:(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null,rel50200:(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null,watchTags:getWatchTags(s),watchSortVal:(()=>{const t=getWatchTags(s);if(!t.length)return 0;const top=t[0].ma;return top==="50D"?3:top==="100D"?2:1;})()} }),[]);
   const briefing=useMemo(()=>generateBriefing(STOCKS,PREV),[]);
@@ -358,6 +426,7 @@ function App(){
   }
 
   return(
+  <React.Fragment>
     <div style={{background:"#0a0e17",color:"#e2e8f0",fontFamily:"'Inter',-apple-system,sans-serif",minHeight:"100vh",padding:24}}>
       {selected&&(
         <div onClick={()=>setSelected(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(8px)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
@@ -413,7 +482,7 @@ function App(){
           <span style={{fontSize:11,color:"#64748b",fontWeight:600,marginRight:4,letterSpacing:"0.04em"}}>SORT BY</span>
           {COLS.filter(c=>!["ticker","name"].includes(c.key)).map(c=>{const active=sortKey===c.key;return(<button key={c.key} onClick={()=>handleSort(c.key)} style={{background:active?"rgba(99,102,241,0.2)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.07)",borderRadius:6,padding:"4px 10px",color:active?"#a5b4fc":"#64748b",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>{c.label}{active?(sortDir>0?" ▲":" ▼"):""}</button>);})}
         </div>
-        <ChartGallery stocks={sorted} sortKey={sortKey}/>
+        <ChartGallery stocks={sorted} sortKey={sortKey} onExpand={setChartModal}/>
       </div>):(<React.Fragment>
       <div style={{overflowX:"auto",overflowY:"auto",maxHeight:"70vh",borderRadius:10,border:"1px solid rgba(255,255,255,0.08)",position:"relative"}}>
         <table style={{width:"100%",borderCollapse:"separate",borderSpacing:0,fontSize:12.5}}>
@@ -462,6 +531,8 @@ function App(){
       </div>
       </React.Fragment>)}
     </div>
+    {chartModal&&<ChartModal stock={chartModal} onClose={()=>setChartModal(null)}/>}
+  </React.Fragment>
   );
 }
 
