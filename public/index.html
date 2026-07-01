@@ -152,7 +152,7 @@ function PriceLadder({stock}){
     }
     const times=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
     const SHOW=cfg.n;const start=Math.max(0,closes.length-SHOW);
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60},timeScale:{borderColor:"rgba(255,255,255,0.08)",timeVisible:cfg.intra,secondsVisible:false},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60},timeScale:{borderColor:"rgba(255,255,255,0.08)",timeVisible:cfg.intra,secondsVisible:false,tickMarkFormatter:(t,type)=>{const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(typeof t==="number"?t*1000:t+"T00:00:00Z");return MONTHS[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||500,height:300}));
     const area=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
     area.setData(closes.slice(start).map((v,i)=>({time:times[start+i],value:v})));
@@ -274,7 +274,7 @@ function PriceLadder({stock}){
   );
 }
 
-function MiniChart({stock}){
+function MiniChart({stock,sortKey}){
   const priceRef=useRef(null);const legendRef=useRef(null);const gutterRef=useRef(null);const s=stock;
   useEffect(()=>{
     if(!priceRef.current)return;
@@ -287,7 +287,7 @@ function MiniChart({stock}){
     }
     const dates=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
     const SHOW=252;const start=Math.max(0,closes.length-SHOW);
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:10},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:54,scaleMargins:{top:0.12,bottom:0.08}},timeScale:{borderColor:"rgba(255,255,255,0.08)"},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:10},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:54,scaleMargins:{top:0.12,bottom:0.08}},timeScale:{borderColor:"rgba(255,255,255,0.08)",tickMarkFormatter:(t,type)=>{const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(typeof t==="number"?t*1000:t+"T00:00:00Z");return MONTHS[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||420,height:200}));
     const area=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
     area.setData(closes.slice(start).map((v,i)=>({time:dates[start+i],value:v})));
@@ -319,15 +319,15 @@ function MiniChart({stock}){
   },[s]);
   return(
     <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px 16px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{s.name}</span>{s.sata!=null&&<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:sataBg(s.sata),color:sataColor(s.sata),flexShrink:0}}>{s.sata}/10</span>}</div>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{s.name}</span>{(()=>{const k=sortKey;if(k==="sata"||!k||k==="ticker"||k==="name"){return s.sata!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:sataBg(s.sata),color:sataColor(s.sata),flexShrink:0}}>{s.sata}/10</span>:null;}if(k==="score"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.score),color:scoreColor(s.score),flexShrink:0}}>{s.score.toFixed(1)}</span>;}if(k==="rsi14"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi14),flexShrink:0}}>RSI14 {s.rsi14.toFixed(1)}</span>;}if(k==="rsi30"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi30),flexShrink:0}}>RSI30 {s.rsi30.toFixed(1)}</span>;}if(k==="macd"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:macdColor(s.macd),flexShrink:0}}>MACD {s.macd>0?"+":""}{s.macd.toFixed(2)}</span>;}if(k==="macdScore"){return s.macdScore!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.macdScore),color:scoreColor(s.macdScore),flexShrink:0}}>MACD {s.macdScore.toFixed(1)}</span>:null;}if(k==="d1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.d1),flexShrink:0}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</span>;}if(k==="m1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.m1),flexShrink:0}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</span>;}if(k==="price"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:"#e2e8f0",flexShrink:0}}>{fmt(s.price)}</span>;}const boolMap={aboveMa50:">50DMA",aboveMa100:">100DMA",aboveMa200:">200DMA",rel921:"9>21",rel2150:"21>50",rel50200:"50>200"};if(boolMap[k]){const v=s[k];return v==null?null:<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v?"#22c55e":"#ef4444",flexShrink:0}}>{boolMap[k]} {v?"YES":"NO"}</span>;}if(k==="watchCol"){return s.watchTags&&s.watchTags.length?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,0.12)",color:"#f59e0b",flexShrink:0}}>{s.watchTags.map(t=>t.ma+t.dir).join(" ")}</span>:null;}return null;})()}</div>
       <div ref={legendRef} style={{fontSize:11,marginBottom:6,minHeight:16}}/>
       <div style={{display:"flex",width:"100%"}}><div ref={priceRef} style={{flex:1,minWidth:0,height:200}}/><div ref={gutterRef} style={{position:"relative",width:54,flexShrink:0,height:200}}/></div>
     </div>
   );
 }
 
-function ChartGallery({stocks}){
-  return(<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(440px,1fr))",gap:16}}>{stocks.map(s=><MiniChart key={s.ticker} stock={s}/>)}</div>);
+function ChartGallery({stocks,sortKey}){
+  return(<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(440px,1fr))",gap:16}}>{stocks.map(s=><MiniChart key={s.ticker} stock={s} sortKey={sortKey}/>)}</div>);
 }
 
 function App(){
@@ -413,7 +413,7 @@ function App(){
           <span style={{fontSize:11,color:"#64748b",fontWeight:600,marginRight:4,letterSpacing:"0.04em"}}>SORT BY</span>
           {COLS.filter(c=>!["ticker","name"].includes(c.key)).map(c=>{const active=sortKey===c.key;return(<button key={c.key} onClick={()=>handleSort(c.key)} style={{background:active?"rgba(99,102,241,0.2)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.07)",borderRadius:6,padding:"4px 10px",color:active?"#a5b4fc":"#64748b",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>{c.label}{active?(sortDir>0?" ▲":" ▼"):""}</button>);})}
         </div>
-        <ChartGallery stocks={sorted}/>
+        <ChartGallery stocks={sorted} sortKey={sortKey}/>
       </div>):(<React.Fragment>
       <div style={{overflowX:"auto",overflowY:"auto",maxHeight:"70vh",borderRadius:10,border:"1px solid rgba(255,255,255,0.08)",position:"relative"}}>
         <table style={{width:"100%",borderCollapse:"separate",borderSpacing:0,fontSize:12.5}}>
