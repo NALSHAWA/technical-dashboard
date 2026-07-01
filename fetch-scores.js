@@ -264,7 +264,18 @@ async function fetchBatch(symbols, interval, size, attempt = 1) {
     `https://api.twelvedata.com/time_series` +
     `?symbol=${encodeURIComponent(symbols.join(","))}` +
     `&interval=${interval}&outputsize=${size}&apikey=${API_KEY}`;
-  const res = await fetch(url);
+
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (netErr) {
+    // Socket/network error (connection dropped, TLS termination, etc.)
+    if (attempt > 4) throw new Error(`Network error after 4 retries: ${netErr.message}`);
+    const wait = attempt * 30 * 1000;
+    console.warn(`Network error (attempt ${attempt}): ${netErr.message}. Retrying in ${wait / 1000}s...`);
+    await sleep(wait);
+    return fetchBatch(symbols, interval, size, attempt + 1);
+  }
 
   if (res.status === 429) {
     if (attempt > 4) throw new Error("Rate limit: gave up after 4 retries");
