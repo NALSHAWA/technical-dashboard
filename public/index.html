@@ -25,6 +25,7 @@ const {useState,useMemo,useRef,useEffect}=React;
 
 let STOCKS=[];
 let PREV=[];
+let PREV24H=[];
 let HISTORY={};
 let INTRADAY={};
 let UPDATED=null;
@@ -116,8 +117,8 @@ function TopMovers({stocks,prev,onSelect}){
   </div>);
   if(ups.length===0&&downs.length===0)return null;
   return(<div style={{display:"flex",gap:16,marginBottom:20,flexWrap:"wrap"}}>
-    {ups.length>0&&<div style={{flex:1,minWidth:280}}><div style={{fontSize:11,fontWeight:600,color:"#22c55e",marginBottom:8,letterSpacing:"0.04em"}}>⬆️ TOP UPGRADES</div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{ups.map(s=><Card key={s.ticker} s={s}/>)}</div></div>}
-    {downs.length>0&&<div style={{flex:1,minWidth:280}}><div style={{fontSize:11,fontWeight:600,color:"#ef4444",marginBottom:8,letterSpacing:"0.04em"}}>⬇️ TOP DOWNGRADES</div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{downs.map(s=><Card key={s.ticker} s={s}/>)}</div></div>}
+    {ups.length>0&&<div style={{flex:1,minWidth:280}}><div style={{fontSize:11,fontWeight:600,color:"#22c55e",marginBottom:8,letterSpacing:"0.04em"}}>⬆️ TOP UPGRADES (24H)</div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{ups.map(s=><Card key={s.ticker} s={s}/>)}</div></div>}
+    {downs.length>0&&<div style={{flex:1,minWidth:280}}><div style={{fontSize:11,fontWeight:600,color:"#ef4444",marginBottom:8,letterSpacing:"0.04em"}}>⬇️ TOP DOWNGRADES (24H)</div><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{downs.map(s=><Card key={s.ticker} s={s}/>)}</div></div>}
   </div>);
 }
 
@@ -247,7 +248,7 @@ function PriceLadder({stock}){
       <div style={{display:"flex",width:"100%"}}><div ref={macdRef} style={{flex:1,minWidth:0,height:110}}/><div ref={macdGutterRef} style={{position:"relative",width:58,flexShrink:0,height:110}}/></div>
       {!isIntra&&<React.Fragment><div style={{fontSize:11,color:"#64748b",margin:"8px 0 4px",letterSpacing:"0.04em",fontWeight:600}}>VOLUME</div><div ref={volRef} style={{width:"100%",height:80}}/></React.Fragment>}
       <div style={{marginTop:22,paddingTop:18,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-        <div style={{fontSize:11,color:"#64748b",marginBottom:14,letterSpacing:"0.04em",fontWeight:600}}>SCORE BREAKDOWN</div>
+        <div style={{fontSize:11,color:"#64748b",marginBottom:14,letterSpacing:"0.04em",fontWeight:600}}>22V SCORE BREAKDOWN</div>
         <div style={{display:"flex",gap:32,flexWrap:"wrap"}}>
           <div style={{flex:"1 1 280px"}}>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{fontSize:40,fontWeight:800,color:scoreColor(sc)}}>{sc.toFixed(1)}</div><div style={{fontSize:14,color:"#64748b"}}>/ 5.0</div></div>
@@ -269,7 +270,7 @@ function PriceLadder({stock}){
           </div>
         </div>
         {s.sataComp&&(<div style={{marginTop:18,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-          <div style={{fontSize:11,color:"#64748b",marginBottom:10,letterSpacing:"0.04em",fontWeight:600}}>SATA BREAKDOWN \u2014 <span style={{color:sataColor(s.sata)}}>{s.sata}/10</span></div>
+          <div style={{fontSize:11,color:"#64748b",marginBottom:10,letterSpacing:"0.04em",fontWeight:600}}>SATA SCORE BREAKDOWN <span style={{color:sataColor(s.sata)}}>{s.sata}/10</span></div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",rowGap:6,columnGap:18}}>
             {SATA_LABELS.map(function(lbl,i){const ok=s.sataComp[i];return(<div key={i} style={{fontSize:12,color:ok?"#22c55e":"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}><span style={{fontWeight:700}}>{ok?"\u2713":"\u2717"}</span> {lbl}</div>);})}
           </div>
@@ -413,7 +414,7 @@ function App(){
   const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);const[view,setView]=useState("table");const[chartModal,setChartModal]=useState(null);
 
   const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),rel921:(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null,rel2150:(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null,rel50200:(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null,watchTags:getWatchTags(s),watchSortVal:(()=>{const t=getWatchTags(s);if(!t.length)return 0;const top=t[0].ma;return top==="50D"?3:top==="100D"?2:1;})()} }),[]);
-  const briefing=useMemo(()=>generateBriefing(STOCKS,PREV),[]);
+  const briefing=useMemo(()=>generateBriefing(STOCKS,PREV24H),[]);
 
   const filtered=useMemo(()=>{let d=enriched;if(search){const q=search.toLowerCase();d=d.filter(s=>s.ticker.toLowerCase().includes(q)||s.name.toLowerCase().includes(q))}if(filter==="aboveMa")d=d.filter(s=>s.aboveMa50&&s.aboveMa100&&s.aboveMa200);if(filter==="belowMa")d=d.filter(s=>!s.aboveMa50&&!s.aboveMa100&&!s.aboveMa200);if(filter==="strongTech")d=d.filter(s=>s.score>=4);if(filter==="weakTech")d=d.filter(s=>s.score<2);if(filter==="overbought")d=d.filter(s=>s.rsi14>=70||s.rsi30>=70);if(filter==="oversold")d=d.filter(s=>s.rsi14<=30||s.rsi30<=30);if(filter==="macdPos")d=d.filter(s=>s.macd>0);if(filter==="watch")d=d.filter(s=>s.watchTags.length>0);if(filter==="sataStrong")d=d.filter(s=>s.sata!=null&&s.sata>=7);if(filter==="sataNeutral")d=d.filter(s=>s.sata!=null&&s.sata>=4&&s.sata<=6);if(filter==="sataWeak")d=d.filter(s=>s.sata!=null&&s.sata<=3);return d},[enriched,search,filter]);
 
@@ -470,14 +471,14 @@ function App(){
         </div>
         <div style={{flex:"1 1 340px",minWidth:280,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,overflow:"hidden",display:"flex",flexDirection:"column"}}>
           <button onClick={()=>setAlertsOpen(o=>!o)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",background:"none",border:"none",cursor:"pointer",color:"#e2e8f0",flexShrink:0}}>
-            <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:14}}>📋</span><span style={{fontSize:13,fontWeight:700,letterSpacing:"0.02em"}}>SCORE CHANGES</span><span style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.06)",padding:"2px 8px",borderRadius:10}}>{briefing.length}</span></div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:14}}>📋</span><span style={{fontSize:13,fontWeight:700,letterSpacing:"0.02em"}}>SCORE CHANGES (24H)</span><span style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.06)",padding:"2px 8px",borderRadius:10}}>{briefing.length}</span></div>
             <span style={{fontSize:12,color:"#64748b"}}>{alertsOpen?"▲":"▼"}</span>
           </button>
           {alertsOpen&&(<div style={{padding:"0 18px 16px",overflowY:"auto",flex:1}}>{briefing.length===0?<div style={{padding:"12px 0",fontSize:13,color:"#64748b"}}>No score changes.</div>:<div style={{display:"flex",flexDirection:"column",gap:6}}>{briefing.map((a,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 10px",background:aBg(a.type),border:`1px solid ${aBo(a.type)}`,borderRadius:8}}><span style={{fontSize:12,flexShrink:0}}>{a.icon}</span><span style={{fontSize:11.5,color:"#cbd5e1"}}>{a.text}</span></div>))}</div>}</div>)}
         </div>
       </div>
 
-      <TopMovers stocks={STOCKS} prev={PREV} onSelect={s=>setSelected({...s,score:calcScore(s),aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),watchTags:getWatchTags(s)})}/>
+      <TopMovers stocks={STOCKS} prev={PREV24H} onSelect={s=>setSelected({...s,score:calcScore(s),aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),watchTags:getWatchTags(s)})}/>
       </React.Fragment>)}
 
       <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
@@ -564,7 +565,7 @@ function App(){
 fetch("./data/scores.json",{cache:"no-store"})
   .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
   .then(j=>{
-    STOCKS=j.stocks||[];PREV=j.prev||[];
+    STOCKS=j.stocks||[];PREV=j.prev||[];PREV24H=j.prev24h||j.prev||[];
     UPDATED=j.updated?new Date(j.updated).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):null;
     return fetch("./data/history.json",{cache:"no-store"}).then(r=>r.ok?r.json():{series:{}}).catch(function(){return {series:{}};});
   })
