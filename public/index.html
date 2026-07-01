@@ -408,7 +408,13 @@ function App(){
         <span style={{fontSize:12,color:"#64748b",marginLeft:"auto"}}>{sorted.length} {view==="charts"?"charts":"results"}</span>
       </div>
 
-      {view==="charts"?<ChartGallery stocks={sorted}/>:(<React.Fragment>
+      {view==="charts"?(<div>
+        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
+          <span style={{fontSize:11,color:"#64748b",fontWeight:600,marginRight:4,letterSpacing:"0.04em"}}>SORT BY</span>
+          {COLS.filter(c=>!["ticker","name"].includes(c.key)).map(c=>{const active=sortKey===c.key;return(<button key={c.key} onClick={()=>handleSort(c.key)} style={{background:active?"rgba(99,102,241,0.2)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.07)",borderRadius:6,padding:"4px 10px",color:active?"#a5b4fc":"#64748b",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>{c.label}{active?(sortDir>0?" ▲":" ▼"):""}</button>);})}
+        </div>
+        <ChartGallery stocks={sorted}/>
+      </div>):(<React.Fragment>
       <div style={{overflowX:"auto",overflowY:"auto",maxHeight:"70vh",borderRadius:10,border:"1px solid rgba(255,255,255,0.08)",position:"relative"}}>
         <table style={{width:"100%",borderCollapse:"separate",borderSpacing:0,fontSize:12.5}}>
           <thead style={{position:"sticky",top:0,zIndex:5}}><tr>{COLS.map(c=>(<th key={c.key} onClick={()=>handleSort(c.key)} style={cellStyle(c,true)}>{c.label} {sortKey===c.key?(sortDir>0?"▲":"▼"):""}</th>))}</tr></thead>
