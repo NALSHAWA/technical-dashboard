@@ -415,19 +415,18 @@ function ChartModal({stock,onClose}){
     pc.timeScale().fitContent();
     let mc3=null;
     if(macdRef3.current){macdRef3.current.innerHTML="";mc3=LightweightCharts.createChart(macdRef3.current,Object.assign({},opts,{width:macdRef3.current.clientWidth||800,height:90}));
+      // Compute MACD over a padded window so the EMA has proper warmup before `start`.
+      const pad=Math.min(start,100);const padStart=start-pad;
+      const mBase=closes.slice(padStart);const mTimes=times.slice(padStart);
       const ema3=function(arr,p){const k=2/(p+1);const o=[];let prev=null;for(let i=0;i<arr.length;i++){if(i<p-1){o.push(null);continue;}if(prev==null){let sum=0;for(let j=i-p+1;j<=i;j++)sum+=arr[j];prev=sum/p;}else{prev=arr[i]*k+prev*(1-k);}o.push(prev);}return o;};
-      const e12m=ema3(closes,12),e26m=ema3(closes,26);
-      const linem=closes.map((_,i)=>(e12m[i]!=null&&e26m[i]!=null)?e12m[i]-e26m[i]:null);
-      const lc2=linem.filter(v=>v!=null);const sig2=ema3(lc2,9);let si2=0;
-      const hvm=closes.map((_,i)=>{if(linem[i]==null)return null;const sg=sig2[si2++];return sg==null?null:linem[i]-sg;});
+      const e12m=ema3(mBase,12),e26m=ema3(mBase,26);
+      const lineM=mBase.map((_,i)=>(e12m[i]!=null&&e26m[i]!=null)?e12m[i]-e26m[i]:null);
+      const lcM=lineM.filter(v=>v!=null);const sigM=ema3(lcM,9);let siM=0;
+      const hvM=lineM.map(v=>{if(v==null)return null;const sg=sigM[siM++];return sg==null?null:v-sg;});
       const hdm=[];
-      for(let i=start;i<closes.length;i++){if(hvm[i]!=null)hdm.push({time:times[i],value:hvm[i],color:hvm[i]>=0?"#22c55e":"#ef4444"});}
+      for(let i=pad;i<mBase.length;i++){if(hvM[i]!=null)hdm.push({time:mTimes[i],value:hvM[i],color:hvM[i]>=0?"#22c55e":"#ef4444"});}
       mc3.addHistogramSeries({priceLineVisible:false,lastValueVisible:false}).setData(hdm);
-      mc3.timeScale().fitContent();
-      requestAnimationFrame(function(){
-        try{const r=pc.timeScale().getVisibleLogicalRange();if(r)mc3.timeScale().setVisibleLogicalRange(r);}catch(e){}
-        pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)mc3.timeScale().setVisibleLogicalRange(r);});
-      });}
+      mc3.timeScale().fitContent();}
     let vc2=null;
     if(volRef2.current){volRef2.current.innerHTML="";vc2=LightweightCharts.createChart(volRef2.current,Object.assign({},opts,{width:volRef2.current.clientWidth||800,height:70}));const vd=[];for(let i=start;i<closes.length;i++){const up=i===0||closes[i]>=closes[i-1];vd.push({time:times[i],value:volumes[i],color:up?"rgba(34,197,94,0.7)":"rgba(239,68,68,0.7)"});}vc2.addHistogramSeries({priceLineVisible:false,lastValueVisible:false}).setData(vd);vc2.timeScale().fitContent();try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)vc2.timeScale().setVisibleLogicalRange(r);});}catch(e){}}
     function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -449,7 +448,7 @@ function ChartModal({stock,onClose}){
   },[s,tf,cType,bInt]);
   const maLegend=<span> &nbsp;<span style={{color:"#3b82f6"}}>50DMA</span> <span style={{color:"#8b5cf6"}}>100DMA</span> <span style={{color:"#f59e0b"}}>200DMA</span></span>;
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:1000,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:40,paddingLeft:20,paddingRight:20,paddingBottom:20}} onClick={onClose}>
       <div style={{background:"#0a0e17",border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:24,width:"min(92vw,880px)",maxHeight:"92vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div><span style={{fontSize:18,fontWeight:700,color:"#a5b4fc",marginRight:10}}>{s.ticker}</span><span style={{fontSize:13,color:"#64748b"}}>{s.name}</span></div>
