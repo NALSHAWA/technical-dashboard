@@ -414,8 +414,7 @@ function ChartModal({stock,onClose}){
     }
     pc.timeScale().fitContent();
     let mc3=null;
-    if(macdRef3.current){macdRef3.current.innerHTML="";mc3=LightweightCharts.createChart(macdRef3.current,Object.assign({},opts,{width:macdRef3.current.clientWidth||800,height:90}));
-      // Compute MACD over a padded window so the EMA has proper warmup before `start`.
+    if(macdRef3.current){macdRef3.current.innerHTML="";mc3=LightweightCharts.createChart(macdRef3.current,Object.assign({},opts,{width:macdRef3.current.clientWidth||800,height:120}));
       const pad=Math.min(start,100);const padStart=start-pad;
       const mBase=closes.slice(padStart);const mTimes=times.slice(padStart);
       const ema3=function(arr,p){const k=2/(p+1);const o=[];let prev=null;for(let i=0;i<arr.length;i++){if(i<p-1){o.push(null);continue;}if(prev==null){let sum=0;for(let j=i-p+1;j<=i;j++)sum+=arr[j];prev=sum/p;}else{prev=arr[i]*k+prev*(1-k);}o.push(prev);}return o;};
@@ -425,7 +424,7 @@ function ChartModal({stock,onClose}){
       const hvM=lineM.map(v=>{if(v==null)return null;const sg=sigM[siM++];return sg==null?null:v-sg;});
       const hdm=[];
       for(let i=pad;i<mBase.length;i++){if(hvM[i]!=null)hdm.push({time:mTimes[i],value:hvM[i],color:hvM[i]>=0?"#22c55e":"#ef4444"});}
-      mc3.addHistogramSeries({priceLineVisible:false,lastValueVisible:false}).setData(hdm);
+      mc3.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(hdm);
       mc3.timeScale().fitContent();}
     let vc2=null;
     if(volRef2.current){volRef2.current.innerHTML="";vc2=LightweightCharts.createChart(volRef2.current,Object.assign({},opts,{width:volRef2.current.clientWidth||800,height:70}));const vd=[];for(let i=start;i<closes.length;i++){const up=i===0||closes[i]>=closes[i-1];vd.push({time:times[i],value:volumes[i],color:up?"rgba(34,197,94,0.7)":"rgba(239,68,68,0.7)"});}vc2.addHistogramSeries({priceLineVisible:false,lastValueVisible:false}).setData(vd);vc2.timeScale().fitContent();try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)vc2.timeScale().setVisibleLogicalRange(r);});}catch(e){}}
@@ -465,7 +464,7 @@ function ChartModal({stock,onClose}){
         <div style={{fontSize:11,color:"#64748b",margin:"8px 0 4px",letterSpacing:"0.04em",fontWeight:600}}>MACD HISTOGRAM</div>
         <div ref={macdRef3} style={{width:"100%",height:90}}/>
         <div style={{fontSize:11,color:"#64748b",margin:"8px 0 4px",letterSpacing:"0.04em",fontWeight:600}}>VOLUME</div>
-        <div ref={volRef2} style={{width:"100%",height:70}}/>
+        <div ref={volRef2} style={{width:"100%",height:90}}/>
       </div>
     </div>
   );
