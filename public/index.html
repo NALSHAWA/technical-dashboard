@@ -39,7 +39,7 @@ function trendScore(s){
   return {location:location,alignment:alignment,total:location+alignment};
 }
 
-function calcScore(s){let sc=trendScore(s).total;const r14=s.rsi14;if(r14>=40&&r14<=60)sc+=0.75;else if(r14>=30&&r14<40)sc+=0.5;else if(r14<30)sc+=0.75;const r30=s.rsi30;if(r30>=40&&r30<=60)sc+=0.75;else if(r30>=30&&r30<40)sc+=0.5;else if(r30<30)sc+=0.75;sc+=(s.macdMom!=null?s.macdMom:0);return Math.min(sc,5)}
+function calcScore(s){let sc=trendScore(s).total;const r14=s.rsi14;if(r14>70)sc+=0.75;else if(r14>=60)sc+=0.5;else if(r14>=40)sc+=0.25;const r30=s.rsi30;if(r30>70)sc+=0.75;else if(r30>=60)sc+=0.5;else if(r30>=40)sc+=0.25;sc+=(s.macdMom!=null?s.macdMom:0);return Math.min(sc,5)}
 
 function generateBriefing(stocks,prev){
   const alerts=[];const pm={};
@@ -69,7 +69,7 @@ const SATA_LABELS=["Close above 10W MA","Close above 30W MA","Close above 40W MA
 function fmt(v){return Math.abs(v)>=10000?v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
 function pctColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
 function maColor(p,m){return p>m?"#22c55e":"#ef4444"}
-function rsiColor(v){return v>=70?"#ef4444":v<=30?"#22c55e":"#94a3b8"}
+function rsiColor(v){return v>=70?"#22c55e":v>=60?"#86efac":v<=30?"#ef4444":v<=40?"#fca5a5":"#94a3b8"}
 function macdColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
 
 function HealthGauge({stocks}){
@@ -224,8 +224,8 @@ function PriceLadder({stock}){
     return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}try{if(mc)mc.remove();}catch(e){}if(priceGutterRef.current)priceGutterRef.current.innerHTML="";if(macdGutterRef.current)macdGutterRef.current.innerHTML="";};
   },[s,tf]);
   const ts=trendScore(s);
-  const r14P=(s.rsi14>=40&&s.rsi14<=60)?0.75:(s.rsi14>=30&&s.rsi14<40)?0.5:s.rsi14<30?0.75:0;
-  const r30P=(s.rsi30>=40&&s.rsi30<=60)?0.75:(s.rsi30>=30&&s.rsi30<40)?0.5:s.rsi30<30?0.75:0;
+  const r14P=s.rsi14>70?0.75:s.rsi14>=60?0.5:s.rsi14>=40?0.25:0;
+  const r30P=s.rsi30>70?0.75:s.rsi30>=60?0.5:s.rsi30>=40?0.25:0;
   const rT=r14P+r30P,mP=(s.macdMom!=null?s.macdMom:0);
   const r921=(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null;
   const r2150=(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null;
@@ -319,7 +319,7 @@ function MiniChart({stock}){
   },[s]);
   return(
     <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px 16px"}}>
-      <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:6}}><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name}</span></div>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap"}}><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{s.name}</span>{s.sata!=null&&<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:sataBg(s.sata),color:sataColor(s.sata),flexShrink:0}}>{s.sata}/10</span>}</div>
       <div ref={legendRef} style={{fontSize:11,marginBottom:6,minHeight:16}}/>
       <div style={{display:"flex",width:"100%"}}><div ref={priceRef} style={{flex:1,minWidth:0,height:200}}/><div ref={gutterRef} style={{position:"relative",width:54,flexShrink:0,height:200}}/></div>
     </div>
@@ -335,12 +335,12 @@ function App(){
   const[sortDir,setSortDir]=useState(-1);const[filter,setFilter]=useState("all");
   const[selected,setSelected]=useState(null);const[alertsOpen,setAlertsOpen]=useState(false);const[view,setView]=useState("table");
 
-  const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),rel921:(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null,rel2150:(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null,rel50200:(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null,watchTags:getWatchTags(s)}}),[]);
+  const enriched=useMemo(()=>STOCKS.map(s=>{const sc=calcScore(s);return{...s,score:sc,aboveMa50:(s.ma50!=null&&s.price>s.ma50),aboveMa100:(s.ma100!=null&&s.price>s.ma100),aboveMa200:(s.ma200!=null&&s.price>s.ma200),rel921:(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null,rel2150:(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null,rel50200:(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null,watchTags:getWatchTags(s),watchSortVal:(()=>{const t=getWatchTags(s);if(!t.length)return 0;const top=t[0].ma;return top==="50D"?3:top==="100D"?2:1;})()} }),[]);
   const briefing=useMemo(()=>generateBriefing(STOCKS,PREV),[]);
 
   const filtered=useMemo(()=>{let d=enriched;if(search){const q=search.toLowerCase();d=d.filter(s=>s.ticker.toLowerCase().includes(q)||s.name.toLowerCase().includes(q))}if(filter==="aboveMa")d=d.filter(s=>s.aboveMa50&&s.aboveMa100&&s.aboveMa200);if(filter==="belowMa")d=d.filter(s=>!s.aboveMa50&&!s.aboveMa100&&!s.aboveMa200);if(filter==="strongTech")d=d.filter(s=>s.score>=4);if(filter==="weakTech")d=d.filter(s=>s.score<2);if(filter==="overbought")d=d.filter(s=>s.rsi14>=70||s.rsi30>=70);if(filter==="oversold")d=d.filter(s=>s.rsi14<=30||s.rsi30<=30);if(filter==="macdPos")d=d.filter(s=>s.macd>0);if(filter==="watch")d=d.filter(s=>s.watchTags.length>0);if(filter==="sataStrong")d=d.filter(s=>s.sata!=null&&s.sata>=7);if(filter==="sataNeutral")d=d.filter(s=>s.sata!=null&&s.sata>=4&&s.sata<=6);if(filter==="sataWeak")d=d.filter(s=>s.sata!=null&&s.sata<=3);return d},[enriched,search,filter]);
 
-  const sorted=useMemo(()=>[...filtered].sort((a,b)=>{const av=a[sortKey],bv=b[sortKey];if(typeof av==="boolean")return sortDir*((av?1:0)-(bv?1:0));if(typeof av==="string")return sortDir*av.localeCompare(bv);return sortDir*(av-bv)}),[filtered,sortKey,sortDir]);
+  const sorted=useMemo(()=>[...filtered].sort((a,b)=>{if(sortKey==="watchCol"){return sortDir*(a.watchSortVal-b.watchSortVal);}const av=a[sortKey],bv=b[sortKey];if(typeof av==="boolean")return sortDir*((av?1:0)-(bv?1:0));if(typeof av==="string")return sortDir*av.localeCompare(bv);return sortDir*(av-bv)}),[filtered,sortKey,sortDir]);
 
   function handleSort(key){if(sortKey===key)setSortDir(d=>d*-1);else{setSortKey(key);setSortDir(key==="ticker"||key==="name"?1:-1)}}
 
@@ -449,7 +449,7 @@ function App(){
         <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:8,letterSpacing:"0.04em"}}>TECHNICAL SCORE METHODOLOGY (0–5)</div>
         <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.7}}>
           <strong style={{color:"#e2e8f0"}}>Trend / Structure (0–2):</strong> Price Location (0–1): +0.5 &gt; 50DMA · +0.25 &gt; 100DMA · +0.25 &gt; 200DMA. MA Alignment (0–1): +0.3 if 9&gt;21DMA · +0.3 if 21&gt;50DMA · +0.4 if 50&gt;200DMA. Unavailable terms score the neutral midpoint. &nbsp;|&nbsp;
-          <strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5):</strong> 0.75 per RSI (14D &amp; 30D) if 40–60 or &lt;30 · 0.5 if 30–40 · 0 if &gt;70 &nbsp;|&nbsp;
+          <strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5):</strong> per RSI (14D &amp; 30D): strong (&gt;70) +0.75 · solid (60–70) +0.5 · neutral (40–60) +0.25 · weak (&lt;40) +0 &nbsp;|&nbsp;
           <strong style={{color:"#e2e8f0"}}>MACD Momentum (0–1.5):</strong> histogram axis only — rising &amp; + = 1.5 · falling &amp; + = 1.0 · rising &amp; − = 0.75 · falling &amp; − = 0 · flat or near zero-line → neutral
         </div>
         <div style={{fontSize:11,color:"#64748b",marginTop:10,lineHeight:1.6}}><strong style={{color:"#94a3b8"}}>MACD State (0–5)</strong> shown per name is the full regime×momentum grid (MACD line vs zero crossed with histogram sign &amp; 3-bar slope). The composite deliberately uses only the histogram-momentum axis above, so regime is owned by the Trend / Structure pillar and not double-counted.</div>
