@@ -580,7 +580,7 @@ function App(){
                 <td style={{...cellStyle(COLS[0],false),fontWeight:600,color:"#a5b4fc",background:rowBg}}>{s.ticker}</td>
                 <td style={{...cellStyle(COLS[1],false),color:"#94a3b8",overflow:"hidden",textOverflow:"ellipsis",maxWidth:180,background:rowBg}}>{s.name}</td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:"#f8fafc",fontWeight:600,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{fmt(s.price)}</td>
-                <td style={{padding:"8px 12px",textAlign:"right",color:pctColor(s.d1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</td>
+                <td style={{padding:"8px 12px",textAlign:"right",color:pctColor(s.d1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}} title={s.d1Stale?"Latest data spans more than one trading session — this move covers multiple days, not 1D":undefined}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%{s.d1Stale&&<span style={{color:"#f59e0b",marginLeft:3}}>*</span>}</td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:pctColor(s.m1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:pct52wColor(s.pct52w),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.pct52w!=null?s.pct52w.toFixed(2)+"%":"—"}</td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa50}/></td>
