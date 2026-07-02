@@ -427,7 +427,7 @@ function ChartModal({stock,onClose}){
       mc3.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(hdm);
       mc3.timeScale().fitContent();}
     let vc2=null;
-    if(volRef2.current){volRef2.current.innerHTML="";vc2=LightweightCharts.createChart(volRef2.current,Object.assign({},opts,{width:volRef2.current.clientWidth||800,height:volRef2.current.clientHeight||60}));const vd=[];for(let i=start;i<closes.length;i++){const up=i===0||closes[i]>=closes[i-1];vd.push({time:times[i],value:volumes[i],color:up?"rgba(34,197,94,0.7)":"rgba(239,68,68,0.7)"});}vc2.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(vd);vc2.timeScale().fitContent();try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)vc2.timeScale().setVisibleLogicalRange(r);});}catch(e){}}
+    if(volRef2.current){volRef2.current.innerHTML="";vc2=LightweightCharts.createChart(volRef2.current,Object.assign({},opts,{width:volRef2.current.clientWidth||800,height:volRef2.current.clientHeight||60,rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60,scaleMargins:{top:0.1,bottom:0.05}}}));const vd=[];for(let i=start;i<closes.length;i++){const up=i===0||closes[i]>=closes[i-1];vd.push({time:times[i],value:volumes[i],color:up?"rgba(34,197,94,0.7)":"rgba(239,68,68,0.7)"});}vc2.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(vd);vc2.timeScale().fitContent();try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)vc2.timeScale().setVisibleLogicalRange(r);});}catch(e){}}
     function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
     function placeTags(){
       if(!gutterRef.current||!showMAs)return;gutterRef.current.innerHTML="";
@@ -464,8 +464,8 @@ function ChartModal({stock,onClose}){
         <div style={{fontSize:11,color:"#64748b",margin:"8px 0 4px",letterSpacing:"0.04em",fontWeight:600}}>MACD HISTOGRAM</div>
         <div ref={macdRef3} style={{width:"100%",height:"clamp(65px,10vh,100px)"}}/>
         <div style={{fontSize:11,color:"#64748b",margin:"8px 0 4px",letterSpacing:"0.04em",fontWeight:600}}>VOLUME</div>
-        <div ref={volRef2} style={{width:"100%",height:"clamp(55px,8vh,70px)"}}/>
-        <div style={{height:8}}/>
+        <div ref={volRef2} style={{width:"100%",height:"clamp(72px,10vh,92px)"}}/>
+        <div style={{height:24}}/>
       </div>
     </div>
   );
