@@ -387,11 +387,24 @@ async function main() {
       const sataRes = computeSataWeekly(rows, benchWeeklyByKey);
       const h52 = Math.max(...closes.slice(-252));
 
+      // Guard: the last two daily bars should be ~1 trading day apart. If they
+      // span more than 4 calendar days (a data gap, halt, or missed session),
+      // the "1D" move is actually multi-day, so we flag it as stale rather than
+      // mislabelling a large multi-day change as a one-day move.
+      let d1Stale = false;
+      try {
+        const lastDate = new Date(rows[rows.length - 1].datetime.slice(0, 10) + "T00:00:00Z");
+        const prevDate = new Date(rows[rows.length - 2].datetime.slice(0, 10) + "T00:00:00Z");
+        const gapDays = (lastDate - prevDate) / 86400000;
+        d1Stale = gapDays > 4;
+      } catch (e) { /* if dates unavailable, leave unflagged */ }
+
       results.push({
         ticker: meta.ticker || sym,
         name: meta.name || sym,
         price: round(price, 2),
         d1: round(((price - prevClose) / prevClose) * 100, 2),
+        d1Stale,
         m1: monthAgo ? round(((price - monthAgo) / monthAgo) * 100, 2) : 0,
         ma9: round(sma(closes, 9), 3),
         ma21: round(sma(closes, 21), 3),
