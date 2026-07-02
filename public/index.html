@@ -322,14 +322,23 @@ function MiniChart({stock,sortKey,onExpand}){
     function smaArr(p){const out=[];for(let i=0;i<closes.length;i++){if(i<p-1)continue;let sum=0;for(let k=i-p+1;k<=i;k++)sum+=closes[k];if(i>=start)out.push({time:dates[i],value:sum/p});}return out;}
     const a50=smaArr(50),a100=smaArr(100),a200=smaArr(200);
     let last50=null,last100=null,last200=null;
-    if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;}
-    if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;}
-    if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;}
+    const ma50Map={},ma100Map={},ma200Map={},closeMapC={};
+    for(let i=start;i<closes.length;i++)closeMapC[dates[i]]=closes[i];
+    if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;a50.forEach(p=>ma50Map[p.time]=p.value);}
+    if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;a100.forEach(p=>ma100Map[p.time]=p.value);}
+    if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;a200.forEach(p=>ma200Map[p.time]=p.value);}
     pc.timeScale().fitContent();
     const lastPrice=closes[closes.length-1];
     function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
     function item(color,label,val){return '<span style="margin-right:12px;white-space:nowrap"><span style="color:'+color+'">'+label+'</span> <b style="color:#e2e8f0;font-weight:600">'+val+'</b></span>';}
-    if(legendRef.current)legendRef.current.innerHTML=item("#e2e8f0","Price",fmtN(lastPrice))+item("#3b82f6","50DMA",fmtN(last50))+item("#8b5cf6","100DMA",fmtN(last100))+item("#f59e0b","200DMA",fmtN(last200));
+    function renderLeg(t){
+      if(!legendRef.current)return;
+      if(t==null||closeMapC[t]==null){legendRef.current.innerHTML=item("#e2e8f0","Price",fmtN(lastPrice))+item("#3b82f6","50DMA",fmtN(last50))+item("#8b5cf6","100DMA",fmtN(last100))+item("#f59e0b","200DMA",fmtN(last200));return;}
+      const dLabel='<span style="color:#94a3b8;margin-right:10px;font-weight:600">'+t+'</span>';
+      legendRef.current.innerHTML=dLabel+item("#e2e8f0","Px",fmtN(closeMapC[t]))+item("#3b82f6","50D",fmtN(ma50Map[t]))+item("#8b5cf6","100D",fmtN(ma100Map[t]))+item("#f59e0b","200D",fmtN(ma200Map[t]));
+    }
+    renderLeg(null);
+    pc.subscribeCrosshairMove(function(param){renderLeg(param&&param.time!=null?param.time:null);});
     function placeTags(){
       if(!gutterRef.current)return;gutterRef.current.innerHTML="";
       const tg=[{v:lastPrice,c:"#e2e8f0"}];if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});
@@ -367,7 +376,7 @@ function toWeeklyOHLC(times,opens,highs,lows,closes,volumes){
 }
 
 function ChartModal({stock,onClose}){
-  const priceRef=useRef(null);const gutterRef=useRef(null);const volRef2=useRef(null);const macdRef3=useRef(null);const s=stock;
+  const priceRef=useRef(null);const gutterRef=useRef(null);const volRef2=useRef(null);const macdRef3=useRef(null);const readoutRef=useRef(null);const s=stock;
   const TFS=[{k:"1Y",n:252},{k:"6M",n:126},{k:"3M",n:63},{k:"1M",n:21},{k:"1W",n:5},{k:"YTD",n:null}];
   const [tf,setTf]=useState("1Y");
   const [cType,setCType]=useState("line");
@@ -406,12 +415,15 @@ function ChartModal({stock,onClose}){
       priceSeries2.setData(closes.slice(start).map((v,i)=>({time:times[start+i],value:v})));
     }
     let last50=null,last100=null,last200=null;
+    const ma50Map={},ma100Map={},ma200Map={};
     function smaArr(p){const out=[];for(let i=0;i<closes.length;i++){if(i<p-1)continue;let sum=0;for(let k=i-p+1;k<=i;k++)sum+=closes[k];if(i>=start)out.push({time:times[i],value:sum/p});}return out;}
     if(showMAs){
-      const a50=smaArr(50);if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;}
-      const a100=smaArr(100);if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;}
-      const a200=smaArr(200);if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;}
+      const a50=smaArr(50);if(a50.length){pc.addLineSeries({color:"#3b82f6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a50);last50=a50[a50.length-1].value;a50.forEach(p=>ma50Map[p.time]=p.value);}
+      const a100=smaArr(100);if(a100.length){pc.addLineSeries({color:"#8b5cf6",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a100);last100=a100[a100.length-1].value;a100.forEach(p=>ma100Map[p.time]=p.value);}
+      const a200=smaArr(200);if(a200.length){pc.addLineSeries({color:"#f59e0b",lineWidth:1,priceLineVisible:false,crosshairMarkerVisible:false,lastValueVisible:false}).setData(a200);last200=a200[a200.length-1].value;a200.forEach(p=>ma200Map[p.time]=p.value);}
     }
+    // Time-keyed close for crosshair readout.
+    const closeMap={};for(let i=start;i<closes.length;i++)closeMap[times[i]]=closes[i];
     pc.timeScale().fitContent();
     let mc3=null;
     if(macdRef3.current){macdRef3.current.innerHTML="";mc3=LightweightCharts.createChart(macdRef3.current,Object.assign({},opts,{width:macdRef3.current.clientWidth||800,height:macdRef3.current.clientHeight||80}));
@@ -441,6 +453,23 @@ function ChartModal({stock,onClose}){
       items.forEach(function(o){const el=document.createElement("div");el.textContent=fmtN(o.v);el.style.cssText="position:absolute;right:2px;top:"+Math.max(0,Math.min(maxTop,o.top))+"px;font-size:10px;font-weight:700;color:"+o.c+";background:rgba(10,14,23,0.85);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gutterRef.current.appendChild(el);});
     }
     requestAnimationFrame(function(){requestAnimationFrame(placeTags);});
+    // Crosshair value inspector: date · price · MAs at cursor.
+    function renderReadout(t){
+      if(!readoutRef.current)return;
+      const chip=function(c,l,v){return '<span style="color:'+c+';margin-right:12px"><span style="color:#64748b">'+l+'</span> '+v+'</span>';};
+      if(t==null){
+        let h=chip("#e2e8f0","Latest",fmtN(closes[closes.length-1]));
+        if(showMAs){if(last50!=null)h+=chip("#3b82f6","50D",fmtN(last50));if(last100!=null)h+=chip("#8b5cf6","100D",fmtN(last100));if(last200!=null)h+=chip("#f59e0b","200D",fmtN(last200));}
+        readoutRef.current.innerHTML=h;return;
+      }
+      const px=closeMap[t];if(px==null){return;}
+      const dLabel=(typeof t==="string")?t:new Date(t*1000).toISOString().slice(0,10);
+      let h='<span style="color:#94a3b8;margin-right:12px;font-weight:600">'+dLabel+'</span>'+chip("#e2e8f0","Price",fmtN(px));
+      if(showMAs){if(ma50Map[t]!=null)h+=chip("#3b82f6","50D",fmtN(ma50Map[t]));if(ma100Map[t]!=null)h+=chip("#8b5cf6","100D",fmtN(ma100Map[t]));if(ma200Map[t]!=null)h+=chip("#f59e0b","200D",fmtN(ma200Map[t]));}
+      readoutRef.current.innerHTML=h;
+    }
+    renderReadout(null);
+    pc.subscribeCrosshairMove(function(param){renderReadout(param&&param.time!=null?param.time:null);});
     const onResize=function(){if(priceRef.current)pc.applyOptions({width:priceRef.current.clientWidth,height:priceRef.current.clientHeight||280});if(mc3&&macdRef3.current)mc3.applyOptions({width:macdRef3.current.clientWidth,height:macdRef3.current.clientHeight||80});if(vc2&&volRef2.current)vc2.applyOptions({width:volRef2.current.clientWidth,height:volRef2.current.clientHeight||60});requestAnimationFrame(placeTags);};
     window.addEventListener("resize",onResize);
     return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}try{if(mc3)mc3.remove();}catch(e){}try{if(vc2)vc2.remove();}catch(e){}if(gutterRef.current)gutterRef.current.innerHTML=""};
@@ -456,7 +485,8 @@ function ChartModal({stock,onClose}){
         <div style={{display:"flex",gap:5,marginBottom:10,flexWrap:"wrap",alignItems:"center"}}>
           {TFS.map(t=>{const active=tf===t.k;return(<button key={t.k} onClick={()=>setTf(t.k)} style={{background:active?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:active?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t.k}</button>);})} <span style={{margin:"0 4px",width:1,height:14,background:"rgba(255,255,255,0.12)",display:"inline-block"}}/>{["Line","Bar"].map(t=>(<button key={t} onClick={()=>setCType(t.toLowerCase())} style={{background:cType===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:cType===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:cType===t.toLowerCase()?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}{cType==="bar"&&(<React.Fragment><span style={{margin:"0 4px",width:1,height:14,background:"rgba(255,255,255,0.12)",display:"inline-block"}}/>{["Daily","Weekly"].map(t=>(<button key={t} onClick={()=>setBInt(t.toLowerCase())} style={{background:bInt===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:bInt===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:bInt===t.toLowerCase()?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}</React.Fragment>)}
         </div>
-        <div style={{fontSize:11,color:"#64748b",marginBottom:8,letterSpacing:"0.04em",fontWeight:600}}>PRICE &middot; {tf}{tf!=="1W"&&maLegend}</div>
+        <div style={{fontSize:11,color:"#64748b",marginBottom:4,letterSpacing:"0.04em",fontWeight:600}}>PRICE &middot; {tf}</div>
+        <div ref={readoutRef} style={{fontSize:12,marginBottom:8,minHeight:18,fontVariantNumeric:"tabular-nums"}}/>
         <div style={{display:"flex",width:"100%"}}>
           <div ref={priceRef} style={{flex:1,minWidth:0,height:"clamp(200px,32vh,340px)"}}/>
           <div ref={gutterRef} style={{position:"relative",width:58,flexShrink:0,height:"clamp(200px,32vh,340px)"}}/>
