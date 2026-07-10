@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-10T10:40:59.435Z",
+  "updated": "2026-07-10T12:41:41.333Z",
   "stocks": [
     {
       "ticker": "LLY US",
@@ -924,7 +924,7 @@
         false,
         true
       ],
-      "mansfield": 17.07,
+      "mansfield": 17.08,
       "high52w": 1235.56,
       "pct52w": -1.51
     },
@@ -996,7 +996,7 @@
         false,
         false
       ],
-      "mansfield": 1.07,
+      "mansfield": 1.08,
       "high52w": 152.46,
       "pct52w": -24.5
     },
@@ -1032,7 +1032,7 @@
         true,
         false
       ],
-      "mansfield": -1.08,
+      "mansfield": -1.07,
       "high52w": 329.23,
       "pct52w": -10.31
     },
@@ -1068,7 +1068,7 @@
         false,
         false
       ],
-      "mansfield": -4.75,
+      "mansfield": -4.74,
       "high52w": 25.9,
       "pct52w": -44.67
     },
@@ -1104,7 +1104,7 @@
         false,
         false
       ],
-      "mansfield": 72.26,
+      "mansfield": 72.27,
       "high52w": 133.02,
       "pct52w": -20.15
     },
@@ -1284,7 +1284,7 @@
         false,
         false
       ],
-      "mansfield": 22.42,
+      "mansfield": 22.43,
       "high52w": 477.57,
       "pct52w": -8.5
     },
@@ -1320,7 +1320,7 @@
         false,
         false
       ],
-      "mansfield": 3.7,
+      "mansfield": 3.71,
       "high52w": 453.92,
       "pct52w": -17.5
     },
@@ -1356,7 +1356,7 @@
         false,
         false
       ],
-      "mansfield": -1.47,
+      "mansfield": -1.46,
       "high52w": 235.74,
       "pct52w": -13.98
     },
@@ -1428,7 +1428,7 @@
         false,
         true
       ],
-      "mansfield": 13.61,
+      "mansfield": 13.62,
       "high52w": 145.67,
       "pct52w": -4.19
     },
@@ -1500,7 +1500,7 @@
         false,
         false
       ],
-      "mansfield": -10.65,
+      "mansfield": -10.64,
       "high52w": 238.42,
       "pct52w": -21.57
     },
@@ -1572,7 +1572,7 @@
         true,
         false
       ],
-      "mansfield": -8.39,
+      "mansfield": -8.38,
       "high52w": 318.25,
       "pct52w": -28.2
     },
@@ -1608,7 +1608,7 @@
         false,
         false
       ],
-      "mansfield": 59.83,
+      "mansfield": 59.84,
       "high52w": 433.33,
       "pct52w": -18.5
     },
@@ -1644,7 +1644,7 @@
         true,
         false
       ],
-      "mansfield": 71.74,
+      "mansfield": 71.75,
       "high52w": 723,
       "pct52w": -18.58
     },
@@ -1680,7 +1680,7 @@
         false,
         false
       ],
-      "mansfield": 65.61,
+      "mansfield": 65.62,
       "high52w": 345.85,
       "pct52w": -25.68
     },
