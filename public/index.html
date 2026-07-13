@@ -10,10 +10,10 @@
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0e17;color:#e2e8f0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+body{background:#f8fafc;color:#1e293b;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
 ::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:rgba(255,255,255,0.03)}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,0.03)}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:3px}
 ::selection{background:rgba(99,102,241,0.3)}
 input:focus{border-color:rgba(99,102,241,0.5)!important;box-shadow:0 0 0 2px rgba(99,102,241,0.15)}
 </style>
@@ -64,16 +64,16 @@ function getWatchTags(s){
 
 function scoreColor(v){return v>=4?"#22c55e":v>=2.5?"#f59e0b":"#ef4444"}
 function scoreBg(v){return v>=4?"rgba(34,197,94,0.1)":v>=2.5?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)"}
-function mansfieldColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
+function mansfieldColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#475569"}
 function pct52wColor(v){return v>=-5?"#22c55e":v>=-15?"#f59e0b":"#ef4444"}
 function sataColor(v){return v>=7?"#22c55e":v>=4?"#f59e0b":"#ef4444"}
 function sataBg(v){return v>=7?"rgba(34,197,94,0.1)":v>=4?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)"}
 const SATA_LABELS=["Close above 10W MA","Close above 30W MA","Close above 40W MA","30W MA rising","Mansfield RS above zero","Momentum positive","Momentum rising","Breakout (13-week high)","Volume accumulation","Minimal overhead resistance"];
 function fmt(v){return Math.abs(v)>=10000?v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
-function pctColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
+function pctColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#475569"}
 function maColor(p,m){return p>m?"#22c55e":"#ef4444"}
-function rsiColor(v){return v>=60?"#22c55e":v<=40?"#ef4444":"#94a3b8"}
-function macdColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#94a3b8"}
+function rsiColor(v){return v>=60?"#22c55e":v<=40?"#ef4444":"#475569"}
+function macdColor(v){return v>0?"#22c55e":v<0?"#ef4444":"#475569"}
 
 function HealthGauge({stocks}){
   const canvasRef=useRef(null);const n=stocks.length;
@@ -87,22 +87,22 @@ function HealthGauge({stocks}){
     c.width=280*dpr;c.height=160*dpr;c.style.width="280px";c.style.height="160px";
     const ctx=c.getContext("2d");ctx.scale(dpr,dpr);
     const cx=140,cy=130,r=100,lw=18;
-    ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI,0);ctx.strokeStyle="rgba(255,255,255,0.06)";ctx.lineWidth=lw;ctx.lineCap="round";ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI,0);ctx.strokeStyle="rgba(0,0,0,0.05)";ctx.lineWidth=lw;ctx.lineCap="round";ctx.stroke();
     const angle=-Math.PI+(health/100)*Math.PI;
     const grad=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
     grad.addColorStop(0,"#ef4444");grad.addColorStop(0.35,"#f59e0b");grad.addColorStop(0.65,"#84cc16");grad.addColorStop(1,"#22c55e");
     ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI,angle);ctx.strokeStyle=grad;ctx.lineWidth=lw;ctx.lineCap="round";ctx.stroke();
     const nx=cx+Math.cos(angle)*r,ny=cy+Math.sin(angle)*r;
-    ctx.beginPath();ctx.arc(nx,ny,6,0,Math.PI*2);ctx.fillStyle="#f8fafc";ctx.shadowColor="rgba(248,250,252,0.5)";ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+    ctx.beginPath();ctx.arc(nx,ny,6,0,Math.PI*2);ctx.fillStyle="#0f172a";ctx.shadowColor="rgba(15,23,42,0.5)";ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
     ctx.fillStyle=health>=60?"#22c55e":health>=40?"#f59e0b":"#ef4444";
     ctx.font="bold 32px Inter,sans-serif";ctx.textAlign="center";ctx.fillText(Math.round(health),cx,cy-10);
     ctx.fillStyle="#64748b";ctx.font="11px Inter,sans-serif";ctx.fillText("/ 100",cx,cy+8);
   },[health]);
   const sub=[{l:"Avg Score",v:`${avgScore.toFixed(1)} / 5`,pct:avgScore/5},{l:"Above All MAs",v:`${Math.round(pctAboveAll*100)}%`,pct:pctAboveAll},{l:"RSI Healthy",v:`${Math.round(rsiHealthy*100)}%`,pct:rsiHealthy},{l:"MACD Positive",v:`${Math.round(macdPos*100)}%`,pct:macdPos}];
   return(
-    <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"20px 24px",display:"flex",gap:28,alignItems:"center",flexWrap:"wrap"}}>
+    <div style={{background:"rgba(0,0,0,0.05)",border:"1px solid rgba(0,0,0,0.1)",borderRadius:12,padding:"20px 24px",display:"flex",gap:28,alignItems:"center",flexWrap:"wrap"}}>
       <div style={{textAlign:"center"}}><div style={{fontSize:11,color:"#64748b",fontWeight:600,letterSpacing:"0.04em",marginBottom:8}}>PORTFOLIO TECHNICAL HEALTH</div><canvas ref={canvasRef} style={{width:280,height:160}}/></div>
-      <div style={{flex:1,minWidth:200}}>{sub.map(s=>(<div key={s.l} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:3}}><span style={{color:"#94a3b8"}}>{s.l}</span><span style={{color:"#e2e8f0",fontWeight:600}}>{s.v}</span></div><div style={{height:5,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${s.pct*100}%`,background:s.pct>=0.6?"#22c55e":s.pct>=0.4?"#f59e0b":"#ef4444",borderRadius:3}}/></div></div>))}<div style={{fontSize:10,color:"#475569",marginTop:8}}>Weighted: Score 40% · MAs 25% · MACD 20% · RSI 15%</div></div>
+      <div style={{flex:1,minWidth:200}}>{sub.map(s=>(<div key={s.l} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:3}}><span style={{color:"#475569"}}>{s.l}</span><span style={{color:"#1e293b",fontWeight:600}}>{s.v}</span></div><div style={{height:5,background:"rgba(0,0,0,0.1)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${s.pct*100}%`,background:s.pct>=0.6?"#22c55e":s.pct>=0.4?"#f59e0b":"#ef4444",borderRadius:3}}/></div></div>))}<div style={{fontSize:10,color:"#475569",marginTop:8}}>Weighted: Score 40% · MAs 25% · MACD 20% · RSI 15%</div></div>
     </div>
   );
 }
@@ -111,8 +111,8 @@ function TopMovers({stocks,prev,onSelect}){
   const pm={};prev.forEach(p=>{pm[p.ticker]={...p,score:calcScore(p)}});
   const movers=stocks.map(s=>{const p=pm[s.ticker];return{...s,score:calcScore(s),delta:p?calcScore(s)-p.score:null}}).filter(s=>s.delta!==null&&s.delta!==0).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
   const ups=movers.filter(m=>m.delta>0).slice(0,3);const downs=movers.filter(m=>m.delta<0).slice(0,3);
-  const Card=({s})=>(<div onClick={()=>onSelect(s)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8,cursor:"pointer",flex:"1 1 0",minWidth:160}} onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}>
-    <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:700,color:"#f8fafc",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.ticker}</div><div style={{fontSize:10,color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.name}</div></div>
+  const Card=({s})=>(<div onClick={()=>onSelect(s)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"rgba(0,0,0,0.03)",border:"1px solid rgba(0,0,0,0.05)",borderRadius:8,cursor:"pointer",flex:"1 1 0",minWidth:160}} onMouseEnter={e=>e.currentTarget.style.background="rgba(99,102,241,0.08)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(0,0,0,0.03)"}>
+    <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:700,color:"#0f172a",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.ticker}</div><div style={{fontSize:10,color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.name}</div></div>
     <div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:14,fontWeight:800,color:scoreColor(s.score)}}>{s.score.toFixed(1)}</div><div style={{fontSize:11,fontWeight:700,color:s.delta>0?"#22c55e":"#ef4444"}}>{s.delta>0?"+":""}{s.delta.toFixed(1)}</div></div>
   </div>);
   if(ups.length===0&&downs.length===0)return null;
@@ -163,7 +163,7 @@ function PriceLadder({stock}){
     const lows=isOHLC?data.map(r=>r[3]):null;
     const volumes=!cfg.intra?data.map(r=>isOHLC?(r[5]||0):(r[2]||0)):null;
     const SHOW=cfg.n;const start=Math.max(0,closes.length-SHOW);
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60},timeScale:{borderColor:"rgba(255,255,255,0.08)",timeVisible:cfg.intra,secondsVisible:false,tickMarkFormatter:(t,type)=>{const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(typeof t==="number"?t*1000:t+"T00:00:00Z");return MONTHS[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#475569",fontSize:11},grid:{vertLines:{color:"rgba(0,0,0,0.05)"},horzLines:{color:"rgba(0,0,0,0.05)"}},rightPriceScale:{borderColor:"rgba(0,0,0,0.1)",minimumWidth:60},timeScale:{borderColor:"rgba(0,0,0,0.1)",timeVisible:cfg.intra,secondsVisible:false,tickMarkFormatter:(t,type)=>{const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(typeof t==="number"?t*1000:t+"T00:00:00Z");return MONTHS[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||500,height:300}));
     let priceSeries;
     const showCandle=!cfg.intra&&chartType==="bar"&&isOHLC;
@@ -178,7 +178,7 @@ function PriceLadder({stock}){
         priceSeries.setData(closes.slice(start).map((c,i)=>({time:times[start+i],open:(opens||closes)[start+i],high:(highs||closes)[start+i],low:(lows||closes)[start+i],close:c})));
       }
     } else {
-      priceSeries=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
+      priceSeries=pc.addAreaSeries({lineColor:"#1e293b",topColor:"rgba(30,41,59,0.12)",bottomColor:"rgba(30,41,59,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
       priceSeries.setData(closes.slice(start).map((v,i)=>({time:times[start+i],value:v})));
     }
     const priceMap={};for(let i=start;i<closes.length;i++)priceMap[times[i]]=closes[i];
@@ -208,12 +208,12 @@ function PriceLadder({stock}){
     if(!cfg.intra&&volumes&&volRef.current){volRef.current.innerHTML="";vc=LightweightCharts.createChart(volRef.current,Object.assign({},opts,{width:volRef.current.clientWidth||500,height:80}));const vd=[];for(let i=start;i<closes.length;i++){const up=i===0||closes[i]>=closes[i-1];vd.push({time:times[i],value:volumes[i],color:up?"rgba(34,197,94,0.7)":"rgba(239,68,68,0.7)"});}vc.addHistogramSeries({priceLineVisible:false,lastValueVisible:false}).setData(vd);vc.timeScale().fitContent();try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)vc.timeScale().setVisibleLogicalRange(r);});}catch(e){}}
     const lastPrice=closes[closes.length-1];
     function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
-    function item(color,label,val){return '<span style="margin-right:18px;white-space:nowrap"><span style="color:'+color+'">'+label+'</span> <b style="color:#e2e8f0;font-weight:600">'+val+'</b></span>';}
+    function item(color,label,val){return '<span style="margin-right:18px;white-space:nowrap"><span style="color:'+color+'">'+label+'</span> <b style="color:#1e293b;font-weight:600">'+val+'</b></span>';}
     function renderLegend(t){
       if(!legendRef.current)return;
       const pv=(t!=null&&priceMap[t]!=null)?priceMap[t]:lastPrice;
       const mv=(t!=null&&macdMap[t]!=null)?macdMap[t]:lastMacd;
-      let html=item("#e2e8f0","Price",fmtN(pv));
+      let html=item("#1e293b","Price",fmtN(pv));
       if(!cfg.intra){
         const v50=(t!=null&&map50[t]!=null)?map50[t]:last50;
         const v100=(t!=null&&map100[t]!=null)?map100[t]:last100;
@@ -226,11 +226,11 @@ function PriceLadder({stock}){
     renderLegend(null);
     pc.subscribeCrosshairMove(function(param){renderLegend(param&&param.time!=null?param.time:null);});
     if(mc)mc.subscribeCrosshairMove(function(param){renderLegend(param&&param.time!=null?param.time:null);});
-    function tagEl(gut,val,color){const el=document.createElement("div");el.textContent=val;el.style.cssText="position:absolute;right:2px;top:"+(0)+"px;font-size:10px;font-weight:700;color:"+color+";background:rgba(10,14,23,0.85);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gut.appendChild(el);return el;}
+    function tagEl(gut,val,color){const el=document.createElement("div");el.textContent=val;el.style.cssText="position:absolute;right:2px;top:"+(0)+"px;font-size:10px;font-weight:700;color:"+color+";background:rgba(248,250,252,0.92);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gut.appendChild(el);return el;}
     function placeTags(){
       if(priceGutterRef.current){
         priceGutterRef.current.innerHTML="";
-        const tg=[{v:lastPrice,c:"#e2e8f0"}];
+        const tg=[{v:lastPrice,c:"#1e293b"}];
         if(!cfg.intra){if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});}
         const H=15,GAP=16,maxTop=300-H;
         const items=[];
@@ -257,19 +257,19 @@ function PriceLadder({stock}){
   const r921=(s.ma9!=null&&s.ma21!=null)?(s.ma9>s.ma21):null;
   const r2150=(s.ma21!=null&&s.ma50!=null)?(s.ma21>s.ma50):null;
   const r50200=(s.ma50!=null&&s.ma200!=null)?(s.ma50>s.ma200):null;
-  const Bar=({label,pts,max,color})=>(<div style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}><span style={{color:"#94a3b8"}}>{label}</span><span style={{color,fontWeight:600}}>{pts.toFixed(1)} / {max.toFixed(1)}</span></div><div style={{height:6,background:"rgba(255,255,255,0.08)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${(pts/max)*100}%`,background:color,borderRadius:3}}/></div></div>);
-  const M=({label,value,color})=>(<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}><span style={{color:"#64748b",fontSize:12}}>{label}</span><span style={{color,fontSize:12,fontWeight:600,fontVariantNumeric:"tabular-nums"}}>{value}</span></div>);
+  const Bar=({label,pts,max,color})=>(<div style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}><span style={{color:"#475569"}}>{label}</span><span style={{color,fontWeight:600}}>{pts.toFixed(1)} / {max.toFixed(1)}</span></div><div style={{height:6,background:"rgba(0,0,0,0.1)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${(pts/max)*100}%`,background:color,borderRadius:3}}/></div></div>);
+  const M=({label,value,color})=>(<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(0,0,0,0.04)"}}><span style={{color:"#64748b",fontSize:12}}>{label}</span><span style={{color,fontSize:12,fontWeight:600,fontVariantNumeric:"tabular-nums"}}>{value}</span></div>);
   const isIntra=(TFS.find(t=>t.k===tf)||{}).intra;
   return(
     <div>
-      <div style={{display:"flex",gap:5,marginBottom:8,flexWrap:"wrap",alignItems:"center"}}>{TFS.map(t=>(<button key={t.k} onClick={()=>setTf(t.k)} style={{background:tf===t.k?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:tf===t.k?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:tf===t.k?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t.k}</button>))}<span style={{margin:"0 4px",width:1,height:14,background:"rgba(255,255,255,0.12)",display:"inline-block"}}/>{["Line","Bar"].map(t=>(<button key={t} onClick={()=>setChartType(t.toLowerCase())} style={{background:chartType===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:chartType===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:chartType===t.toLowerCase()?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}{chartType==="bar"&&!isIntra&&(<React.Fragment><span style={{margin:"0 4px",width:1,height:14,background:"rgba(255,255,255,0.12)",display:"inline-block"}}/>{["Daily","Weekly"].map(t=>(<button key={t} onClick={()=>setBarInterval(t.toLowerCase())} style={{background:barInterval===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:barInterval===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:barInterval===t.toLowerCase()?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}</React.Fragment>)}</div>
+      <div style={{display:"flex",gap:5,marginBottom:8,flexWrap:"wrap",alignItems:"center"}}>{TFS.map(t=>(<button key={t.k} onClick={()=>setTf(t.k)} style={{background:tf===t.k?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:tf===t.k?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:6,padding:"4px 11px",color:tf===t.k?"#4f46e5":"#475569",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t.k}</button>))}<span style={{margin:"0 4px",width:1,height:14,background:"rgba(0,0,0,0.14)",display:"inline-block"}}/>{["Line","Bar"].map(t=>(<button key={t} onClick={()=>setChartType(t.toLowerCase())} style={{background:chartType===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:chartType===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:6,padding:"4px 11px",color:chartType===t.toLowerCase()?"#4f46e5":"#475569",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}{chartType==="bar"&&!isIntra&&(<React.Fragment><span style={{margin:"0 4px",width:1,height:14,background:"rgba(0,0,0,0.14)",display:"inline-block"}}/>{["Daily","Weekly"].map(t=>(<button key={t} onClick={()=>setBarInterval(t.toLowerCase())} style={{background:barInterval===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:barInterval===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:6,padding:"4px 11px",color:barInterval===t.toLowerCase()?"#4f46e5":"#475569",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}</React.Fragment>)}</div>
       <div style={{fontSize:11,color:"#64748b",margin:"2px 0 6px",letterSpacing:"0.04em",fontWeight:600}}>PRICE · {tf}{isIntra?" · intraday":""}</div>
       <div ref={legendRef} style={{fontSize:12,marginBottom:8,minHeight:18}}/>
       <div style={{display:"flex",width:"100%"}}><div ref={priceRef} style={{flex:1,minWidth:0,height:300}}/><div ref={priceGutterRef} style={{position:"relative",width:58,flexShrink:0,height:300}}/></div>
       <div style={{fontSize:11,color:"#64748b",margin:"14px 0 6px",letterSpacing:"0.04em",fontWeight:600}}>MACD HISTOGRAM{isIntra?" (intraday)":""}</div>
       <div style={{display:"flex",width:"100%"}}><div ref={macdRef} style={{flex:1,minWidth:0,height:110}}/><div ref={macdGutterRef} style={{position:"relative",width:58,flexShrink:0,height:110}}/></div>
       {!isIntra&&<React.Fragment><div style={{fontSize:11,color:"#64748b",margin:"8px 0 4px",letterSpacing:"0.04em",fontWeight:600}}>VOLUME</div><div ref={volRef} style={{width:"100%",height:80}}/></React.Fragment>}
-      <div style={{marginTop:22,paddingTop:18,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+      <div style={{marginTop:22,paddingTop:18,borderTop:"1px solid rgba(0,0,0,0.1)"}}>
         <div style={{fontSize:11,color:"#64748b",marginBottom:14,letterSpacing:"0.04em",fontWeight:600}}>22V SCORE BREAKDOWN</div>
         <div style={{display:"flex",gap:32,flexWrap:"wrap"}}>
           <div style={{flex:"1 1 280px"}}>
@@ -286,12 +286,12 @@ function PriceLadder({stock}){
             <div style={{marginTop:16}}>
               <div style={{fontSize:11,color:"#64748b",marginBottom:8,letterSpacing:"0.04em",fontWeight:600}}>MA STACK (shorter vs longer)</div>
               <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                {[["9DMA / 21DMA",r921],["21DMA / 50DMA",r2150],["50DMA / 200DMA",r50200]].map(function(p,i){const v=p[1];return(<span key={i} style={{fontSize:11.5,fontWeight:700,padding:"5px 11px",borderRadius:6,background:v==null?"rgba(255,255,255,0.05)":v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v==null?"#64748b":v?"#22c55e":"#ef4444"}}>{p[0]} {v==null?"n/a":v?"\u2191":"\u2193"}</span>);})}
+                {[["9DMA / 21DMA",r921],["21DMA / 50DMA",r2150],["50DMA / 200DMA",r50200]].map(function(p,i){const v=p[1];return(<span key={i} style={{fontSize:11.5,fontWeight:700,padding:"5px 11px",borderRadius:6,background:v==null?"rgba(0,0,0,0.04)":v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v==null?"#64748b":v?"#22c55e":"#ef4444"}}>{p[0]} {v==null?"n/a":v?"\u2191":"\u2193"}</span>);})}
               </div>
             </div>
           </div>
         </div>
-        {s.sataComp&&(<div style={{marginTop:18,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+        {s.sataComp&&(<div style={{marginTop:18,paddingTop:16,borderTop:"1px solid rgba(0,0,0,0.1)"}}>
           <div style={{fontSize:11,color:"#64748b",marginBottom:10,letterSpacing:"0.04em",fontWeight:600}}>SATA SCORE BREAKDOWN <span style={{color:sataColor(s.sata)}}>{s.sata}/10</span></div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",rowGap:6,columnGap:18}}>
             {SATA_LABELS.map(function(lbl,i){const ok=s.sataComp[i];return(<div key={i} style={{fontSize:12,color:ok?"#22c55e":"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}><span style={{fontWeight:700}}>{ok?"\u2713":"\u2717"}</span> {lbl}</div>);})}
@@ -315,9 +315,9 @@ function MiniChart({stock,sortKey,onExpand}){
     }
     const dates=data.map(r=>r[0]);const closes=data.map(r=>r[1]);
     const SHOW=252;const start=Math.max(0,closes.length-SHOW);
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:10},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:54,scaleMargins:{top:0.12,bottom:0.08}},timeScale:{borderColor:"rgba(255,255,255,0.08)",tickMarkFormatter:(t,type)=>{const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(typeof t==="number"?t*1000:t+"T00:00:00Z");return MONTHS[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#475569",fontSize:10},grid:{vertLines:{color:"rgba(0,0,0,0.05)"},horzLines:{color:"rgba(0,0,0,0.05)"}},rightPriceScale:{borderColor:"rgba(0,0,0,0.1)",minimumWidth:54,scaleMargins:{top:0.12,bottom:0.08}},timeScale:{borderColor:"rgba(0,0,0,0.1)",tickMarkFormatter:(t,type)=>{const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(typeof t==="number"?t*1000:t+"T00:00:00Z");return MONTHS[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||420,height:200}));
-    const area=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
+    const area=pc.addAreaSeries({lineColor:"#1e293b",topColor:"rgba(30,41,59,0.12)",bottomColor:"rgba(30,41,59,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
     area.setData(closes.slice(start).map((v,i)=>({time:dates[start+i],value:v})));
     function smaArr(p){const out=[];for(let i=0;i<closes.length;i++){if(i<p-1)continue;let sum=0;for(let k=i-p+1;k<=i;k++)sum+=closes[k];if(i>=start)out.push({time:dates[i],value:sum/p});}return out;}
     const a50=smaArr(50),a100=smaArr(100),a200=smaArr(200);
@@ -330,24 +330,24 @@ function MiniChart({stock,sortKey,onExpand}){
     pc.timeScale().fitContent();
     const lastPrice=closes[closes.length-1];
     function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
-    function item(color,label,val){return '<span style="margin-right:12px;white-space:nowrap"><span style="color:'+color+'">'+label+'</span> <b style="color:#e2e8f0;font-weight:600">'+val+'</b></span>';}
+    function item(color,label,val){return '<span style="margin-right:12px;white-space:nowrap"><span style="color:'+color+'">'+label+'</span> <b style="color:#1e293b;font-weight:600">'+val+'</b></span>';}
     function renderLeg(t){
       if(!legendRef.current)return;
-      if(t==null||closeMapC[t]==null){legendRef.current.innerHTML=item("#e2e8f0","Price",fmtN(lastPrice))+item("#3b82f6","50DMA",fmtN(last50))+item("#8b5cf6","100DMA",fmtN(last100))+item("#f59e0b","200DMA",fmtN(last200));return;}
-      const dLabel='<span style="color:#94a3b8;margin-right:10px;font-weight:600">'+t+'</span>';
-      legendRef.current.innerHTML=dLabel+item("#e2e8f0","Px",fmtN(closeMapC[t]))+item("#3b82f6","50D",fmtN(ma50Map[t]))+item("#8b5cf6","100D",fmtN(ma100Map[t]))+item("#f59e0b","200D",fmtN(ma200Map[t]));
+      if(t==null||closeMapC[t]==null){legendRef.current.innerHTML=item("#1e293b","Price",fmtN(lastPrice))+item("#3b82f6","50DMA",fmtN(last50))+item("#8b5cf6","100DMA",fmtN(last100))+item("#f59e0b","200DMA",fmtN(last200));return;}
+      const dLabel='<span style="color:#475569;margin-right:10px;font-weight:600">'+t+'</span>';
+      legendRef.current.innerHTML=dLabel+item("#1e293b","Px",fmtN(closeMapC[t]))+item("#3b82f6","50D",fmtN(ma50Map[t]))+item("#8b5cf6","100D",fmtN(ma100Map[t]))+item("#f59e0b","200D",fmtN(ma200Map[t]));
     }
     renderLeg(null);
     pc.subscribeCrosshairMove(function(param){renderLeg(param&&param.time!=null?param.time:null);});
     function placeTags(){
       if(!gutterRef.current)return;gutterRef.current.innerHTML="";
-      const tg=[{v:lastPrice,c:"#e2e8f0"}];if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});
+      const tg=[{v:lastPrice,c:"#1e293b"}];if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});
       const H=14,GAP=15,maxTop=200-H;const items=[];
       tg.forEach(function(o){let y=null;try{y=area.priceToCoordinate(o.v);}catch(e){}if(y==null)return;items.push({v:o.v,c:o.c,top:y-Math.round(H/2)});});
       items.sort(function(a,b){return a.top-b.top;});
       for(let i=1;i<items.length;i++){if(items[i].top<items[i-1].top+GAP)items[i].top=items[i-1].top+GAP;}
       if(items.length){const over=(items[items.length-1].top+H)-maxTop;if(over>0)items.forEach(function(o){o.top-=over;});if(items[0].top<0){const d=-items[0].top;items.forEach(function(o){o.top+=d;});}}
-      items.forEach(function(o){const el=document.createElement("div");el.textContent=fmtN(o.v);el.style.cssText="position:absolute;right:2px;top:"+o.top+"px;font-size:10px;font-weight:700;color:"+o.c+";background:rgba(10,14,23,0.85);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gutterRef.current.appendChild(el);});
+      items.forEach(function(o){const el=document.createElement("div");el.textContent=fmtN(o.v);el.style.cssText="position:absolute;right:2px;top:"+o.top+"px;font-size:10px;font-weight:700;color:"+o.c+";background:rgba(248,250,252,0.92);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gutterRef.current.appendChild(el);});
     }
     requestAnimationFrame(function(){requestAnimationFrame(placeTags);});
     const onResize=function(){if(priceRef.current)pc.applyOptions({width:priceRef.current.clientWidth});requestAnimationFrame(placeTags);};
@@ -355,8 +355,8 @@ function MiniChart({stock,sortKey,onExpand}){
     return function(){window.removeEventListener("resize",onResize);try{pc.remove();}catch(e){}if(gutterRef.current)gutterRef.current.innerHTML="";};
   },[s]);
   return(
-    <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px 16px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap",cursor:"pointer"}} onClick={()=>onExpand&&onExpand(s)} title="Click to expand"><span style={{fontSize:14,fontWeight:700,color:"#a5b4fc"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{s.name}</span>{(()=>{const k=sortKey;if(k==="sata"||!k||k==="ticker"||k==="name"){return s.sata!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:sataBg(s.sata),color:sataColor(s.sata),flexShrink:0}}>{s.sata}/10</span>:null;}if(k==="score"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.score),color:scoreColor(s.score),flexShrink:0}}>{s.score.toFixed(1)}</span>;}if(k==="rsi14"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi14),flexShrink:0}}>RSI14 {s.rsi14.toFixed(1)}</span>;}if(k==="rsi21"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:rsiColor(s.rsi21),flexShrink:0}}>RSI21 {s.rsi21.toFixed(1)}</span>;}if(k==="mansfield"){return s.mansfield!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:mansfieldColor(s.mansfield),flexShrink:0}}>MRS {s.mansfield.toFixed(2)}</span>:null;}if(k==="pct52w"){return s.pct52w!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pct52wColor(s.pct52w),flexShrink:0}}>{s.pct52w.toFixed(2)}%</span>:null;}if(k==="d1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.d1),flexShrink:0}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</span>;}if(k==="m1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:pctColor(s.m1),flexShrink:0}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</span>;}if(k==="price"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(255,255,255,0.06)",color:"#e2e8f0",flexShrink:0}}>{fmt(s.price)}</span>;}const boolMap={aboveMa50:">50DMA",aboveMa100:">100DMA",aboveMa200:">200DMA",rel921:"9>21",rel2150:"21>50",rel50200:"50>200"};if(boolMap[k]){const v=s[k];return v==null?null:<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v?"#22c55e":"#ef4444",flexShrink:0}}>{boolMap[k]} {v?"YES":"NO"}</span>;}if(k==="watchCol"){return s.watchTags&&s.watchTags.length?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,0.12)",color:"#f59e0b",flexShrink:0}}>{s.watchTags.map(t=>t.ma+t.dir).join(" ")}</span>:null;}return null;})()}</div>
+    <div style={{background:"rgba(0,0,0,0.03)",border:"1px solid rgba(0,0,0,0.1)",borderRadius:12,padding:"14px 16px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,flexWrap:"wrap",cursor:"pointer"}} onClick={()=>onExpand&&onExpand(s)} title="Click to expand"><span style={{fontSize:14,fontWeight:700,color:"#4f46e5"}}>{s.ticker}</span><span style={{fontSize:12,color:"#64748b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{s.name}</span>{(()=>{const k=sortKey;if(k==="sata"||!k||k==="ticker"||k==="name"){return s.sata!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:sataBg(s.sata),color:sataColor(s.sata),flexShrink:0}}>{s.sata}/10</span>:null;}if(k==="score"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:scoreBg(s.score),color:scoreColor(s.score),flexShrink:0}}>{s.score.toFixed(1)}</span>;}if(k==="rsi14"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(0,0,0,0.05)",color:rsiColor(s.rsi14),flexShrink:0}}>RSI14 {s.rsi14.toFixed(1)}</span>;}if(k==="rsi21"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(0,0,0,0.05)",color:rsiColor(s.rsi21),flexShrink:0}}>RSI21 {s.rsi21.toFixed(1)}</span>;}if(k==="mansfield"){return s.mansfield!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(0,0,0,0.05)",color:mansfieldColor(s.mansfield),flexShrink:0}}>MRS {s.mansfield.toFixed(2)}</span>:null;}if(k==="pct52w"){return s.pct52w!=null?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(0,0,0,0.05)",color:pct52wColor(s.pct52w),flexShrink:0}}>{s.pct52w.toFixed(2)}%</span>:null;}if(k==="d1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(0,0,0,0.05)",color:pctColor(s.d1),flexShrink:0}}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%</span>;}if(k==="m1"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(0,0,0,0.05)",color:pctColor(s.m1),flexShrink:0}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</span>;}if(k==="price"){return<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(0,0,0,0.05)",color:"#1e293b",flexShrink:0}}>{fmt(s.price)}</span>;}const boolMap={aboveMa50:">50DMA",aboveMa100:">100DMA",aboveMa200:">200DMA",rel921:"9>21",rel2150:"21>50",rel50200:"50>200"};if(boolMap[k]){const v=s[k];return v==null?null:<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:v?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.12)",color:v?"#22c55e":"#ef4444",flexShrink:0}}>{boolMap[k]} {v?"YES":"NO"}</span>;}if(k==="watchCol"){return s.watchTags&&s.watchTags.length?<span style={{fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:5,background:"rgba(245,158,11,0.12)",color:"#f59e0b",flexShrink:0}}>{s.watchTags.map(t=>t.ma+t.dir).join(" ")}</span>:null;}return null;})()}</div>
       <div ref={legendRef} style={{fontSize:11,marginBottom:6,minHeight:16}}/>
       <div style={{display:"flex",width:"100%"}}><div ref={priceRef} style={{flex:1,minWidth:0,height:200}}/><div ref={gutterRef} style={{position:"relative",width:54,flexShrink:0,height:200}}/></div>
     </div>
@@ -396,7 +396,7 @@ function ChartModal({stock,onClose}){
     if(cfg.n==null){const ytd=new Date().getFullYear()+"-01-01";const i=times.findIndex(t=>t>=ytd);start=i>=0?i:0;}
     else{start=Math.max(0,closes.length-cfg.n);}
     const showMAs=cfg.n==null||cfg.n>=21;
-    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#94a3b8",fontSize:11},grid:{vertLines:{color:"rgba(255,255,255,0.04)"},horzLines:{color:"rgba(255,255,255,0.04)"}},rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60},timeScale:{borderColor:"rgba(255,255,255,0.08)",tickMarkFormatter:(t)=>{const M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(t+"T00:00:00Z");return M[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
+    const opts={layout:{background:{type:"solid",color:"transparent"},textColor:"#475569",fontSize:11},grid:{vertLines:{color:"rgba(0,0,0,0.05)"},horzLines:{color:"rgba(0,0,0,0.05)"}},rightPriceScale:{borderColor:"rgba(0,0,0,0.1)",minimumWidth:60},timeScale:{borderColor:"rgba(0,0,0,0.1)",tickMarkFormatter:(t)=>{const M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const d=new Date(t+"T00:00:00Z");return M[d.getUTCMonth()];}},crosshair:{mode:0},handleScroll:false,handleScale:false};
     const pc=LightweightCharts.createChart(priceRef.current,Object.assign({},opts,{width:priceRef.current.clientWidth||800,height:priceRef.current.clientHeight||280}));
     let priceSeries2;
     const showCandle2=cType==="bar"&&isOHLC2;
@@ -411,7 +411,7 @@ function ChartModal({stock,onClose}){
         priceSeries2.setData(closes.slice(start).map((c,i)=>({time:times[start+i],open:(opens2||closes)[start+i],high:(highs2||closes)[start+i],low:(lows2||closes)[start+i],close:c})));
       }
     } else {
-      priceSeries2=pc.addAreaSeries({lineColor:"#e2e8f0",topColor:"rgba(226,232,240,0.14)",bottomColor:"rgba(226,232,240,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
+      priceSeries2=pc.addAreaSeries({lineColor:"#1e293b",topColor:"rgba(30,41,59,0.12)",bottomColor:"rgba(30,41,59,0.02)",lineWidth:2,priceLineVisible:false,lastValueVisible:false});
       priceSeries2.setData(closes.slice(start).map((v,i)=>({time:times[start+i],value:v})));
     }
     let last50=null,last100=null,last200=null;
@@ -439,18 +439,18 @@ function ChartModal({stock,onClose}){
       mc3.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(hdm);
       mc3.timeScale().fitContent();}
     let vc2=null;
-    if(volRef2.current){volRef2.current.innerHTML="";vc2=LightweightCharts.createChart(volRef2.current,Object.assign({},opts,{width:volRef2.current.clientWidth||800,height:volRef2.current.clientHeight||60,rightPriceScale:{borderColor:"rgba(255,255,255,0.08)",minimumWidth:60,scaleMargins:{top:0.1,bottom:0.05}}}));const vd=[];for(let i=start;i<closes.length;i++){const up=i===0||closes[i]>=closes[i-1];vd.push({time:times[i],value:volumes[i],color:up?"rgba(34,197,94,0.7)":"rgba(239,68,68,0.7)"});}vc2.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(vd);vc2.timeScale().fitContent();try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)vc2.timeScale().setVisibleLogicalRange(r);});}catch(e){}}
+    if(volRef2.current){volRef2.current.innerHTML="";vc2=LightweightCharts.createChart(volRef2.current,Object.assign({},opts,{width:volRef2.current.clientWidth||800,height:volRef2.current.clientHeight||60,rightPriceScale:{borderColor:"rgba(0,0,0,0.1)",minimumWidth:60,scaleMargins:{top:0.1,bottom:0.05}}}));const vd=[];for(let i=start;i<closes.length;i++){const up=i===0||closes[i]>=closes[i-1];vd.push({time:times[i],value:volumes[i],color:up?"rgba(34,197,94,0.7)":"rgba(239,68,68,0.7)"});}vc2.addHistogramSeries({priceLineVisible:false,lastValueVisible:true}).setData(vd);vc2.timeScale().fitContent();try{pc.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)vc2.timeScale().setVisibleLogicalRange(r);});}catch(e){}}
     function fmtN(v){return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
     function placeTags(){
       if(!gutterRef.current||!showMAs)return;gutterRef.current.innerHTML="";
       const H=15,GAP=16,maxTop=(priceRef.current?priceRef.current.clientHeight:280)-H;
-      const tg=[{v:closes[closes.length-1],c:"#e2e8f0"}];
+      const tg=[{v:closes[closes.length-1],c:"#1e293b"}];
       if(last50!=null)tg.push({v:last50,c:"#3b82f6"});if(last100!=null)tg.push({v:last100,c:"#8b5cf6"});if(last200!=null)tg.push({v:last200,c:"#f59e0b"});
       const items=[];tg.forEach(function(o){let y=null;try{y=priceSeries2.priceToCoordinate(o.v);}catch(e){}if(y==null)return;items.push({v:o.v,c:o.c,top:y-Math.round(H/2)});});
       items.sort(function(a,b){return a.top-b.top;});
       for(let i=1;i<items.length;i++){if(items[i].top<items[i-1].top+GAP)items[i].top=items[i-1].top+GAP;}
       if(items.length){const over=(items[items.length-1].top+H)-maxTop;if(over>0)items.forEach(function(o){o.top-=over;});if(items[0].top<0){const d=-items[0].top;items.forEach(function(o){o.top+=d;});}}
-      items.forEach(function(o){const el=document.createElement("div");el.textContent=fmtN(o.v);el.style.cssText="position:absolute;right:2px;top:"+Math.max(0,Math.min(maxTop,o.top))+"px;font-size:10px;font-weight:700;color:"+o.c+";background:rgba(10,14,23,0.85);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gutterRef.current.appendChild(el);});
+      items.forEach(function(o){const el=document.createElement("div");el.textContent=fmtN(o.v);el.style.cssText="position:absolute;right:2px;top:"+Math.max(0,Math.min(maxTop,o.top))+"px;font-size:10px;font-weight:700;color:"+o.c+";background:rgba(248,250,252,0.92);padding:0 4px;border-radius:3px;white-space:nowrap;pointer-events:none";gutterRef.current.appendChild(el);});
     }
     requestAnimationFrame(function(){requestAnimationFrame(placeTags);});
     // Crosshair value inspector: date · price · MAs at cursor.
@@ -458,13 +458,13 @@ function ChartModal({stock,onClose}){
       if(!readoutRef.current)return;
       const chip=function(c,l,v){return '<span style="color:'+c+';margin-right:12px"><span style="color:#64748b">'+l+'</span> '+v+'</span>';};
       if(t==null){
-        let h=chip("#e2e8f0","Latest",fmtN(closes[closes.length-1]));
+        let h=chip("#1e293b","Latest",fmtN(closes[closes.length-1]));
         if(showMAs){if(last50!=null)h+=chip("#3b82f6","50D",fmtN(last50));if(last100!=null)h+=chip("#8b5cf6","100D",fmtN(last100));if(last200!=null)h+=chip("#f59e0b","200D",fmtN(last200));}
         readoutRef.current.innerHTML=h;return;
       }
       const px=closeMap[t];if(px==null){return;}
       const dLabel=(typeof t==="string")?t:new Date(t*1000).toISOString().slice(0,10);
-      let h='<span style="color:#94a3b8;margin-right:12px;font-weight:600">'+dLabel+'</span>'+chip("#e2e8f0","Price",fmtN(px));
+      let h='<span style="color:#475569;margin-right:12px;font-weight:600">'+dLabel+'</span>'+chip("#1e293b","Price",fmtN(px));
       if(showMAs){if(ma50Map[t]!=null)h+=chip("#3b82f6","50D",fmtN(ma50Map[t]));if(ma100Map[t]!=null)h+=chip("#8b5cf6","100D",fmtN(ma100Map[t]));if(ma200Map[t]!=null)h+=chip("#f59e0b","200D",fmtN(ma200Map[t]));}
       readoutRef.current.innerHTML=h;
     }
@@ -477,13 +477,13 @@ function ChartModal({stock,onClose}){
   const maLegend=<span> &nbsp;<span style={{color:"#3b82f6"}}>50DMA</span> <span style={{color:"#8b5cf6"}}>100DMA</span> <span style={{color:"#f59e0b"}}>200DMA</span></span>;
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:1000,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:40,paddingLeft:20,paddingRight:20,paddingBottom:20}} onClick={onClose}>
-      <div style={{background:"#0a0e17",border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:24,width:"min(92vw,880px)",maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+      <div style={{background:"#f8fafc",border:"1px solid rgba(0,0,0,0.14)",borderRadius:16,padding:24,width:"min(92vw,880px)",maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <div><span style={{fontSize:18,fontWeight:700,color:"#a5b4fc",marginRight:10}}>{s.ticker}</span><span style={{fontSize:13,color:"#64748b"}}>{s.name}</span></div>
-          <button onClick={onClose} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#94a3b8",fontSize:13,padding:"4px 12px",cursor:"pointer"}}>&#x2715; Close</button>
+          <div><span style={{fontSize:18,fontWeight:700,color:"#4f46e5",marginRight:10}}>{s.ticker}</span><span style={{fontSize:13,color:"#64748b"}}>{s.name}</span></div>
+          <button onClick={onClose} style={{background:"rgba(0,0,0,0.04)",border:"1px solid rgba(0,0,0,0.12)",borderRadius:8,color:"#475569",fontSize:13,padding:"4px 12px",cursor:"pointer"}}>&#x2715; Close</button>
         </div>
         <div style={{display:"flex",gap:5,marginBottom:10,flexWrap:"wrap",alignItems:"center"}}>
-          {TFS.map(t=>{const active=tf===t.k;return(<button key={t.k} onClick={()=>setTf(t.k)} style={{background:active?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:active?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t.k}</button>);})} <span style={{margin:"0 4px",width:1,height:14,background:"rgba(255,255,255,0.12)",display:"inline-block"}}/>{["Line","Bar"].map(t=>(<button key={t} onClick={()=>setCType(t.toLowerCase())} style={{background:cType===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:cType===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:cType===t.toLowerCase()?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}{cType==="bar"&&(<React.Fragment><span style={{margin:"0 4px",width:1,height:14,background:"rgba(255,255,255,0.12)",display:"inline-block"}}/>{["Daily","Weekly"].map(t=>(<button key={t} onClick={()=>setBInt(t.toLowerCase())} style={{background:bInt===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:bInt===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 11px",color:bInt===t.toLowerCase()?"#a5b4fc":"#94a3b8",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}</React.Fragment>)}
+          {TFS.map(t=>{const active=tf===t.k;return(<button key={t.k} onClick={()=>setTf(t.k)} style={{background:active?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:6,padding:"4px 11px",color:active?"#4f46e5":"#475569",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t.k}</button>);})} <span style={{margin:"0 4px",width:1,height:14,background:"rgba(0,0,0,0.14)",display:"inline-block"}}/>{["Line","Bar"].map(t=>(<button key={t} onClick={()=>setCType(t.toLowerCase())} style={{background:cType===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:cType===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:6,padding:"4px 11px",color:cType===t.toLowerCase()?"#4f46e5":"#475569",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}{cType==="bar"&&(<React.Fragment><span style={{margin:"0 4px",width:1,height:14,background:"rgba(0,0,0,0.14)",display:"inline-block"}}/>{["Daily","Weekly"].map(t=>(<button key={t} onClick={()=>setBInt(t.toLowerCase())} style={{background:bInt===t.toLowerCase()?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:bInt===t.toLowerCase()?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:6,padding:"4px 11px",color:bInt===t.toLowerCase()?"#4f46e5":"#475569",fontSize:11,fontWeight:600,cursor:"pointer"}}>{t}</button>))}</React.Fragment>)}
         </div>
         <div style={{fontSize:11,color:"#64748b",marginBottom:4,letterSpacing:"0.04em",fontWeight:600}}>PRICE &middot; {tf}</div>
         <div ref={readoutRef} style={{fontSize:12,marginBottom:8,minHeight:18,fontVariantNumeric:"tabular-nums"}}/>
@@ -519,7 +519,7 @@ function App(){
 
   function handleSort(key){if(sortKey===key)setSortDir(d=>d*-1);else{setSortKey(key);setSortDir(key==="ticker"||key==="name"?1:-1)}}
 
-  const bb="1px solid rgba(255,255,255,0.04)";
+  const bb="1px solid rgba(0,0,0,0.05)";
   const YN=({val})=><span style={{color:val?"#22c55e":"#ef4444",fontWeight:700,fontSize:12}}>{val?"YES":"NO"}</span>;
   const Rel=({val})=>val==null?<span style={{color:"#475569"}}>—</span>:<span style={{color:val?"#22c55e":"#ef4444",fontWeight:700,fontSize:13}}>{val?"\u2191":"\u2193"}</span>;
   const aBg=t=>t==="downgrade"?"rgba(239,68,68,0.06)":t==="upgrade"?"rgba(34,197,94,0.06)":"rgba(99,102,241,0.06)";
@@ -528,22 +528,22 @@ function App(){
   function cellStyle(c,isHead){
     const NUMERIC=["price","d1","m1","pct52w","rsi14","rsi21","mansfield"];
     const align=(c.key==="ticker"||c.key==="name")?"left":(NUMERIC.includes(c.key)?"right":"center");
-    const base={padding:isHead?"8px 12px":"8px 12px",textAlign:align,borderBottom:isHead?"1px solid rgba(255,255,255,0.08)":bb,whiteSpace:"nowrap"};
-    if(c.sticky)Object.assign(base,{position:"sticky",left:c.left,zIndex:isHead?4:2,borderRight:c.key==="name"?"1px solid rgba(255,255,255,0.08)":"none"});
-    if(isHead)Object.assign(base,{cursor:"pointer",color:sortKey===c.key?"#a5b4fc":"#64748b",fontWeight:600,fontSize:11,letterSpacing:"0.04em",userSelect:"none",top:0,minWidth:c.w,background:"rgba(10,14,23,1)",zIndex:c.sticky?4:3,position:"sticky"});
+    const base={padding:isHead?"8px 12px":"8px 12px",textAlign:align,borderBottom:isHead?"1px solid rgba(0,0,0,0.1)":bb,whiteSpace:"nowrap"};
+    if(c.sticky)Object.assign(base,{position:"sticky",left:c.left,zIndex:isHead?4:2,borderRight:c.key==="name"?"1px solid rgba(0,0,0,0.1)":"none"});
+    if(isHead)Object.assign(base,{cursor:"pointer",color:sortKey===c.key?"#4f46e5":"#64748b",fontWeight:600,fontSize:11,letterSpacing:"0.04em",userSelect:"none",top:0,minWidth:c.w,background:"rgba(248,250,252,1)",zIndex:c.sticky?4:3,position:"sticky"});
     return base;
   }
 
   return(
   <React.Fragment>
-    <div style={{background:"#0a0e17",color:"#e2e8f0",fontFamily:"'Inter',-apple-system,sans-serif",minHeight:"100vh",padding:24,fontVariantNumeric:"tabular-nums"}}>
+    <div style={{background:"#f8fafc",color:"#1e293b",fontFamily:"'Inter',-apple-system,sans-serif",minHeight:"100vh",padding:24,fontVariantNumeric:"tabular-nums"}}>
       {selected&&(
         <div onClick={()=>setSelected(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(8px)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-          <div onClick={e=>e.stopPropagation()} style={{background:"#0f1420",border:"1px solid rgba(255,255,255,0.1)",borderRadius:16,padding:28,maxWidth:880,width:"100%",maxHeight:"90vh",overflowY:"auto",position:"relative"}}>
-            <button onClick={()=>setSelected(null)} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,0.08)",border:"none",color:"#94a3b8",fontSize:18,width:32,height:32,borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-            <div style={{display:"flex",alignItems:"baseline",gap:12,marginBottom:4}}><h2 style={{margin:0,fontSize:20,fontWeight:700,color:"#f8fafc"}}>{selected.ticker}</h2><span style={{fontSize:13,color:"#64748b"}}>{selected.name}</span></div>
+          <div onClick={e=>e.stopPropagation()} style={{background:"#ffffff",border:"1px solid rgba(0,0,0,0.12)",borderRadius:16,padding:28,maxWidth:880,width:"100%",maxHeight:"90vh",overflowY:"auto",position:"relative"}}>
+            <button onClick={()=>setSelected(null)} style={{position:"absolute",top:16,right:16,background:"rgba(0,0,0,0.1)",border:"none",color:"#475569",fontSize:18,width:32,height:32,borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+            <div style={{display:"flex",alignItems:"baseline",gap:12,marginBottom:4}}><h2 style={{margin:0,fontSize:20,fontWeight:700,color:"#0f172a"}}>{selected.ticker}</h2><span style={{fontSize:13,color:"#64748b"}}>{selected.name}</span></div>
             <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:24,flexWrap:"wrap"}}>
-              <span style={{fontSize:28,fontWeight:700,color:"#f8fafc"}}>{fmt(selected.price)}</span>
+              <span style={{fontSize:28,fontWeight:700,color:"#0f172a"}}>{fmt(selected.price)}</span>
               <span style={{fontSize:15,fontWeight:600,color:pctColor(selected.d1)}}>{selected.d1>0?"+":""}{selected.d1.toFixed(2)}%</span><span style={{fontSize:12,color:"#64748b"}}>1D</span>
               <span style={{fontSize:15,fontWeight:600,color:pctColor(selected.m1)}}>{selected.m1>0?"+":""}{selected.m1.toFixed(2)}%</span><span style={{fontSize:12,color:"#64748b"}}>1M</span>
             </div>
@@ -553,31 +553,31 @@ function App(){
       )}
 
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:12}}>
-        <div><h1 style={{margin:0,fontSize:22,fontWeight:700,color:"#f8fafc",letterSpacing:"-0.02em"}}>ARP Global Capital Technical Dashboard</h1><p style={{margin:"4px 0 0",fontSize:12,color:"#64748b"}}>{enriched.length} instruments · updated {UPDATED||"—"} · Click any row to inspect</p></div>
-        <div style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.05)",padding:"5px 10px",borderRadius:6}}>Score: <span style={{color:"#22c55e"}}>■</span> 4-5 &nbsp;<span style={{color:"#f59e0b"}}>■</span> 2.5-3.5 &nbsp;<span style={{color:"#ef4444"}}>■</span> 0-2</div>
+        <div><h1 style={{margin:0,fontSize:22,fontWeight:700,color:"#0f172a",letterSpacing:"-0.02em"}}>ARP Global Capital Technical Dashboard</h1><p style={{margin:"4px 0 0",fontSize:12,color:"#64748b"}}>{enriched.length} instruments · updated {UPDATED||"—"} · Click any row to inspect</p></div>
+        <div style={{fontSize:11,color:"#64748b",background:"rgba(0,0,0,0.04)",padding:"5px 10px",borderRadius:6}}>Score: <span style={{color:"#22c55e"}}>■</span> 4-5 &nbsp;<span style={{color:"#f59e0b"}}>■</span> 2.5-3.5 &nbsp;<span style={{color:"#ef4444"}}>■</span> 0-2</div>
       </div>
 
       <div style={{display:"flex",gap:8,marginBottom:24,justifyContent:"center"}}>
-        {[["table","Table"],["charts","Charts"]].map(function(t){const active=view===t[0];return(<button key={t[0]} onClick={()=>setView(t[0])} style={{background:active?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:8,color:active?"#a5b4fc":"#94a3b8",fontSize:14,fontWeight:600,padding:"9px 28px",cursor:"pointer"}}>{t[1]}</button>);})}
+        {[["table","Table"],["charts","Charts"]].map(function(t){const active=view===t[0];return(<button key={t[0]} onClick={()=>setView(t[0])} style={{background:active?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:8,color:active?"#4f46e5":"#475569",fontSize:14,fontWeight:600,padding:"9px 28px",cursor:"pointer"}}>{t[1]}</button>);})}
       </div>
 
       {view==="table"&&(<React.Fragment>
       <div style={{display:"flex",gap:16,marginBottom:20,flexWrap:"wrap"}}>
         <div style={{flex:"1 1 420px",minWidth:340}}><HealthGauge stocks={enriched}/></div>
-        <div style={{flex:"0 1 220px",minWidth:200,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"20px 18px",display:"flex",flexDirection:"column",justifyContent:"center"}}>
+        <div style={{flex:"0 1 220px",minWidth:200,background:"rgba(0,0,0,0.05)",border:"1px solid rgba(0,0,0,0.1)",borderRadius:12,padding:"20px 18px",display:"flex",flexDirection:"column",justifyContent:"center"}}>
           <div style={{fontSize:11,color:"#64748b",fontWeight:600,letterSpacing:"0.04em",marginBottom:12}}>SCORE DISTRIBUTION</div>
           <ScoreDistribution stocks={enriched}/>
         </div>
-        <div style={{flex:"1 1 340px",minWidth:280,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px 18px"}}>
+        <div style={{flex:"1 1 340px",minWidth:280,background:"rgba(0,0,0,0.03)",border:"1px solid rgba(0,0,0,0.1)",borderRadius:12,padding:"14px 18px"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
             <span style={{fontSize:14}}>👁</span>
             <span style={{fontSize:11,fontWeight:600,letterSpacing:"0.04em",color:"#64748b"}}>WATCH CLOSELY</span>
-            <span style={{fontSize:11,color:"#64748b",background:"rgba(255,255,255,0.06)",padding:"2px 8px",borderRadius:10}}>{enriched.filter(s=>s.watchTags.length>0).length}</span>
+            <span style={{fontSize:11,color:"#64748b",background:"rgba(0,0,0,0.05)",padding:"2px 8px",borderRadius:10}}>{enriched.filter(s=>s.watchTags.length>0).length}</span>
           </div>
           {enriched.filter(s=>s.watchTags.length>0).length===0
             ?<div style={{fontSize:12,color:"#64748b"}}>No names near a key moving average.</div>
             :<div style={{display:"flex",flexDirection:"column",gap:6}}>{enriched.filter(s=>s.watchTags.length>0).map(s=>(<div key={s.ticker} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"7px 10px",background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.15)",borderRadius:8}}>
-              <div><span style={{fontSize:12,fontWeight:700,color:"#f8fafc",marginRight:8}}>{s.ticker}</span><span style={{fontSize:11,color:"#94a3b8"}}>{s.name}</span></div>
+              <div><span style={{fontSize:12,fontWeight:700,color:"#0f172a",marginRight:8}}>{s.ticker}</span><span style={{fontSize:11,color:"#475569"}}>{s.name}</span></div>
               <div style={{display:"flex",gap:4,flexShrink:0}}>{s.watchTags.map((t,i)=><span key={i} style={{fontSize:11,fontWeight:700,padding:"2px 7px",borderRadius:5,background:t.dir==="↑"?"rgba(34,197,94,0.15)":"rgba(239,68,68,0.15)",color:t.dir==="↑"?"#22c55e":"#ef4444"}}>{t.ma} {t.dir}</span>)}</div>
             </div>))}</div>}
         </div>
@@ -587,29 +587,29 @@ function App(){
       </React.Fragment>)}
 
       <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
-        <input type="text" placeholder="Search ticker or name..." value={search} onChange={e=>setSearch(e.target.value)} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 14px",color:"#e2e8f0",fontSize:13,width:240,outline:"none"}}/>
-        {FILTERS.map(f=>(<button key={f.key} onClick={()=>setFilter(filter===f.key?"all":f.key)} style={{background:filter===f.key?"rgba(99,102,241,0.25)":"rgba(255,255,255,0.04)",border:filter===f.key?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"6px 12px",color:filter===f.key?"#a5b4fc":"#94a3b8",fontSize:12,cursor:"pointer",whiteSpace:"nowrap"}}>{f.label}</button>))}
+        <input type="text" placeholder="Search ticker or name..." value={search} onChange={e=>setSearch(e.target.value)} style={{background:"rgba(0,0,0,0.05)",border:"1px solid rgba(0,0,0,0.12)",borderRadius:8,padding:"8px 14px",color:"#1e293b",fontSize:13,width:240,outline:"none"}}/>
+        {FILTERS.map(f=>(<button key={f.key} onClick={()=>setFilter(filter===f.key?"all":f.key)} style={{background:filter===f.key?"rgba(99,102,241,0.25)":"rgba(0,0,0,0.05)",border:filter===f.key?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.1)",borderRadius:6,padding:"6px 12px",color:filter===f.key?"#4f46e5":"#475569",fontSize:12,cursor:"pointer",whiteSpace:"nowrap"}}>{f.label}</button>))}
       </div>
 
       {view==="charts"?(<div>
         <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:14,alignItems:"center"}}>
           <span style={{fontSize:11,color:"#64748b",fontWeight:600,marginRight:4,letterSpacing:"0.04em"}}>SORT BY</span>
-          {COLS.filter(c=>!["ticker","name"].includes(c.key)).map(c=>{const active=sortKey===c.key;return(<button key={c.key} onClick={()=>handleSort(c.key)} style={{background:active?"rgba(99,102,241,0.2)":"rgba(255,255,255,0.04)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(255,255,255,0.07)",borderRadius:6,padding:"4px 10px",color:active?"#a5b4fc":"#64748b",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>{c.label}{active?(sortDir>0?" ▲":" ▼"):""}</button>);})}
+          {COLS.filter(c=>!["ticker","name"].includes(c.key)).map(c=>{const active=sortKey===c.key;return(<button key={c.key} onClick={()=>handleSort(c.key)} style={{background:active?"rgba(99,102,241,0.2)":"rgba(0,0,0,0.05)",border:active?"1px solid rgba(99,102,241,0.5)":"1px solid rgba(0,0,0,0.09)",borderRadius:6,padding:"4px 10px",color:active?"#4f46e5":"#64748b",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>{c.label}{active?(sortDir>0?" ▲":" ▼"):""}</button>);})}
         </div>
         <ChartGallery stocks={sorted} sortKey={sortKey} onExpand={setChartModal}/>
       </div>):(<React.Fragment>
-      <div style={{overflowX:"auto",borderRadius:10,border:"1px solid rgba(255,255,255,0.08)",position:"relative"}}>
+      <div style={{overflowX:"auto",borderRadius:10,border:"1px solid rgba(0,0,0,0.1)",position:"relative"}}>
         <table style={{width:"100%",borderCollapse:"separate",borderSpacing:0,fontSize:12.5}}>
           <thead style={{position:"sticky",top:0,zIndex:5}}><tr>{COLS.map(c=>(<th key={c.key} onClick={()=>handleSort(c.key)} style={cellStyle(c,true)}>{c.label} {sortKey===c.key?(sortDir>0?"▲":"▼"):""}</th>))}</tr></thead>
           <tbody>
-            {sorted.map((s,i)=>{const even=i%2===0;const rowBg=even?"#0a0e17":"#0c1019";const wt=s.watchTags;
+            {sorted.map((s,i)=>{const even=i%2===0;const rowBg=even?"#f8fafc":"#eef2f7";const wt=s.watchTags;
               return(<tr key={s.ticker} style={{cursor:"pointer"}}
                 onMouseEnter={e=>e.currentTarget.querySelectorAll("td").forEach(td=>{td.style.background="rgba(99,102,241,0.08)"})}
                 onMouseLeave={e=>e.currentTarget.querySelectorAll("td").forEach(td=>{td.style.background=rowBg})}
                 onClick={()=>setSelected(s)}>
-                <td style={{...cellStyle(COLS[0],false),fontWeight:600,color:"#a5b4fc",background:rowBg}}>{s.ticker}</td>
-                <td style={{...cellStyle(COLS[1],false),color:"#94a3b8",overflow:"hidden",textOverflow:"ellipsis",maxWidth:180,background:rowBg}}>{s.name}</td>
-                <td style={{padding:"8px 12px",textAlign:"right",color:"#f8fafc",fontWeight:600,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{fmt(s.price)}</td>
+                <td style={{...cellStyle(COLS[0],false),fontWeight:600,color:"#4f46e5",background:rowBg}}>{s.ticker}</td>
+                <td style={{...cellStyle(COLS[1],false),color:"#475569",overflow:"hidden",textOverflow:"ellipsis",maxWidth:180,background:rowBg}}>{s.name}</td>
+                <td style={{padding:"8px 12px",textAlign:"right",color:"#0f172a",fontWeight:600,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{fmt(s.price)}</td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:pctColor(s.d1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}} title={s.d1Stale?"Latest data spans more than one trading session — this move covers multiple days, not 1D":undefined}>{s.d1>0?"+":""}{s.d1.toFixed(2)}%{s.d1Stale&&<span style={{color:"#f59e0b",marginLeft:3}}>*</span>}</td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:pctColor(s.m1),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.m1>0?"+":""}{s.m1.toFixed(2)}%</td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:pct52wColor(s.pct52w),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.pct52w!=null?s.pct52w.toFixed(2)+"%":"—"}</td>
@@ -620,7 +620,7 @@ function App(){
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel2150==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel2150}/>}</td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel50200==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel50200}/>}</td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg,fontSize:11}}>
-                  {wt.length>0?wt.map((t,j)=><span key={j} style={{color:t.dir==="↑"?"#22c55e":"#ef4444",marginRight:6,fontWeight:700}}>{t.dir} {t.ma}</span>):<span style={{color:"#1e293b"}}>—</span>}
+                  {wt.length>0?wt.map((t,j)=><span key={j} style={{color:t.dir==="↑"?"#22c55e":"#ef4444",marginRight:6,fontWeight:700}}>{t.dir} {t.ma}</span>):<span style={{color:"#cbd5e1"}}>—</span>}
                 </td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:rsiColor(s.rsi14),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi14.toFixed(2)}</td>
                 <td style={{padding:"8px 12px",textAlign:"right",color:rsiColor(s.rsi21),fontWeight:500,fontVariantNumeric:"tabular-nums",borderBottom:bb,background:rowBg}}>{s.rsi21.toFixed(2)}</td>
@@ -635,26 +635,26 @@ function App(){
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginTop:20}}>
-        <div style={{padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
+        <div style={{padding:16,background:"rgba(0,0,0,0.03)",borderRadius:10,border:"1px solid rgba(0,0,0,0.05)"}}>
           <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:10,letterSpacing:"0.04em"}}>22V SCORE METHODOLOGY (0–5)</div>
-          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.8}}>
-            <div><strong style={{color:"#e2e8f0"}}>Trend / Structure (0–2)</strong></div>
+          <div style={{fontSize:12,color:"#475569",lineHeight:1.8}}>
+            <div><strong style={{color:"#1e293b"}}>Trend / Structure (0–2)</strong></div>
             <div style={{paddingLeft:10,marginBottom:6}}>Price Location (0–1): +0.5 above 50DMA · +0.25 above 100DMA · +0.25 above 200DMA<br/>MA Alignment (0–1): +0.3 if 9&gt;21DMA · +0.3 if 21&gt;50DMA · +0.4 if 50&gt;200DMA · unavailable terms score neutral midpoint</div>
-            <div><strong style={{color:"#e2e8f0"}}>RSI Momentum (0–1.5)</strong></div>
+            <div><strong style={{color:"#1e293b"}}>RSI Momentum (0–1.5)</strong></div>
             <div style={{paddingLeft:10,marginBottom:6}}>Per RSI 14D and RSI 21D: &gt;60 (strong) +0.75 · 40–60 (neutral) +0.25 · &lt;40 (weak) +0</div>
-            <div><strong style={{color:"#e2e8f0"}}>MACD Momentum (0–1.5)</strong></div>
+            <div><strong style={{color:"#1e293b"}}>MACD Momentum (0–1.5)</strong></div>
             <div style={{paddingLeft:10}}>Histogram momentum only — rising &amp; positive +1.5 · falling &amp; positive +1.0 · rising &amp; negative +0.75 · falling &amp; negative +0 · flat or near zero-line → neutral. MACD regime is captured by the Trend pillar to avoid double-counting.</div>
           </div>
         </div>
-        <div style={{padding:16,background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.06)"}}>
+        <div style={{padding:16,background:"rgba(0,0,0,0.03)",borderRadius:10,border:"1px solid rgba(0,0,0,0.05)"}}>
           <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:10,letterSpacing:"0.04em"}}>SATA SCORE METHODOLOGY (0–10)</div>
-          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.8}}>
-            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Price / Moving Averages (4 pts)</strong> · Close above 10W MA · Close above 30W MA · Close above 40W MA · 30W MA rising</div>
-            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Mansfield RS (1 pt)</strong> · Stock/ACWI ratio above its own 52-week moving average</div>
-            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Momentum (2 pts)</strong> · 12-week rate of change positive · 12-week RoC rising (vs 3 weeks ago)</div>
-            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Breakout (1 pt)</strong> · Weekly high exceeds the prior 13-week high</div>
-            <div style={{marginBottom:4}}><strong style={{color:"#e2e8f0"}}>Volume (1 pt)</strong> · Average up-week volume exceeds average down-week volume (last 10 weeks)</div>
-            <div><strong style={{color:"#e2e8f0"}}>Overhead Resistance (1 pt)</strong> · Close within 8% of 52-week high</div>
+          <div style={{fontSize:12,color:"#475569",lineHeight:1.8}}>
+            <div style={{marginBottom:4}}><strong style={{color:"#1e293b"}}>Price / Moving Averages (4 pts)</strong> · Close above 10W MA · Close above 30W MA · Close above 40W MA · 30W MA rising</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#1e293b"}}>Mansfield RS (1 pt)</strong> · Stock/ACWI ratio above its own 52-week moving average</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#1e293b"}}>Momentum (2 pts)</strong> · 12-week rate of change positive · 12-week RoC rising (vs 3 weeks ago)</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#1e293b"}}>Breakout (1 pt)</strong> · Weekly high exceeds the prior 13-week high</div>
+            <div style={{marginBottom:4}}><strong style={{color:"#1e293b"}}>Volume (1 pt)</strong> · Average up-week volume exceeds average down-week volume (last 10 weeks)</div>
+            <div><strong style={{color:"#1e293b"}}>Overhead Resistance (1 pt)</strong> · Close within 8% of 52-week high</div>
             <div style={{marginTop:8,fontSize:11,color:"#64748b"}}>Zones: 7–10 Strong (Stage 2) · 4–6 Neutral (Stage 1/3) · 0–3 Weak (Stage 4). Computed on weekly bars resampled from daily data. Benchmark: ACWI.</div>
           </div>
         </div>
