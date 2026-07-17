@@ -1,0 +1,51 @@
+{
+  "updated": "2026-07-17T11:01:27.212Z",
+  "date": "2026-07-17",
+  "events": [
+    {
+      "ticker": "NU US",
+      "name": "NU HOLDINGS",
+      "event": "Lost 100DMA"
+    },
+    {
+      "ticker": "NVDA US",
+      "name": "NVIDIA CORP",
+      "event": "Lost 50DMA"
+    },
+    {
+      "ticker": "C US",
+      "name": "CITIGROUP INC",
+      "event": "Lost 50DMA"
+    },
+    {
+      "ticker": "BE US",
+      "name": "BLOOM ENERGY CORP",
+      "event": "Lost 100DMA"
+    },
+    {
+      "ticker": "CEPT US",
+      "name": "CANTOR EQUITY PARTNERS",
+      "event": "Lost 50DMA"
+    }
+  ],
+  "levels": {
+    "strong": [
+      "LLY US (9)"
+    ],
+    "weak": [
+      "NU US (2)",
+      "IBM US (0)",
+      "BTDR US (1)",
+      "TSLA US (2)",
+      "CCJ US (1)",
+      "CRWV US (1)",
+      "BWXT US (1)",
+      "FSLR US (2)",
+      "XME US (2)"
+    ],
+    "overbought": [],
+    "oversold": [
+      "CCJ US (29.8)"
+    ]
+  }
+}
