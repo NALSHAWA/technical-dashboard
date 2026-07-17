@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-17T12:18:57.588Z",
+  "updated": "2026-07-17T12:34:21.697Z",
   "date": "2026-07-17",
   "events": [
     {
@@ -30,7 +30,9 @@
   ],
   "levels": {
     "strong": [
-      "LLY US (9)"
+      "LLY US (9)",
+      "ASML US (7)",
+      "AMAT US (7)"
     ],
     "weak": [
       "NU US (2)",
@@ -39,6 +41,7 @@
       "TSLA US (2)",
       "CCJ US (1)",
       "CRWV US (1)",
+      "SEI US (3)",
       "BWXT US (1)",
       "FSLR US (2)",
       "XME US (2)"
