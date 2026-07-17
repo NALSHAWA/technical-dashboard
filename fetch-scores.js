@@ -540,41 +540,42 @@ async function sendDigest(events, levels) {
 
   const bullish = (t) => t.indexOf("Reclaimed") === 0 || t.indexOf("Golden") === 0;
   const green = "#16a34a", red = "#dc2626", ink = "#0f172a", dim = "#64748b";
+
+  // One shared row format for every line: LABEL — values, all on one line.
+  const row = (label, color, valuesArr) => {
+    const vals = (valuesArr && valuesArr.length) ? valuesArr.join(", ") : "none";
+    return `<div style="font-size:13px;margin-bottom:6px">` +
+      `<span style="font-weight:700;color:${color}">${label}</span>` +
+      `<span style="color:${dim}"> \u2014 </span>` +
+      `<span style="color:${ink}">${vals}</span></div>`;
+  };
+
   let sections = "";
   order.forEach((t) => {
     const list = byType[t];
     if (!list || !list.length) return;
-    const color = bullish(t) ? green : red;
-    sections +=
-      `<tr><td style="padding:10px 0">` +
-      `<div style="font-size:13px;font-weight:700;color:${color};margin-bottom:4px">${t} <span style="color:${dim};font-weight:400">(${list.length})</span></div>` +
-      `<div style="font-size:13px;color:${ink}">${list.join(", ")}</div></td></tr>`;
+    sections += row(`${t} (${list.length})`, bullish(t) ? green : red, list);
   });
-  const eventsHtml = sections
-    ? `<table style="width:100%;border-collapse:collapse">${sections}</table>`
-    : `<div style="font-size:13px;color:${dim}">No moving-average crosses today.</div>`;
-
-  const levelRow = (label, arr, color) =>
-    `<div style="margin-bottom:8px"><span style="font-size:12px;font-weight:700;color:${color}">${label}</span> ` +
-    `<span style="font-size:13px;color:${ink}">${arr.length ? arr.join(", ") : "—"}</span></div>`;
+  const eventsHtml = sections || `<div style="font-size:13px;color:${dim}">No moving-average crosses.</div>`;
 
   const totalEvents = events.length;
   const dash = process.env.DASHBOARD_URL || "https://arptechnicaldashboard.netlify.app";
+  const dashText = dash.replace(/^https?:\/\//, "");
   const subject = `ARP Technical Digest — ${date} · ${totalEvents} event${totalEvents === 1 ? "" : "s"}`;
-  const heading = (t) => `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin:22px 0 10px">${t}</div>`;
+  const heading = (t) => `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin:20px 0 8px">${t}</div>`;
   const html =
     `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#0f172a">` +
-    `<div style="font-size:18px;font-weight:700;margin-bottom:4px">ARP Technical Digest</div>` +
-    `<div style="font-size:13px;margin-bottom:2px"><a href="${dash}" style="color:#4f46e5;text-decoration:none">${dash}</a></div>` +
-    `<div style="font-size:12px;color:${dim};margin-bottom:18px">${date} · All changes from previous night's close</div>` +
-    `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin-bottom:8px">MOVING-AVERAGE CROSSES</div>` +
+    `<div style="font-size:18px;font-weight:700;margin-bottom:4px">ARP Technical Digest ` +
+    `<span style="font-size:13px;font-weight:400">(<a href="${dash}" style="color:#4f46e5;text-decoration:none">${dashText}</a>)</span></div>` +
+    `<div style="font-size:12px;color:${dim};margin-bottom:4px">${date} · All changes from previous night's close</div>` +
+    heading("MOVING-AVERAGE CROSSES") +
     eventsHtml +
     heading("LEVELS") +
-    levelRow("SATA above 7", levels.strong, green) +
-    levelRow("SATA below 3", levels.weak, red) +
+    row("SATA above 7", green, levels.strong) +
+    row("SATA below 3", red, levels.weak) +
     heading("RSI") +
-    levelRow("RSI above 69 (overbought)", levels.overbought, "#d97706") +
-    levelRow("RSI below 31 (oversold)", levels.oversold, "#2563eb") +
+    row("RSI above 69 (overbought)", "#d97706", levels.overbought) +
+    row("RSI below 31 (oversold)", "#2563eb", levels.oversold) +
     `<div style="font-size:11px;color:#94a3b8;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:12px">` +
     `Generated automatically from the ARP Technical Dashboard. Crosses are daily open-vs-close events on the completed session; levels are the current standing at the close.</div>` +
     `</div>`;
