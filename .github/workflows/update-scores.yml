@@ -34,6 +34,10 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
           # Full on the nightly run and manual triggers; quick for all intraday runs.
           FETCH_MODE: ${{ (github.event.schedule == '37 22 * * 1-5' || github.event_name == 'workflow_dispatch') && 'full' || 'quick' }}
+          # Daily digest email (optional — leave unset to disable sending).
+          POSTMARK_API_KEY: ${{ secrets.POSTMARK_API_KEY }}
+          ALERT_TO: ${{ secrets.ALERT_TO }}
+          ALERT_FROM: ${{ secrets.ALERT_FROM }}
         run: node fetch-scores.js
 
       - name: Commit updated data
@@ -43,12 +47,15 @@ jobs:
           mkdir -p /tmp/fresh
           cp public/data/scores.json /tmp/fresh/scores.json
           cp public/data/history.json /tmp/fresh/history.json
+          cp public/data/alerts.json /tmp/fresh/alerts.json 2>/dev/null || true
           git fetch origin main
           git reset --hard origin/main
           mkdir -p public/data
           cp /tmp/fresh/scores.json public/data/scores.json
           cp /tmp/fresh/history.json public/data/history.json
+          cp /tmp/fresh/alerts.json public/data/alerts.json 2>/dev/null || true
           git add public/data/scores.json public/data/history.json
+          git add public/data/alerts.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
