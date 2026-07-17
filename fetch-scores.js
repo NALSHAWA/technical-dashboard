@@ -454,8 +454,8 @@ async function main() {
         }
         const sc = sataRes ? sataRes.score : null;
         const r14 = round(rsi(closes, 14), 1);
-        if (sc != null && sc > 7) levels.strong.push(`${tkr} (${sc})`);
-        if (sc != null && sc < 3) levels.weak.push(`${tkr} (${sc})`);
+        if (sc != null && sc >= 7) levels.strong.push(`${tkr} (${sc})`);
+        if (sc != null && sc <= 3) levels.weak.push(`${tkr} (${sc})`);
         if (r14 != null && r14 > 69) levels.overbought.push(`${tkr} (${r14})`);
         if (r14 != null && r14 < 31) levels.oversold.push(`${tkr} (${r14})`);
       }
@@ -571,8 +571,8 @@ async function sendDigest(events, levels) {
     heading("MOVING-AVERAGE CROSSES") +
     eventsHtml +
     heading("LEVELS") +
-    row("SATA above 7", green, levels.strong) +
-    row("SATA below 3", red, levels.weak) +
+    row("SATA \u2265 7", green, levels.strong) +
+    row("SATA \u2264 3", red, levels.weak) +
     heading("RSI") +
     row("RSI above 69 (overbought)", "#d97706", levels.overbought) +
     row("RSI below 31 (oversold)", "#2563eb", levels.oversold) +
