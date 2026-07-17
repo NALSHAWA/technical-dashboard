@@ -546,7 +546,7 @@ async function sendDigest(events, levels) {
     if (!list || !list.length) return;
     const color = bullish(t) ? green : red;
     sections +=
-      `<tr><td style="padding:10px 0;border-bottom:1px solid #e2e8f0">` +
+      `<tr><td style="padding:10px 0">` +
       `<div style="font-size:13px;font-weight:700;color:${color};margin-bottom:4px">${t} <span style="color:${dim};font-weight:400">(${list.length})</span></div>` +
       `<div style="font-size:13px;color:${ink}">${list.join(", ")}</div></td></tr>`;
   });
@@ -559,20 +559,24 @@ async function sendDigest(events, levels) {
     `<span style="font-size:13px;color:${ink}">${arr.length ? arr.join(", ") : "—"}</span></div>`;
 
   const totalEvents = events.length;
+  const dash = process.env.DASHBOARD_URL || "https://arptechnicaldashboard.netlify.app";
   const subject = `ARP Technical Digest — ${date} · ${totalEvents} event${totalEvents === 1 ? "" : "s"}`;
+  const heading = (t) => `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin:22px 0 10px">${t}</div>`;
   const html =
     `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#0f172a">` +
-    `<div style="font-size:18px;font-weight:700;margin-bottom:2px">ARP Technical Digest</div>` +
-    `<div style="font-size:12px;color:${dim};margin-bottom:18px">${date} · US watchlist</div>` +
-    `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin-bottom:8px">MOVING-AVERAGE CROSSES TODAY</div>` +
+    `<div style="font-size:18px;font-weight:700;margin-bottom:4px">ARP Technical Digest</div>` +
+    `<div style="font-size:13px;margin-bottom:2px"><a href="${dash}" style="color:#4f46e5;text-decoration:none">${dash}</a></div>` +
+    `<div style="font-size:12px;color:${dim};margin-bottom:18px">${date} · All changes from previous night's close</div>` +
+    `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin-bottom:8px">MOVING-AVERAGE CROSSES</div>` +
     eventsHtml +
-    `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin:22px 0 10px">LEVELS</div>` +
+    heading("LEVELS") +
     levelRow("SATA above 7", levels.strong, green) +
     levelRow("SATA below 3", levels.weak, red) +
-    levelRow("RSI above 69", levels.overbought, "#d97706") +
-    levelRow("RSI below 31", levels.oversold, "#2563eb") +
+    heading("RSI") +
+    levelRow("RSI above 69 (overbought)", levels.overbought, "#d97706") +
+    levelRow("RSI below 31 (oversold)", levels.oversold, "#2563eb") +
     `<div style="font-size:11px;color:#94a3b8;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:12px">` +
-    `Generated automatically from the ARP technical dashboard. Crosses are daily open-vs-close events on the completed session; levels are the current standing at the close.</div>` +
+    `Generated automatically from the ARP Technical Dashboard. Crosses are daily open-vs-close events on the completed session; levels are the current standing at the close.</div>` +
     `</div>`;
 
   const key = process.env.POSTMARK_API_KEY, to = process.env.ALERT_TO, from = process.env.ALERT_FROM;
