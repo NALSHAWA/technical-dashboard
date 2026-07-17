@@ -36,6 +36,7 @@ const BENCHMARK = "ACWI";
 const TICKERS_PATH = path.join(__dirname, "tickers.json");
 const OUTPUT_PATH = path.join(__dirname, "public", "data", "scores.json");
 const HISTORY_PATH = path.join(__dirname, "public", "data", "history.json");
+const ALERTS_PATH = path.join(__dirname, "public", "data", "alerts.json");
 
 const INTERVAL = "1day";
 const OUTPUT_SIZE = 460;        // ~1y to display (252) plus MA200 lookback
@@ -351,6 +352,9 @@ async function main() {
 
   const results = [];
   const historyOut = {};
+  // Daily technical alert collectors (populated on full runs only).
+  const alertEvents = [];              // { ticker, name, event }
+  const levels = { strong: [], weak: [], overbought: [], oversold: [] };
 
   // Benchmark series for Mansfield relative strength (one extra request).
   let benchWeeklyByKey = {};
@@ -429,6 +433,32 @@ async function main() {
       historyOut[meta.ticker || sym] = rows
         .slice(-HISTORY_KEEP)
         .map((r) => [r.datetime, round(parseFloat(r.open), 2), round(parseFloat(r.high), 2), round(parseFloat(r.low), 2), round(parseFloat(r.close), 2), Math.round(parseFloat(r.volume) || 0)]);
+
+      // Daily technical alerts — evaluated only on full (nightly) runs, when
+      // the day's bar is complete, using today's open vs close against each MA.
+      if (!QUICK) {
+        const tkr = meta.ticker || sym, nm = meta.name || sym;
+        const o = parseFloat(rows[rows.length - 1].open);
+        const c = price;
+        const m50 = sma(closes, 50), m100 = sma(closes, 100), m200 = sma(closes, 200);
+        const m50p = smaAtOffset(closes, 50, 1), m200p = smaAtOffset(closes, 200, 1);
+        const push = (event) => alertEvents.push({ ticker: tkr, name: nm, event });
+        if (isFinite(o) && isFinite(c)) {
+          if (m50 != null)  { if (o < m50  && c > m50)  push("Reclaimed 50DMA");  else if (o > m50  && c < m50)  push("Lost 50DMA"); }
+          if (m100 != null) { if (o < m100 && c > m100) push("Reclaimed 100DMA"); else if (o > m100 && c < m100) push("Lost 100DMA"); }
+          if (m200 != null) { if (o < m200 && c > m200) push("Reclaimed 200DMA"); else if (o > m200 && c < m200) push("Lost 200DMA"); }
+        }
+        if (m50 != null && m200 != null && m50p != null && m200p != null) {
+          if (m50p <= m200p && m50 > m200) push("Golden cross (50/200)");
+          else if (m50p >= m200p && m50 < m200) push("Death cross (50/200)");
+        }
+        const sc = sataRes ? sataRes.score : null;
+        const r14 = round(rsi(closes, 14), 1);
+        if (sc != null && sc > 7) levels.strong.push(`${tkr} (${sc})`);
+        if (sc != null && sc < 3) levels.weak.push(`${tkr} (${sc})`);
+        if (r14 != null && r14 > 69) levels.overbought.push(`${tkr} (${r14})`);
+        if (r14 != null && r14 < 31) levels.oversold.push(`${tkr} (${r14})`);
+      }
     }
     if (gi < groups.length - 1) {
       console.log(`Processed a batch of ${group.length}; pausing for rate limit...`);
@@ -480,6 +510,97 @@ async function main() {
   const history = { updated: new Date().toISOString(), series: historyOut, intraday: intradayOut };
   fs.writeFileSync(HISTORY_PATH, JSON.stringify(history));
   console.log(`Wrote history (${Object.keys(historyOut).length} daily, ${Object.keys(intradayOut).length} intraday) to ${HISTORY_PATH}`);
+
+  // Daily digest email — full runs only.
+  if (!QUICK) {
+    await sendDigest(alertEvents, levels);
+  }
+}
+
+// Build and send the daily technical digest. Provider: Resend (simple HTTPS
+// POST, zero dependencies). Enabled when RESEND_API_KEY, ALERT_TO and
+// ALERT_FROM are set; otherwise writes alerts.json and logs a skip notice.
+async function sendDigest(events, levels) {
+  const date = new Date().toISOString().slice(0, 10);
+
+  // Persist a machine-readable record (also usable by the dashboard later).
+  try {
+    fs.writeFileSync(ALERTS_PATH, JSON.stringify({ updated: new Date().toISOString(), date, events, levels }, null, 2));
+  } catch (e) { console.warn("Could not write alerts.json:", e.message); }
+
+  // Group events by type in a sensible priority order.
+  const order = [
+    "Golden cross (50/200)", "Death cross (50/200)",
+    "Reclaimed 200DMA", "Lost 200DMA",
+    "Reclaimed 100DMA", "Lost 100DMA",
+    "Reclaimed 50DMA", "Lost 50DMA",
+  ];
+  const byType = {};
+  events.forEach((e) => { (byType[e.event] = byType[e.event] || []).push(e.ticker); });
+
+  const bullish = (t) => t.indexOf("Reclaimed") === 0 || t.indexOf("Golden") === 0;
+  const green = "#16a34a", red = "#dc2626", ink = "#0f172a", dim = "#64748b";
+  let sections = "";
+  order.forEach((t) => {
+    const list = byType[t];
+    if (!list || !list.length) return;
+    const color = bullish(t) ? green : red;
+    sections +=
+      `<tr><td style="padding:10px 0;border-bottom:1px solid #e2e8f0">` +
+      `<div style="font-size:13px;font-weight:700;color:${color};margin-bottom:4px">${t} <span style="color:${dim};font-weight:400">(${list.length})</span></div>` +
+      `<div style="font-size:13px;color:${ink}">${list.join(", ")}</div></td></tr>`;
+  });
+  const eventsHtml = sections
+    ? `<table style="width:100%;border-collapse:collapse">${sections}</table>`
+    : `<div style="font-size:13px;color:${dim}">No moving-average crosses today.</div>`;
+
+  const levelRow = (label, arr, color) =>
+    `<div style="margin-bottom:8px"><span style="font-size:12px;font-weight:700;color:${color}">${label}</span> ` +
+    `<span style="font-size:13px;color:${ink}">${arr.length ? arr.join(", ") : "—"}</span></div>`;
+
+  const totalEvents = events.length;
+  const subject = `ARP Technical Digest — ${date} · ${totalEvents} event${totalEvents === 1 ? "" : "s"}`;
+  const html =
+    `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#0f172a">` +
+    `<div style="font-size:18px;font-weight:700;margin-bottom:2px">ARP Technical Digest</div>` +
+    `<div style="font-size:12px;color:${dim};margin-bottom:18px">${date} · US watchlist</div>` +
+    `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin-bottom:8px">MOVING-AVERAGE CROSSES TODAY</div>` +
+    eventsHtml +
+    `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin:22px 0 10px">LEVELS</div>` +
+    levelRow("SATA above 7", levels.strong, green) +
+    levelRow("SATA below 3", levels.weak, red) +
+    levelRow("RSI above 69", levels.overbought, "#d97706") +
+    levelRow("RSI below 31", levels.oversold, "#2563eb") +
+    `<div style="font-size:11px;color:#94a3b8;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:12px">` +
+    `Generated automatically from the ARP technical dashboard. Crosses are daily open-vs-close events on the completed session; levels are the current standing at the close.</div>` +
+    `</div>`;
+
+  const key = process.env.POSTMARK_API_KEY, to = process.env.ALERT_TO, from = process.env.ALERT_FROM;
+  if (!key || !to || !from) {
+    console.log("Digest built but email skipped — set POSTMARK_API_KEY, ALERT_TO and ALERT_FROM secrets to enable sending.");
+    return;
+  }
+  try {
+    const res = await fetch("https://api.postmarkapp.com/email", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-Postmark-Server-Token": key,
+      },
+      body: JSON.stringify({
+        From: from,
+        To: to.split(",").map((s) => s.trim()).join(","),
+        Subject: subject,
+        HtmlBody: html,
+        MessageStream: "outbound",
+      }),
+    });
+    if (!res.ok) console.warn(`Digest email failed: HTTP ${res.status} ${await res.text()}`);
+    else console.log(`Digest email sent to ${to} (${totalEvents} events).`);
+  } catch (e) {
+    console.warn("Digest email error:", e.message);
+  }
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
