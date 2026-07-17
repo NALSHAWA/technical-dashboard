@@ -559,7 +559,7 @@ async function sendDigest(events, levels) {
   const eventsHtml = sections || `<div style="font-size:13px;color:${dim}">No moving-average crosses.</div>`;
 
   const totalEvents = events.length;
-  const dash = process.env.DASHBOARD_URL || "https://arptechnicaldashboard.netlify.app";
+  const dash = process.env.DASHBOARD_URL || "https://arpglobalcapital-technicaldashboard.netlify.app/";
   const dashText = dash.replace(/^https?:\/\//, "");
   const subject = `ARP Technical Digest — ${date} · ${totalEvents} event${totalEvents === 1 ? "" : "s"}`;
   const heading = (t) => `<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:${dim};margin:20px 0 8px">${t}</div>`;
