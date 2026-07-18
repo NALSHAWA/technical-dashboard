@@ -1,26 +1,11 @@
 {
-  "updated": "2026-07-17T12:34:21.697Z",
-  "date": "2026-07-17",
+  "updated": "2026-07-18T06:35:14.976Z",
+  "date": "2026-07-18",
   "events": [
     {
-      "ticker": "NU US",
-      "name": "NU HOLDINGS",
-      "event": "Lost 100DMA"
-    },
-    {
-      "ticker": "NVDA US",
-      "name": "NVIDIA CORP",
-      "event": "Lost 50DMA"
-    },
-    {
-      "ticker": "C US",
-      "name": "CITIGROUP INC",
-      "event": "Lost 50DMA"
-    },
-    {
-      "ticker": "BE US",
-      "name": "BLOOM ENERGY CORP",
-      "event": "Lost 100DMA"
+      "ticker": "TSM US",
+      "name": "TAIWAN SEMICONDUCTOR",
+      "event": "Reclaimed 100DMA"
     },
     {
       "ticker": "CEPT US",
@@ -31,24 +16,26 @@
   "levels": {
     "strong": [
       "LLY US (9)",
-      "ASML US (7)",
-      "AMAT US (7)"
+      "CF US (7)"
     ],
     "weak": [
       "NU US (2)",
       "IBM US (0)",
       "BTDR US (1)",
-      "TSLA US (2)",
+      "TSLA US (1)",
       "CCJ US (1)",
+      "OIH US (3)",
+      "NVDA US (3)",
       "CRWV US (1)",
       "SEI US (3)",
       "BWXT US (1)",
+      "WOLF US (3)",
       "FSLR US (2)",
       "XME US (2)"
     ],
     "overbought": [],
     "oversold": [
-      "CCJ US (29.8)"
+      "CCJ US (28.2)"
     ]
   }
 }
