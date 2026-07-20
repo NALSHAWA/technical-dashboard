@@ -126,7 +126,7 @@ const COLS=[
 {key:"ticker",label:"Ticker",w:100,sticky:true,left:0},{key:"name",label:"Name",w:180,sticky:true,left:100},
 {key:"price",label:"Price",w:95},{key:"d1",label:"%1D",w:68},{key:"m1",label:"%1M",w:72},{key:"pct52w",label:"% 52W Hi",w:85},
 {key:"aboveMa50",label:"> 50DMA",w:75},{key:"aboveMa100",label:"> 100DMA",w:80},{key:"aboveMa200",label:"> 200DMA",w:80},
-{key:"rel921",label:"9>21",w:62},{key:"rel2150",label:"21>50",w:64},{key:"rel50200",label:"50>200",w:68},{key:"rel535",label:"5>35",w:62},
+{key:"rel535",label:"5>35",w:62},{key:"rel921",label:"9>21",w:62},{key:"rel2150",label:"21>50",w:64},{key:"rel50200",label:"50>200",w:68},
 {key:"watchCol",label:"Watch Closely",w:110},
 {key:"rsi14",label:"RSI 14D",w:72},{key:"rsi21",label:"RSI 21D",w:72},{key:"mansfield",label:"Mansfield RS",w:100},{key:"score",label:"22V Score",w:110},{key:"sata",label:"SATA Score",w:105},
 ];
@@ -616,10 +616,10 @@ function App(){
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa50}/></td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa100}/></td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}><YN val={s.aboveMa200}/></td>
+<td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel535==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel535}/>}</td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel921==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel921}/>}</td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel2150==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel2150}/>}</td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel50200==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel50200}/>}</td>
-                <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg}}>{s.rel535==null?<span style={{color:"#475569"}}>—</span>:<YN val={s.rel535}/>}</td>
                 <td style={{padding:"8px 12px",textAlign:"center",borderBottom:bb,background:rowBg,fontSize:11}}>
                   {wt.length>0?wt.map((t,j)=><span key={j} style={{color:t.dir==="↑"?"#22c55e":"#ef4444",marginRight:6,fontWeight:700}}>{t.dir} {t.ma}</span>):<span style={{color:"#cbd5e1"}}>—</span>}
                 </td>
