@@ -354,7 +354,10 @@ async function main() {
   const historyOut = {};
   // Daily technical alert collectors (populated on full runs only).
   const alertEvents = [];              // { ticker, name, event }
-  const levels = { strong: [], weak: [], overbought: [], oversold: [] };
+  const levels = { upgrades: [], downgrades: [], overbought: [], oversold: [] };
+  // Prior full-run SATA by ticker, for overnight upgrade/downgrade deltas.
+  const prevSataByTicker = {};
+  prev24h.forEach((p) => { if (p && p.ticker != null) prevSataByTicker[p.ticker] = p.sata; });
 
   // Benchmark series for Mansfield relative strength (one extra request).
   let benchWeeklyByKey = {};
@@ -444,6 +447,8 @@ async function main() {
         const c = price;
         const m50 = sma(closes, 50), m100 = sma(closes, 100), m200 = sma(closes, 200);
         const m50p = smaAtOffset(closes, 50, 1), m200p = smaAtOffset(closes, 200, 1);
+        const m5 = sma(closes, 5), m35 = sma(closes, 35);
+        const m5p = smaAtOffset(closes, 5, 1), m35p = smaAtOffset(closes, 35, 1);
         const push = (event) => alertEvents.push({ ticker: tkr, name: nm, event });
         if (isFinite(o) && isFinite(c)) {
           if (m50 != null)  { if (o < m50  && c > m50)  push("Reclaimed 50DMA");  else if (o > m50  && c < m50)  push("Lost 50DMA"); }
@@ -454,10 +459,19 @@ async function main() {
           if (m50p <= m200p && m50 > m200) push("Golden cross (50/200)");
           else if (m50p >= m200p && m50 < m200) push("Death cross (50/200)");
         }
+        // 5/35 MA crossover — overnight (day-over-day) change only.
+        if (m5 != null && m35 != null && m5p != null && m35p != null) {
+          if (m5p <= m35p && m5 > m35) push("5DMA crossed above 35DMA");
+          else if (m5p >= m35p && m5 < m35) push("5DMA crossed below 35DMA");
+        }
         const sc = sataRes ? sataRes.score : null;
         const r14 = round(rsi(closes, 14), 1);
-        if (sc != null && sc >= 7) levels.strong.push(`${tkr} (${sc})`);
-        if (sc != null && sc <= 3) levels.weak.push(`${tkr} (${sc})`);
+        // Overnight SATA upgrades / downgrades (any change of 1 or more).
+        const scPrev = prevSataByTicker[tkr];
+        if (sc != null && scPrev != null && sc !== scPrev) {
+          if (sc > scPrev) levels.upgrades.push(`${tkr} (${scPrev}\u2192${sc})`);
+          else levels.downgrades.push(`${tkr} (${scPrev}\u2192${sc})`);
+        }
         if (r14 != null && r14 > 69) levels.overbought.push(`${tkr} (${r14})`);
         if (r14 != null && r14 < 31) levels.oversold.push(`${tkr} (${r14})`);
       }
@@ -533,6 +547,7 @@ async function sendDigest(events, levels) {
   // Group events by type in a sensible priority order.
   const order = [
     "Golden cross (50/200)", "Death cross (50/200)",
+    "5DMA crossed above 35DMA", "5DMA crossed below 35DMA",
     "Reclaimed 200DMA", "Lost 200DMA",
     "Reclaimed 100DMA", "Lost 100DMA",
     "Reclaimed 50DMA", "Lost 50DMA",
@@ -540,7 +555,7 @@ async function sendDigest(events, levels) {
   const byType = {};
   events.forEach((e) => { (byType[e.event] = byType[e.event] || []).push(e.ticker); });
 
-  const bullish = (t) => t.indexOf("Reclaimed") === 0 || t.indexOf("Golden") === 0;
+  const bullish = (t) => t.indexOf("Reclaimed") === 0 || t.indexOf("Golden") === 0 || t.indexOf("5DMA crossed above") === 0;
   const green = "#16a34a", red = "#dc2626", ink = "#0f172a", dim = "#64748b";
 
   // One shared row format for every line: LABEL — values, all on one line.
@@ -572,14 +587,14 @@ async function sendDigest(events, levels) {
     `<div style="font-size:12px;color:${dim};margin-bottom:4px">${date} · All changes from previous night's close</div>` +
     heading("MOVING-AVERAGE CROSSES") +
     eventsHtml +
-    heading("LEVELS") +
-    row("SATA \u2265 7", green, levels.strong) +
-    row("SATA \u2264 3", red, levels.weak) +
+    heading("SATA") +
+    row("SATA upgrades", green, levels.upgrades) +
+    row("SATA downgrades", red, levels.downgrades) +
     heading("RSI") +
     row("RSI above 69 (overbought)", "#d97706", levels.overbought) +
     row("RSI below 31 (oversold)", "#2563eb", levels.oversold) +
     `<div style="font-size:11px;color:#94a3b8;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:12px">` +
-    `Generated automatically from the ARP Technical Dashboard. Crosses are daily open-vs-close events on the completed session; levels are the current standing at the close.</div>` +
+    `Generated automatically from the ARP Technical Dashboard. Crosses and SATA moves are day-over-day changes on the completed session; RSI shows the current standing at the close.</div>` +
     `</div>`;
 
   const key = process.env.POSTMARK_API_KEY, to = process.env.ALERT_TO, from = process.env.ALERT_FROM;
