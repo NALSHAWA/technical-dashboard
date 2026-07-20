@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-20T07:43:26.899Z",
+  "updated": "2026-07-20T08:02:54.545Z",
   "date": "2026-07-20",
   "events": [
     {
@@ -14,25 +14,8 @@
     }
   ],
   "levels": {
-    "strong": [
-      "LLY US (9)",
-      "CF US (7)"
-    ],
-    "weak": [
-      "NU US (2)",
-      "IBM US (0)",
-      "BTDR US (1)",
-      "TSLA US (1)",
-      "CCJ US (1)",
-      "OIH US (3)",
-      "NVDA US (3)",
-      "CRWV US (1)",
-      "SEI US (3)",
-      "BWXT US (1)",
-      "WOLF US (3)",
-      "FSLR US (2)",
-      "XME US (2)"
-    ],
+    "upgrades": [],
+    "downgrades": [],
     "overbought": [],
     "oversold": [
       "CCJ US (28.2)"
