@@ -412,6 +412,8 @@ async function main() {
         m1: monthAgo ? round(((price - monthAgo) / monthAgo) * 100, 2) : 0,
         ma9: round(sma(closes, 9), 3),
         ma21: round(sma(closes, 21), 3),
+        ma5: round(sma(closes, 5), 3),
+        ma35: round(sma(closes, 35), 3),
         ma50: round(sma(closes, 50), 3),
         ma100: round(sma(closes, 100), 3),
         ma150: round(sma(closes, 150), 3),
