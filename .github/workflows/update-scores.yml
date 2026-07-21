@@ -8,8 +8,9 @@ on:
     # Hourly through the Dubai morning/afternoon (04:00-12:00 UTC = 8am-4pm Dubai),
     # when the US market is closed and prices are static. QUICK mode.
     - cron: "0 4-12 * * 1-5"
-    # Full nightly run at 22:37 UTC, refetches the 15-min intraday series.
-    - cron: "37 22 * * 1-5"
+    # Full nightly run at 23:00 UTC = 3:00am Dubai (Tue-Sat). Writes the 24h
+    # baseline, refetches the 15-min intraday series, and sends the digest email.
+    - cron: "0 23 * * 1-5"
   workflow_dispatch: {}   # manual trigger = full run
 
 permissions:
@@ -32,8 +33,9 @@ jobs:
       - name: Fetch data and compute scores
         env:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-          # Full on the nightly run and manual triggers; quick for all intraday runs.
-          FETCH_MODE: ${{ (github.event.schedule == '37 22 * * 1-5' || github.event_name == 'workflow_dispatch') && 'full' || 'quick' }}
+          # Manual runs force a full run; scheduled runs use "auto" and the
+          # engine decides full vs quick by UTC hour (nightly hour 23 = full).
+          FETCH_MODE: ${{ github.event_name == 'workflow_dispatch' && 'full' || 'auto' }}
           # Daily digest email (optional — leave unset to disable sending).
           POSTMARK_API_KEY: ${{ secrets.POSTMARK_API_KEY }}
           ALERT_TO: ${{ secrets.ALERT_TO }}
