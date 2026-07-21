@@ -26,9 +26,25 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-// QUICK mode: refresh daily data/scores only and skip the intraday fetch.
-// Used by the every-30-minutes market-hours runs to stay under the data cap.
-const QUICK = process.env.FETCH_MODE === "quick";
+// Full vs quick run decision. QUICK refreshes daily data/scores only and skips
+// the intraday fetch + digest email; the every-30-minutes market-hours runs use
+// it to stay under the data cap. The nightly run must be FULL (writes the 24h
+// baseline and sends the digest).
+//
+// Robust logic (not tied to matching an exact cron string, which is fragile):
+//   FETCH_MODE=full  -> force full   (manual dispatch)
+//   FETCH_MODE=quick -> force quick
+//   otherwise "auto" -> full only during the nightly UTC hour (23:00 UTC =
+//                       3:00am Dubai); every other scheduled hour is quick.
+// The intraday crons run in hours 4-12 and 13-21 UTC, so only the 23:00 UTC
+// nightly cron lands in hour 23 and becomes the full run.
+const NIGHTLY_UTC_HOUR = 23;
+const _mode = (process.env.FETCH_MODE || "auto").toLowerCase();
+const QUICK =
+  _mode === "full" ? false :
+  _mode === "quick" ? true :
+  new Date().getUTCHours() !== NIGHTLY_UTC_HOUR;
+console.log(`Run mode: ${QUICK ? "QUICK" : "FULL"} (FETCH_MODE=${_mode}, UTC hour=${new Date().getUTCHours()})`);
 
 // Benchmark for Mansfield relative strength (MSCI ACWI ETF).
 const BENCHMARK = "ACWI";
