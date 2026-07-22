@@ -1,32 +1,7 @@
 {
-  "updated": "2026-07-21T05:52:30.664Z",
-  "date": "2026-07-21",
+  "updated": "2026-07-22T10:33:34.749Z",
+  "date": "2026-07-22",
   "events": [
-    {
-      "ticker": "NU US",
-      "name": "NU HOLDINGS",
-      "event": "Reclaimed 100DMA"
-    },
-    {
-      "ticker": "HOOD US",
-      "name": "ROBINHOOD MARKETS",
-      "event": "Lost 200DMA"
-    },
-    {
-      "ticker": "CCJ US",
-      "name": "CAMECO CORP",
-      "event": "Death cross (50/200)"
-    },
-    {
-      "ticker": "AMAT US",
-      "name": "APPLIED MATERIALS",
-      "event": "Lost 50DMA"
-    },
-    {
-      "ticker": "AMAT US",
-      "name": "APPLIED MATERIALS",
-      "event": "5DMA crossed below 35DMA"
-    },
     {
       "ticker": "CEPT US",
       "name": "CANTOR EQUITY PARTNERS",
@@ -35,21 +10,19 @@
   ],
   "levels": {
     "upgrades": [
-      "ASML US (6→7)",
-      "TSM US (4→5)",
-      "OIH US (3→4)",
-      "NVDA US (3→5)",
-      "BWXT US (1→2)"
+      "LLY US (6→8)",
+      "BTDR US (1→3)",
+      "NVDA US (5→7)",
+      "SEI US (3→4)",
+      "BE US (3→4)"
     ],
     "downgrades": [
-      "LLY US (9→6)",
-      "FSLR US (2→1)",
-      "BE US (4→3)"
+      "HOOD US (5→4)",
+      "OIH US (4→3)",
+      "BWXT US (2→1)",
+      "XME US (2→1)"
     ],
     "overbought": [],
-    "oversold": [
-      "CCJ US (27.4)",
-      "XME US (30.6)"
-    ]
+    "oversold": []
   }
 }
