@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-24T06:24:47.573Z",
+  "updated": "2026-07-24T08:54:34.589Z",
   "date": "2026-07-24",
   "events": [
     {
@@ -14,22 +14,8 @@
     }
   ],
   "levels": {
-    "upgrades": [
-      "HOOD (4→5)",
-      "HUT (5→7)",
-      "WFC (5→6)",
-      "XME (1→2)"
-    ],
-    "downgrades": [
-      "BAC (9→8)",
-      "BTDR (3→2)",
-      "GOOGL (4→1)",
-      "IBIT (2→0)",
-      "KRE (9→8)",
-      "META (6→3)",
-      "SEI (4→3)",
-      "WOLF (3→2)"
-    ],
+    "upgrades": [],
+    "downgrades": [],
     "overbought": [],
     "oversold": [
       "IBM (30.3)",
