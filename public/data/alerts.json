@@ -1,17 +1,39 @@
 {
-  "updated": "2026-07-22T11:05:49.620Z",
-  "date": "2026-07-22",
+  "updated": "2026-07-24T06:24:47.573Z",
+  "date": "2026-07-24",
   "events": [
     {
-      "ticker": "MU",
-      "name": "Micron Technology",
+      "ticker": "HUT",
+      "name": "Hut 8",
       "event": "Reclaimed 50DMA"
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms",
+      "event": "Lost 50DMA"
     }
   ],
   "levels": {
-    "upgrades": [],
-    "downgrades": [],
+    "upgrades": [
+      "HOOD (4→5)",
+      "HUT (5→7)",
+      "WFC (5→6)",
+      "XME (1→2)"
+    ],
+    "downgrades": [
+      "BAC (9→8)",
+      "BTDR (3→2)",
+      "GOOGL (4→1)",
+      "IBIT (2→0)",
+      "KRE (9→8)",
+      "META (6→3)",
+      "SEI (4→3)",
+      "WOLF (3→2)"
+    ],
     "overbought": [],
-    "oversold": []
+    "oversold": [
+      "IBM (30.3)",
+      "TSLA (29.1)"
+    ]
   }
 }
