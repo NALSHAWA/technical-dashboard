@@ -27,7 +27,7 @@
   { "symbol": "OIH",   "ticker": "OIH",  "name": "VanEck Oil Services ETF" },
   { "symbol": "SECZ",  "ticker": "SECZ", "name": "Securitize" },
   { "symbol": "SEI",   "ticker": "SEI",  "name": "Solaris Energy Infrastructure" },
-  { "symbol": "SKHYX", "ticker": "SKHYX","name": "SK Hynix (ADR)" },
+  { "symbol": "SKHYY", "ticker": "SKHYY","name": "SK Hynix (ADR)" },
   { "symbol": "SPCX",  "ticker": "SPCX", "name": "SPAC & New Issue ETF" },
   { "symbol": "TSLA",  "ticker": "TSLA", "name": "Tesla" },
   { "symbol": "TSM",   "ticker": "TSM",  "name": "Taiwan Semiconductor (ADR)" },
