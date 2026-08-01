@@ -1,47 +1,46 @@
 {
-  "updated": "2026-07-31T00:05:08.705Z",
-  "date": "2026-07-31",
+  "updated": "2026-08-01T00:04:04.665Z",
+  "date": "2026-08-01",
   "events": [
     {
-      "ticker": "TSM",
-      "name": "Taiwan Semiconductor (ADR)",
+      "ticker": "GOOGL",
+      "name": "Alphabet",
       "event": "Reclaimed 100DMA"
     },
     {
-      "ticker": "WFC",
-      "name": "Wells Fargo",
-      "event": "Reclaimed 200DMA"
+      "ticker": "HOOD",
+      "name": "Robinhood Markets",
+      "event": "Reclaimed 100DMA"
+    },
+    {
+      "ticker": "HUT",
+      "name": "Hut 8",
+      "event": "Lost 50DMA"
+    },
+    {
+      "ticker": "LRCX",
+      "name": "Lam Research",
+      "event": "Lost 100DMA"
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA",
+      "event": "Reclaimed 100DMA"
     }
   ],
   "levels": {
     "upgrades": [
-      "BAC (8→10)",
-      "BE (4→5)",
-      "BWXT (1→2)",
-      "GOOGL (1→3)",
-      "IBIT (0→1)",
-      "NU (2→4)"
+      "GDX (1→2)",
+      "GOOGL (3→5)",
+      "KRE (8→9)"
     ],
     "downgrades": [
-      "ASML (7→5)",
-      "AMAT (6→5)",
-      "BTDR (2→1)",
-      "CCJ (1→0)",
-      "CRWV (1→0)",
-      "HOOD (5→2)",
-      "HUT (7→5)",
-      "LLY (8→7)",
-      "META (3→1)",
-      "MU (6→5)",
-      "NVDA (7→3)",
-      "SEI (3→1)",
-      "TSM (5→4)",
-      "WOLF (2→1)",
-      "XME (2→0)"
+      "IBIT (1→0)",
+      "LLY (7→6)",
+      "LRCX (5→4)",
+      "WFC (6→5)"
     ],
     "overbought": [],
-    "oversold": [
-      "TSLA (30.6)"
-    ]
+    "oversold": []
   }
 }
