@@ -1,49 +1,46 @@
 {
-  "updated": "2026-08-05T00:05:17.719Z",
-  "date": "2026-08-05",
+  "updated": "2026-08-06T00:01:30.392Z",
+  "date": "2026-08-06",
   "events": [
     {
-      "ticker": "FSLR",
-      "name": "First Solar",
-      "event": "Reclaimed 200DMA"
-    },
-    {
-      "ticker": "GOOGL",
-      "name": "Alphabet",
+      "ticker": "GDX",
+      "name": "VanEck Gold Miners ETF",
       "event": "5DMA crossed above 35DMA"
     },
     {
-      "ticker": "LLY",
-      "name": "Eli Lilly",
-      "event": "5DMA crossed below 35DMA"
+      "ticker": "IBIT",
+      "name": "iShares Bitcoin Trust",
+      "event": "Reclaimed 50DMA"
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA",
+      "event": "5DMA crossed above 35DMA"
     },
     {
       "ticker": "OIH",
       "name": "VanEck Oil Services ETF",
-      "event": "5DMA crossed above 35DMA"
+      "event": "Lost 50DMA"
+    },
+    {
+      "ticker": "XME",
+      "name": "SPDR Metals & Mining ETF",
+      "event": "Reclaimed 50DMA"
     }
   ],
   "levels": {
     "upgrades": [
-      "CCJ (0→1)",
-      "CRWV (0→4)",
-      "FSLR (1→4)",
-      "GOOGL (5→6)",
-      "HOOD (2→3)",
-      "IBM (0→2)",
-      "IBIT (0→1)",
-      "LRCX (4→5)",
-      "NVDA (3→5)",
-      "OIH (3→5)",
-      "TSM (4→6)",
-      "XME (0→1)"
+      "FSLR (4→5)",
+      "LLY (6→8)",
+      "NU (3→4)",
+      "NVDA (5→6)",
+      "XME (1→3)"
     ],
     "downgrades": [
-      "BWXT (2→1)",
-      "CF (7→6)",
-      "HUT (5→4)",
-      "NU (4→3)",
-      "TSLA (1→0)"
+      "CF (6→5)",
+      "CRWV (4→2)",
+      "GOOGL (6→5)",
+      "OIH (5→4)"
     ],
     "overbought": [],
     "oversold": []
