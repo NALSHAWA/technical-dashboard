@@ -1,48 +1,59 @@
 {
-  "updated": "2026-08-06T00:01:30.392Z",
-  "date": "2026-08-06",
+  "updated": "2026-08-07T23:35:48.203Z",
+  "date": "2026-08-07",
   "events": [
     {
-      "ticker": "GDX",
-      "name": "VanEck Gold Miners ETF",
+      "ticker": "BE",
+      "name": "Bloom Energy",
+      "event": "Lost 100DMA"
+    },
+    {
+      "ticker": "CRWV",
+      "name": "CoreWeave",
       "event": "5DMA crossed above 35DMA"
     },
     {
-      "ticker": "IBIT",
-      "name": "iShares Bitcoin Trust",
-      "event": "Reclaimed 50DMA"
-    },
-    {
-      "ticker": "NVDA",
-      "name": "NVIDIA",
-      "event": "5DMA crossed above 35DMA"
-    },
-    {
-      "ticker": "OIH",
-      "name": "VanEck Oil Services ETF",
+      "ticker": "GOOGL",
+      "name": "Alphabet",
       "event": "Lost 50DMA"
     },
     {
-      "ticker": "XME",
-      "name": "SPDR Metals & Mining ETF",
-      "event": "Reclaimed 50DMA"
+      "ticker": "HOOD",
+      "name": "Robinhood Markets",
+      "event": "Golden cross (50/200)"
+    },
+    {
+      "ticker": "HUT",
+      "name": "Hut 8",
+      "event": "Lost 100DMA"
+    },
+    {
+      "ticker": "WOLF",
+      "name": "Wolfspeed",
+      "event": "Reclaimed 200DMA"
     }
   ],
   "levels": {
     "upgrades": [
-      "FSLR (4→5)",
-      "LLY (6→8)",
-      "NU (3→4)",
-      "NVDA (5→6)",
-      "XME (1→3)"
+      "CCJ (1→2)",
+      "CRWV (2→3)",
+      "GDX (2→5)",
+      "HOOD (3→4)",
+      "KRE (9→10)",
+      "META (1→2)",
+      "NVDA (6→7)",
+      "TSLA (0→1)",
+      "WFC (5→6)",
+      "WOLF (1→4)",
+      "XME (3→6)"
     ],
     "downgrades": [
-      "CF (6→5)",
-      "CRWV (4→2)",
-      "GOOGL (6→5)",
-      "OIH (5→4)"
+      "CF (5→4)",
+      "NU (4→3)"
     ],
-    "overbought": [],
+    "overbought": [
+      "GDX (70.4)"
+    ],
     "oversold": []
   }
 }
